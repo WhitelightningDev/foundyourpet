@@ -1,0 +1,48 @@
+/* Footer Styling */
+.footer {
+    background-color: #343a40; /* Dark background */
+    color: white; /* White text */
+}
+
+.footer-logo {
+    max-width: 150px;
+}
+
+.footer-link {
+    color: #ddd; /* Light grey color for links */
+    text-decoration: none;
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    display: inline-block;
+}
+
+.footer-link:hover {
+    color: #c76f16; /* Hover effect on links */
+}
+
+.footer-social-icon {
+    color: #fff;
+    font-size: 1.5rem;
+    margin: 0 0.5rem;
+}
+
+.footer-social-icon:hover {
+    color: #c76f16; /* Hover effect on social icons */
+}
+
+.footer-text {
+    font-size: 0.9rem;
+    color: #bbb; /* Lighter grey text for the copyright notice */
+    margin-top: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .footer-logo {
+        margin-bottom: 1rem; /* Adds space for logo on mobile */
+    }
+
+    .footer-links, .footer-social-icon {
+        text-align: center; /* Center align links and social icons */
+    }
+}

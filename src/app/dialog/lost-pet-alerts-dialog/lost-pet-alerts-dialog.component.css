@@ -1,0 +1,72 @@
+.dialog-content {
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    text-align: center;
+  }
+  
+  .dialog-title {
+    font-size: 28px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  
+  .dialog-description {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  
+  .details-section {
+    margin-top: 20px;
+    text-align: left;
+  }
+  
+  .details-title {
+    font-size: 18px;
+    color: #444;
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  
+  .details-section ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .details-section li {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+  }
+  
+  .details-section li::before {
+    content: "✔️";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #4caf50;
+    font-size: 16px;
+  }
+  
+  .close-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #0c0c0c;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .close-btn:hover {
+    background-color: #333;
+  }
+  

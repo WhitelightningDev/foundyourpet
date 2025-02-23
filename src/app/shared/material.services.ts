@@ -16,6 +16,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSidenav } from '@angular/material/sidenav';
+import { MatCard } from '@angular/material/card';
 
 @Injectable({
   providedIn: 'root',
@@ -38,6 +39,7 @@ export class MaterialService {
     MatSelectModule,
     MatMenuModule,
     MatExpansionModule,
-    MatSidenav
+    MatSidenav,
+    MatCard
   ];
 }

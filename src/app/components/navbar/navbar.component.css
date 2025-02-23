@@ -1,0 +1,54 @@
+.navbar {
+    margin: 20px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+}
+
+.navbar .navbar-brand {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #363636;
+}
+
+.navbar .logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.navheading {
+    margin-left: 30px;
+}
+
+#navbarNav {
+    margin-right: 30px;
+}
+
+.navbar-nav .nav-item .nav-link {
+    font-size: 1.1rem;
+    margin-left: 20px;
+    color: #343a40;
+}
+
+.navbar-nav .nav-item .nav-link:hover {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+.navbar-toggler-icon {
+    background-color: #007bff;
+}
+
+@media (max-width: 991px) {
+    .navbar {
+        margin: 10px;
+    }
+
+    .navbar-nav .nav-item {
+        margin-left: 0;
+    }
+}

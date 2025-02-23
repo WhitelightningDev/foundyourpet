@@ -1,0 +1,306 @@
+/* Flexbox container for evenly spaced cards */
+.d-flex {
+    display: flex;
+    justify-content: space-between; /* Distribute cards evenly */
+    flex-wrap: wrap; /* Ensures cards wrap on smaller screens */
+    margin-top: 4rem; /* Adds margin at the top */
+    margin-bottom: 4rem; /* Adds margin at the bottom */
+}
+
+/* Flex card styling */
+.flex-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    flex: 1 1 30%; /* Cards will take 30% width */
+    margin: 10px; /* Adds spacing between cards */
+    padding: 2.5rem; /* Padding for space inside card */
+    border-radius: 20px; /* Rounded corners */
+    background-color: #ffffff; /* Clean white background */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    height: auto; /* Dynamic height based on content */
+    transition: transform 0.3s ease-in-out; /* Smooth transition on hover */
+    text-align: center;
+}
+
+/* Hover effect on flex cards */
+.flex-card:hover {
+    transform: translateY(-5px); /* Slight lift effect on hover */
+}
+
+/* Card content styling */
+.mat-card-content {
+    margin-top: 1rem;
+}
+
+/* Paragraph inside the card */
+.mat-card-content p {
+    margin-bottom: 1rem;
+}
+
+/* Typography Styling */
+h5 {
+    font-size: 1.5rem;
+    font-weight: 600; /* Semi-bold text */
+    margin-bottom: 0.75rem; /* Space below heading */
+    color: #333; /* Dark text for contrast */
+}
+
+/* Text styling for paragraphs */
+.p-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #666; /* Grey for better readability */
+    margin-bottom: 1rem;
+}
+
+/* Lord-icon sizing and spacing */
+lord-icon {
+    margin-bottom: 1.5rem; /* Space below the icon */
+    width: 80px;
+    height: 80px; /* Increased size for better visibility */
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .flex-card {
+        flex: 1 1 100%; /* Cards will take full width on small screens */
+    }
+
+    .PlayButton, .AppleButton {
+        max-width: 100px; /* Resize images for smaller screens */
+    }
+}
+
+/* Container for the introductory section */
+.mt-4 {
+    margin-top: 2rem; /* Space at the top */
+}
+
+.mx-5 {
+    margin-left: 3rem;
+    margin-right: 3rem; /* Horizontal spacing */
+}
+
+.bg-white {
+    background-color: white; /* White background */
+}
+
+.p-5 {
+    padding: 2rem; /* Padding around content */
+}
+
+.text-center {
+    text-align: center; /* Centers text */
+}
+
+/* Additional sections styling */
+.mt-5 {
+    margin-top: 3rem; /* Space at the top of sections */
+}
+
+.mb-5 {
+    margin-bottom: 2rem; /* Space at the bottom of sections */
+}
+
+
+
+/* Login icon styling */
+.Login-icon {
+    position: relative;
+    left: 42%;
+    margin-bottom: 10px; /* Adds space below the icon */
+}
+
+/* Spacing for the "How it Works" section */
+.d-flex {
+    margin-top: 4rem;
+    margin-bottom: 4rem; /* Added margin for the "How it Works" section */
+}
+
+
+
+.image-container {
+    text-align: center; /* Centers the content */
+}
+
+/* Styling for images and buttons */
+.image-buttons {
+    display: flex;
+    justify-content: center; /* Centers the buttons horizontally */
+    gap: 1rem; /* Space between images */
+}
+
+.PlayButton, .AppleButton {
+    max-width: 40px; /* Controls the size of the images */
+}
+
+/* Icon Styling */
+lord-icon {
+    margin-bottom: 1.5rem; /* Adds space below the icon */
+}
+
+/* Features Section Layout */
+.features-section {
+    padding: 3rem 2rem;
+    background-color: #f9f9f9;
+}
+
+.features-section h4 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.feature-card {
+    background-color: #fff;
+    padding: 1.5rem;
+    margin: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    flex: 1 1 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.feature-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.feature-card img {
+    margin-bottom: 1rem;
+    max-width: 80px;
+    max-height: 80px;
+}
+
+.feature-card h5 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.feature-card p {
+    font-size: 1rem;
+    color: #777;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.feature-card a {
+    font-size: 1rem;
+    text-decoration: none;
+    color: #333;
+    border: 2px solid #333;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    transition: background-color 0.3s ease;
+}
+
+.feature-card a:hover {
+    background-color: #333;
+    color: #fff;
+}
+
+/* Responsive Design for smaller screens */
+@media (max-width: 768px) {
+    .feature-card {
+        flex: 1 1 100%;
+        margin: 1rem 0;
+    }
+}
+
+/* Container for Testimonials Section */
+.testimonial-card-container {
+    display: flex;
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+    width: 100%; /* Take up full width */
+    margin-top: 2rem; /* Space from top */
+}
+
+.testimonial-card {
+    max-width: 50%; /* Restrict max width for readability */
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 18px; /* Rounded corners for a sleek look */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px); /* Apple-style blur effect */
+    transition: transform 0.3s ease-in-out; /* Smooth hover effect */
+}
+
+/* Hover effect on testimonial card */
+.testimonial-card:hover {
+    transform: translateY(-5px); /* Slight hover effect */
+}
+
+.testimonial-text {
+    font-size: 1.25rem; /* Larger font for readability */
+    line-height: 1.6;
+    color: #5f6368; /* Lighter grey color for the quote */
+    font-style: italic;
+    margin-bottom: 1.5rem; /* Space below the quote */
+}
+
+.customer-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+}
+
+
+@media (max-width: 768px) {
+    .testimonial-card {
+        padding: 1.5rem;
+        max-width: 90%;
+    }
+}
+
+/* Ensuring all text and icons are left aligned within each list item */
+.card-body ul li {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Left-align text and icons */
+    margin-left: 0; /* Remove any default indentation */
+}
+
+/* Styling for the icons */
+.pricing-icon {
+    font-size: 1.5rem; /* Ensure uniform icon size */
+    margin-right: 10px; /* Space between icon and text */
+}
+
+/* Green tick icon */
+.check-icon {
+    color: #28a745; /* Green color for check icon */
+}
+
+/* Red cross icon */
+.cross-icon {
+    color: #dc3545; /* Red color for cross icon */
+}
+
+/* Ensuring cards have equal height */
+.pricing-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
+}
+
+/* Equal height for card body */
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+/* Button styling */
+button {
+    margin-top: 1.5rem;
+}
