@@ -237,7 +237,7 @@ function Features() {
               tracking their pets via their iPhone or iPad.
             </p>
             <a class="btn btn-primary btn-lg">Purchase</a>
-            <Link to="/NormalLearn" className="btn btn-secondary btn-lg">
+            <Link to="/AppleLearn" className="btn btn-secondary btn-lg">
               Learn More
             </Link>
           </div>

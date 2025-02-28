@@ -8,6 +8,7 @@ import Footer from "./components/Footer";
 import NormalTagLearn from "./pages/NormalTagLearn";
 import SamsungLearn from "./pages/SamsungLearn";
 import Contact from "./pages/Contact";
+import AppleLearn from "./pages/AppleLearn";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/features" element={<Features/>} />
         <Route path="/NormalLearn" element={<NormalTagLearn/>}/>
         <Route path="/SamsungLearn" element={<SamsungLearn/>}/>
+        <Route path="/AppleLearn" element={<AppleLearn/>}/>
       </Routes>
       <Footer/>
     </Router>
