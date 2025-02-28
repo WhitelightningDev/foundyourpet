@@ -7,6 +7,7 @@ import NavigationBar from "./components/Navbar";
 import Footer from "./components/Footer";
 import NormalTagLearn from "./pages/NormalTagLearn";
 import SamsungLearn from "./pages/SamsungLearn";
+import Contact from "./pages/Contact";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About/>}/>
+        <Route path="/contact" element={<Contact/>}/>
         <Route path="/features" element={<Features/>} />
         <Route path="/NormalLearn" element={<NormalTagLearn/>}/>
         <Route path="/SamsungLearn" element={<SamsungLearn/>}/>
