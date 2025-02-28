@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Navbar, Nav, Container } from "react-bootstrap";
+import { Navbar, Nav, Container, Button } from "react-bootstrap";
 import logo from "../assets/android-chrome-192x192.png";
 
 function NavigationBar() {
@@ -43,6 +43,17 @@ function NavigationBar() {
             <Nav.Link as={Link} to="/about" onClick={closeNavbar}>About</Nav.Link>
             <Nav.Link as={Link} to="/features" onClick={closeNavbar}>Features</Nav.Link>
             <Nav.Link as={Link} to="/contact" onClick={closeNavbar}>Contact</Nav.Link>
+            
+            {/* Separator for better spacing */}
+            <div className="vr mx-3 d-none d-md-block text-white"></div>
+
+            {/* Login & Sign Up Buttons */}
+            <Nav.Link as={Link} to="/login" className="text-light" onClick={closeNavbar}>
+              <i className="bi bi-box-arrow-in-right me-1"></i> Login
+            </Nav.Link>
+            <Nav.Link as={Link} to="/signup" className="text-light" onClick={closeNavbar}>
+              <i className="bi bi-person-plus me-1"></i> Sign Up
+            </Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
