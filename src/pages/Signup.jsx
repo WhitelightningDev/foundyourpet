@@ -1,95 +1,184 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { Toast, ToastContainer } from "react-bootstrap";  // Ensure Bootstrap Toast is imported
 
 function Signup() {
+  const [formData, setFormData] = useState({
+    name: "",
+    surname: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastVariant, setToastVariant] = useState(""); // 'success' or 'danger'
+
+  // Handle form input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  // Input validation
+  const validateInputs = () => {
+    if (formData.password !== formData.confirmPassword) {
+      setToastMessage("Passwords do not match");
+      setToastVariant('danger');
+      setShowToast(true);
+      return false;
+    }
+    return true;
+  };
+
+  // Handle form submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (validateInputs()) {
+      try {
+        // Frontend: Ensure the full URL is specified
+const response = await axios.post("http://localhost:5000/api/users/register", formData);
+
+
+        // Handle success
+        setToastMessage(response.data.message || "Signup successful!");
+        setToastVariant("success");
+        setShowToast(true);
+
+        // Redirect after successful signup (or navigate to another page)
+        setTimeout(() => {
+          window.location.href = "/login";  // Change to your desired page after success
+        }, 2000);
+      } catch (error) {
+        // Handle error
+        if (error.response) {
+          setToastMessage(error.response.data.message || "Signup failed. Please try again.");
+          setToastVariant("danger");
+        } else {
+          setToastMessage("An error occurred. Please try again.");
+          setToastVariant("danger");
+        }
+        setShowToast(true);
+      }
+    }
+  };
+
   return (
-    <div
-      className="modal modal-sheet position-static d-block bg-body-secondary p-4 py-md-5"
-      tabindex="-1"
-      role="dialog"
-      id="modalSignin"
-    >
-      <div className="modal-dialog" role="document">
+    <div className="d-flex justify-content-center align-items-center bg-body-secondary">
+      <div className="modal-dialog mb-3 mt-3" style={{ maxWidth: "400px" }}>
         <div className="modal-content rounded-4 shadow">
-          <div className="modal-header p-5 pb-4 border-bottom-0">
-            <img
-              classNameName="rounded"
-              src="/android-chrome-192x192.png"
-              width="50px"
-              alt=""
-            />
-            <h1 className="fw-bold m-3 mb-0 fs-2">Sign up for free</h1>
+          <div className="modal-header p-3 border-bottom-0 text-center">
+            <img className="rounded" src="/android-chrome-192x192.png" width="40px" alt="Logo" />
+            <h2 className="fw-bold ms-2 fs-5">Sign Up</h2>
           </div>
 
-          <div className="modal-body p-5 pt-0">
-            <form className="">
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control rounded-3"
-                  id="floatingInput"
-                  placeholder="name@example.com"
-                />
-                <label for="floatingInput">First Name</label>
+          <div className="modal-body p-3">
+            <form onSubmit={handleSubmit}>
+              {/* First Name & Last Name Side by Side */}
+              <div className="row g-2 mb-2">
+                <div className="col">
+                  <div className="form-floating">
+                    <input
+                      type="text"
+                      className="form-control rounded-3"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="First Name"
+                    />
+                    <label>First Name</label>
+                  </div>
+                </div>
+                <div className="col">
+                  <div className="form-floating">
+                    <input
+                      type="text"
+                      className="form-control rounded-3"
+                      name="surname"
+                      value={formData.surname}
+                      onChange={handleChange}
+                      placeholder="Last Name"
+                    />
+                    <label>Last Name</label>
+                  </div>
+                </div>
               </div>
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control rounded-3"
-                  id="floatingInput"
-                  placeholder="name@example.com"
-                />
-                <label for="floatingInput">Last Name</label>
+
+              {/* Email & Password Side by Side */}
+              <div className="row g-2 mb-2">
+                <div className="col">
+                  <div className="form-floating">
+                    <input
+                      type="email"
+                      className="form-control rounded-3"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="name@example.com"
+                    />
+                    <label>Email</label>
+                  </div>
+                </div>
+                <div className="col">
+                  <div className="form-floating">
+                    <input
+                      type="password"
+                      className="form-control rounded-3"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Password"
+                    />
+                    <label>Password</label>
+                  </div>
+                </div>
               </div>
-              <div className="form-floating mb-3">
-                <input
-                  type="email"
-                  className="form-control rounded-3"
-                  id="floatingInput"
-                  placeholder="name@example.com"
-                />
-                <label for="floatingInput">Email address</label>
-              </div>
-              <div className="form-floating mb-3">
+
+              {/* Confirm Password */}
+              <div className="form-floating mb-2">
                 <input
                   type="password"
                   className="form-control rounded-3"
-                  id="floatingPassword"
-                  placeholder="Password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm Password"
                 />
-                <label for="floatingPassword">Password</label>
+                <label>Confirm Password</label>
               </div>
-              <div className="form-floating mb-3">
-                <input
-                  type="password"
-                  className="form-control rounded-3"
-                  id="floatingPassword"
-                  placeholder="Password"
-                />
-                <label for="floatingPassword">Confirm Passowrd</label>
-              </div>
-              <button
-                className="w-100 mb-2 btn btn-lg rounded-3 btn-primary"
-                type="submit"
-              >
-                Sign up
+
+              {/* Signup Button */}
+              <button className="w-100 btn btn-sm rounded-3 btn-primary" type="submit">
+                Sign Up
               </button>
-              <small className="text-body-secondary">
-                By clicking Sign up, you agree to the terms of use.
+              <small className="text-body-secondary d-block text-center mt-2">
+                By signing up, you agree to the terms of use.
               </small>
-              <hr className="my-4" />
-              <div className="d-flex justify-content-between">
-              <small className="text-body-secondary">
-               Already have an account?
-              </small>
-              <Link to="/Login" className="btn btn-outline-secondary">
-                Login
-              </Link>
+
+              <hr className="my-2" />
+
+              {/* Login Link */}
+              <div className="d-flex justify-content-between align-items-center">
+                <small className="text-body-secondary">Already have an account?</small>
+                <Link to="/login" className="btn btn-outline-secondary btn-sm">
+                  Login
+                </Link>
               </div>
             </form>
           </div>
         </div>
       </div>
+
+      {/* Toast for Feedback */}
+      <ToastContainer position="top-center">
+        <Toast show={showToast} onClose={() => setShowToast(false)} delay={5000} autohide>
+          <Toast.Body className={`text-white bg-${toastVariant}`}>
+            {toastMessage}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
     </div>
   );
 }

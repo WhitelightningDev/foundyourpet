@@ -1,14 +1,29 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Navbar, Nav, Container, Button } from "react-bootstrap";
+import { Navbar, Nav, Container } from "react-bootstrap";
 import logo from "../assets/android-chrome-192x192.png";
 
 function NavigationBar() {
   const [expanded, setExpanded] = useState(false); // Track navbar state
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
+  const navigate = useNavigate();
 
   // Function to close navbar after clicking a link
   const closeNavbar = () => setExpanded(false);
+
+  // Check if the user is logged in by checking localStorage
+  useEffect(() => {
+    const token = localStorage.getItem("authToken"); // Check token in localStorage
+    setIsLoggedIn(!!token); // Update state based on token presence
+  }, []); // Empty dependency array to check only on component mount
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem("authToken"); // Remove the token from localStorage
+    setIsLoggedIn(false); // Update state to reflect logout
+    navigate("/"); // Redirect to home page (or any page you prefer)
+  };
 
   return (
     <Navbar
@@ -16,8 +31,8 @@ function NavigationBar() {
       variant="dark"
       expand="md"
       sticky="top"
-      expanded={expanded} // Bind state
-      onToggle={setExpanded} // Control toggle button
+      expanded={expanded}
+      onToggle={() => setExpanded((prev) => !prev)} // Toggle navbar
       className="shadow-lg py-3"
     >
       <Container>
@@ -47,13 +62,21 @@ function NavigationBar() {
             {/* Separator for better spacing */}
             <div className="vr mx-3 d-none d-md-block text-white"></div>
 
-            {/* Login & Sign Up Buttons */}
-            <Nav.Link as={Link} to="/login" className="text-light" onClick={closeNavbar}>
-              <i className="bi bi-box-arrow-in-right me-1"></i> Login
-            </Nav.Link>
-            <Nav.Link as={Link} to="/signup" className="text-light" onClick={closeNavbar}>
-              <i className="bi bi-person-plus me-1"></i> Sign Up
-            </Nav.Link>
+            {/* Conditionally render Login, Signup, or Logout based on login state */}
+            {!isLoggedIn ? (
+              <>
+                <Nav.Link as={Link} to="/login" className="text-light" onClick={closeNavbar}>
+                  <i className="bi bi-box-arrow-in-right me-1"></i> Login
+                </Nav.Link>
+                <Nav.Link as={Link} to="/signup" className="text-light" onClick={closeNavbar}>
+                  <i className="bi bi-person-plus me-1"></i> Sign Up
+                </Nav.Link>
+              </>
+            ) : (
+              <Nav.Link as="button" className="text-light" onClick={handleLogout}>
+                <i className="bi bi-box-arrow-right me-1"></i> Logout
+              </Nav.Link>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>

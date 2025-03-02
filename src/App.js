@@ -11,9 +11,12 @@ import Contact from "./pages/Contact";
 import AppleLearn from "./pages/AppleLearn";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   return (
+    <AuthProvider>
     <Router>
       <NavigationBar />
       <Routes>
@@ -26,9 +29,11 @@ function App() {
         <Route path="/AppleLearn" element={<AppleLearn/>}/>
         <Route path="/Login" element={<Login/>}/>
         <Route path="/Signup" element={<Signup/>}/>
+        <Route path="/Dashboard" element={<Dashboard/>}/>
       </Routes>
       <Footer/>
     </Router>
+    </AuthProvider>
   );
 }
 
