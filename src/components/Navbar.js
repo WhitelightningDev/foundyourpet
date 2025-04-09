@@ -43,6 +43,13 @@ function NavigationBar() {
 
             <div className="vr mx-3 d-none d-md-block text-white"></div>
 
+            {/* Show Dashboard link only if the user is logged in */}
+            {isLoggedIn && (
+              <Nav.Link as={Link} to="/dashboard" onClick={closeNavbar}>
+                Dashboard
+              </Nav.Link>
+            )}
+
             {!isLoggedIn ? (
               <>
                 <Nav.Link as={Link} to="/login" onClick={closeNavbar}>Login</Nav.Link>
