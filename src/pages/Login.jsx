@@ -40,7 +40,7 @@ function Login() {
         showToastMessage("Login successful! Redirecting...");
         const token = response.data.token;
         localStorage.setItem("authToken", token); // Save the token in localStorage
-        login(token); // Call login function from context, if you're using context
+        Login(token); // Call login function from context, if you're using context
         setTimeout(() => navigate("/dashboard"), 2000); // Redirect to dashboard
       }
     } catch (error) {

@@ -7,6 +7,7 @@ function Signup() {
   const [formData, setFormData] = useState({
     name: "",
     surname: "",
+    contact: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -15,6 +16,7 @@ function Signup() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVariant, setToastVariant] = useState(""); // 'success' or 'danger'
+  const [showPassword, setShowPassword] = useState(false); // State for show/hide password
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -22,14 +24,29 @@ function Signup() {
     setFormData({ ...formData, [name]: value });
   };
 
+  // Toggle password visibility
+  const handleShowPasswordChange = () => {
+    setShowPassword(!showPassword);
+  };
+
   // Input validation
   const validateInputs = () => {
+    // Check if passwords match
     if (formData.password !== formData.confirmPassword) {
       setToastMessage("Passwords do not match");
-      setToastVariant('danger');
+      setToastVariant("danger");
       setShowToast(true);
       return false;
     }
+
+    // Additional checks for required fields (email, password length, etc.)
+    if (!formData.email || !formData.password || !formData.name || !formData.surname) {
+      setToastMessage("Please fill in all fields");
+      setToastVariant("danger");
+      setShowToast(true);
+      return false;
+    }
+
     return true;
   };
 
@@ -39,8 +56,7 @@ function Signup() {
     if (validateInputs()) {
       try {
         // Frontend: Ensure the full URL is specified
-const response = await axios.post("http://localhost:5000/api/users/register", formData);
-
+        const response = await axios.post("http://localhost:5000/api/users/signup", formData);
 
         // Handle success
         setToastMessage(response.data.message || "Signup successful!");
@@ -105,6 +121,23 @@ const response = await axios.post("http://localhost:5000/api/users/register", fo
                   </div>
                 </div>
               </div>
+              
+               {/* Contact phone number */}
+               <div className="row g-2 mb-2">
+                <div className="col">
+                  <div className="form-floating">
+                    <input
+                      type="contact"
+                      className="form-control rounded-3"
+                      name="contact"
+                      value={formData.contact}
+                      onChange={handleChange}
+                      placeholder="+27"
+                    />
+                    <label>Contact</label>
+                  </div>
+                </div>
+              </div>
 
               {/* Email & Password Side by Side */}
               <div className="row g-2 mb-2">
@@ -124,7 +157,7 @@ const response = await axios.post("http://localhost:5000/api/users/register", fo
                 <div className="col">
                   <div className="form-floating">
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"} // Toggle password visibility
                       className="form-control rounded-3"
                       name="password"
                       value={formData.password}
@@ -136,10 +169,12 @@ const response = await axios.post("http://localhost:5000/api/users/register", fo
                 </div>
               </div>
 
+             
+
               {/* Confirm Password */}
               <div className="form-floating mb-2">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"} // Toggle password visibility
                   className="form-control rounded-3"
                   name="confirmPassword"
                   value={formData.confirmPassword}
@@ -147,6 +182,19 @@ const response = await axios.post("http://localhost:5000/api/users/register", fo
                   placeholder="Confirm Password"
                 />
                 <label>Confirm Password</label>
+              </div>
+
+              {/* Show Password Checkbox */}
+              <div className="form-check mb-3">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id="showPassword"
+                  onChange={handleShowPasswordChange}
+                />
+                <label className="form-check-label" htmlFor="showPassword">
+                  Show Password
+                </label>
               </div>
 
               {/* Signup Button */}
