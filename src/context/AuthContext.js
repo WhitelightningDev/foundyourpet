@@ -1,21 +1,23 @@
-import React, { createContext, useState, useContext } from 'react';
+import { createContext, useState, useEffect } from "react";
 
-// Create a context to manage user authentication
-const AuthContext = createContext();
-
-export const useAuth = () => useContext(AuthContext);
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    setIsLoggedIn(!!token); // Set on first render
+  }, []);
+
   const login = (token) => {
-    localStorage.setItem("authToken", token); // Store token in localStorage
-    setIsLoggedIn(true);
+    localStorage.setItem("authToken", token);
+    setIsLoggedIn(true); // triggers re-render
   };
 
   const logout = () => {
     localStorage.removeItem("authToken");
-    setIsLoggedIn(false);
+    setIsLoggedIn(false); // triggers re-render
   };
 
   return (

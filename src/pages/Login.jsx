@@ -1,15 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Toast, ToastContainer } from "react-bootstrap";
+// import your AuthContext if using one
+import { AuthContext } from "../context/AuthContext";
 
-function Login() {
+function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext); // ADD this line
+
+  // If you're using context:
+  // const { login } = useContext(AuthContext);
 
   const validateForm = () => {
     if (!email || !password) {
@@ -33,15 +39,21 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-  
+
     try {
-      const response = await axios.post("http://localhost:5000/api/users/login", { email, password });
+      const response = await axios.post("http://localhost:5000/api/users/login", {
+        email,
+        password,
+      });
+
       if (response.status === 200) {
         showToastMessage("Login successful! Redirecting...");
-        const token = response.data.token;
-        localStorage.setItem("authToken", token); // Save the token in localStorage
-        Login(token); // Call login function from context, if you're using context
-        setTimeout(() => navigate("/dashboard"), 2000); // Redirect to dashboard
+      
+        const token = response.data.token || "";
+        localStorage.setItem("authToken", token);
+        login(token); // TRIGGER CONTEXT LOGIN
+      
+        setTimeout(() => navigate("/dashboard"), 2000);
       }
     } catch (error) {
       if (error.response) {
@@ -72,45 +84,70 @@ function Login() {
 
   return (
     <div>
-        <div>
-        <ToastContainer position="scroll" className="top-0 end-0 p-3" style={{ zIndex: 1050 }}>
-        <Toast show={showToast} bg="danger" onClose={() => setShowToast(false)}>
+      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1050 }}>
+      <Toast show={showToast} bg={toastMessage.includes("successful") ? "success" : "danger"} onClose={() => setShowToast(false)}>
           <Toast.Body>{toastMessage}</Toast.Body>
         </Toast>
       </ToastContainer>
-        </div>
-        <div className=" position-static d-block bg-body-secondary  d-flex justify-content-center align-items-center">
+
+      <div className="position-static d-block bg-body-secondary d-flex justify-content-center align-items-center">
         <div className="modal-dialog mb-3" style={{ maxWidth: "500px" }}>
           <div className="modal-content rounded-4 shadow">
             <div className="modal-header p-4 pb-3 border-bottom-0">
-              <img className="rounded" src="/android-chrome-192x192.png" width="50px" alt="Logo" />
+              <img
+                className="rounded"
+                src="/android-chrome-192x192.png"
+                width="50px"
+                alt="Logo"
+              />
               <h1 className="fw-bold m-3 mb-0 fs-3">Login</h1>
             </div>
             <div className="modal-body p-4 pt-0">
               <form onSubmit={handleSubmit}>
                 <div className="form-floating mb-1">
-                  <input type="email" className="form-control rounded-3" placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <input
+                    type="email"
+                    className="form-control rounded-3"
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                   <label>Email address</label>
                 </div>
                 <div className="form-floating mb-1">
-                  <input type="password" className="form-control rounded-3" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <input
+                    type="password"
+                    className="form-control rounded-3"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
                   <label>Password</label>
                 </div>
-                <button className="w-100 mb-1 btn btn-lg rounded-3 btn-primary" type="submit">Login</button>
-                <small className="text-body-secondary">By clicking Login, you agree to the terms of use.</small>
+                <button className="w-100 mb-1 btn btn-lg rounded-3 btn-primary" type="submit">
+                  Login
+                </button>
+                <small className="text-body-secondary">
+                  By clicking Login, you agree to the terms of use.
+                </small>
                 <hr className="my-3" />
                 <div className="d-flex justify-content-between">
-                  <button className="btn btn-outline-secondary" type="button">Forgot Password</button>
-                  <Link to="/Signup" className="btn btn-outline-secondary">Signup</Link>
+                  <button className="btn btn-outline-secondary" type="button">
+                    Forgot Password
+                  </button>
+                  <Link to="/Signup" className="btn btn-outline-secondary">
+                    Signup
+                  </Link>
                 </div>
               </form>
             </div>
           </div>
         </div>
       </div>
-      </div>
-
+    </div>
   );
 }
 
-export default Login;
+export default LoginPage;
