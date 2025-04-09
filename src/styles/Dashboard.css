@@ -3,3 +3,34 @@
     height: 300px;    /* Fixed height of 350px */
     object-fit: cover; /* Ensures the image covers the container, maintaining aspect ratio */
 }
+.pet-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .species-icon {
+    font-size: 2rem;
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .card-title {
+    font-size: 1.25rem;
+  }
+  
+  .hover-effect {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .hover-effect:hover {
+    transform: scale(1.05);
+  }
+  
+  button {
+    border-radius: 0.25rem;
+    padding: 0.75rem;
+  }
+  
