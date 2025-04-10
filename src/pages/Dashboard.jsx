@@ -162,7 +162,7 @@ function Dashboard() {
 {/* Optional Membership Section */}
 <h5 className="mb-3 text-center">Add Monthly Support</h5>
 <Row className="justify-content-center mb-5">
-  <Col md={6}>
+  <Col md={12}>
     <Card className="shadow-sm border-info text-center">
       <Card.Body>
         <Card.Title className="text-info fw-bold">Support Membership</Card.Title>
