@@ -1,58 +1,46 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, Row, Col, Card, Button, Form, Modal } from "react-bootstrap";
-
-const packages = {
-  standard: {
-    name: "Standard Tag",
-    basePrice: 99.99,
-    options: [
-      { label: "Circle Tag (Engraved QR)", price: 0 },
-      { label: "Bone Tag (Engraved QR)", price: 10 },
-    ]
-  },
-  samsung: {
-    name: "Samsung Smart Tag",
-    basePrice: 349.99,
-    options: [
-      { label: "Leather SmartTag Holder", price: 79.99 }
-    ]
-  },
-  apple: {
-    name: "Apple AirTag",
-    basePrice: 499.99,
-    options: [
-      { label: "Silicone AirTag Collar", price: 129.99 },
-      { label: "Leather AirTag Collar", price: 199.99 }
-    ]
-  }
-};
+import { Container, Card, Button, Form, Modal, Spinner } from "react-bootstrap";
+import axios from "axios";
 
 function SelectTagPage() {
   const { tagType } = useParams();
   const navigate = useNavigate();
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [addons, setAddons] = useState([]);
+  const [selectedOptionPrice, setSelectedOptionPrice] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  const [total, setTotal] = useState(0);
   const [includeMembership, setIncludeMembership] = useState(false);
-
-  const selectedPackage = packages[tagType];
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setTotal(selectedPackage.basePrice);
+    async function fetchData() {
+      try {
+        const [pkgRes, addonRes] = await Promise.all([
+          axios.get(`http://localhost:5000/api/packages/type/${tagType}`),  // Updated URL
+          axios.get(`http://localhost:5000/api/addons/filter?type=${tagType}`) // Updated endpoint
+        ]);
+        setSelectedPackage(pkgRes.data);
+        setAddons(addonRes.data);
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
   }, [tagType]);
 
   const handleOptionSelect = (price) => {
-    setTotal(selectedPackage.basePrice + price);
-    setSelectedOption(price);
+    setSelectedOptionPrice(price);
   };
 
-  const handleContinue = () => {
-    setShowModal(true);
-  };
+  const handleContinue = () => setShowModal(true);
 
   const handleModalChoice = (choice) => {
-    const finalPrice = choice ? total + 49.99 : total;
+    const base = selectedPackage?.basePrice || 0;
+    const finalPrice = choice ? base + selectedOptionPrice + 49.99 : base + selectedOptionPrice;
     navigate("/checkout", {
       state: {
         package: selectedPackage.name,
@@ -62,6 +50,14 @@ function SelectTagPage() {
     });
   };
 
+  if (loading || !selectedPackage) {
+    return (
+      <Container className="my-5 text-center">
+        <Spinner animation="border" />
+      </Container>
+    );
+  }
+
   return (
     <Container className="my-5">
       <h3 className="mb-4 text-center">Customize Your {selectedPackage.name}</h3>
@@ -69,17 +65,17 @@ function SelectTagPage() {
         <p><strong>Base Price:</strong> R{selectedPackage.basePrice.toFixed(2)}</p>
         <p><strong>Choose an Add-on:</strong></p>
         <Form>
-          {selectedPackage.options.map((opt, idx) => (
+          {addons.map((addon, idx) => (
             <Form.Check
               key={idx}
               type="radio"
               name="addon"
-              label={`${opt.label} (+R${opt.price})`}
-              onChange={() => handleOptionSelect(opt.price)}
+              label={`${addon.name} (+R${addon.price})`}
+              onChange={() => handleOptionSelect(addon.price)}
             />
           ))}
         </Form>
-        <h5 className="mt-4">Total: R{total.toFixed(2)}</h5>
+        <h5 className="mt-4">Total: R{(selectedPackage.basePrice + selectedOptionPrice).toFixed(2)}</h5>
         <Button className="mt-3 w-100" onClick={handleContinue}>Continue</Button>
       </Card>
 
