@@ -62,9 +62,9 @@ function Home() {
             Easily register your pets, get personalized tags with QR codes, and
             track them anytime, anywhere with our NFC-enabled tags.
           </p>
-          <button className="btn btn-primary btn-lg" type="button">
+          <a href="/Login"><button className="btn btn-primary btn-lg" type="button">
             Get Started
-          </button>
+          </button></a>
         </div>
       </div>
 
