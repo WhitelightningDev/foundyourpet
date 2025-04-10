@@ -35,7 +35,7 @@ function Home() {
     
       const appleTagFeatures = [
         { title: "iOS Compatibility", description: "Works seamlessly with Apple devices." },
-        { title: "Advanced Location Tracking", description: "Track your pet with the Find My app." },
+        { title: "Advanced Location Tracking", description: "Track your pet with the Found My app." },
       ];
       const appleTagIcons = ["bi-apple fs-4", " fs-4 bi-geo-alt"];
 
@@ -55,10 +55,10 @@ function Home() {
         </div>
         <div className="col-lg-6">
           <h4 className="display-4 text-body-emphasis lh-1 mb-3">
-            Keep Your Pets Safe with Find Your Pet
+            Keep Your Pets Safe with Found Your Pet
           </h4>
           <p className="lead">
-            Find Your Pet is your trusted companion for keeping your pets safe.
+            Found Your Pet is your trusted companion for keeping your pets safe.
             Easily register your pets, get personalized tags with QR codes, and
             track them anytime, anywhere with our NFC-enabled tags.
           </p>
@@ -77,7 +77,7 @@ function Home() {
         </h4>
         <div className="col-lg-6 mx-auto">
           <p className="lead mb-5">
-            With Find Your Pet, you can choose from a variety of customizable
+            With Found Your Pet, you can choose from a variety of customizable
             tags and enjoy peace of mind knowing your pet’s safety is just a
             scan away.
           </p>
@@ -198,7 +198,7 @@ function Home() {
             Effortless Pet Tracking
           </h2>
           <p className="text-body-secondary">
-            With Find Your Pet, simply generate a unique QR code for your pet's
+            With Found Your Pet, simply generate a unique QR code for your pet's
             tag, ensuring you never lose track of them again.
           </p>
         </div>
