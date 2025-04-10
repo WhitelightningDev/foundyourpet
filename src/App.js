@@ -14,6 +14,8 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./components/PrivateRoute";
+import SelectTagPage from "./pages/SelectTagPage";
+import CheckoutPage from "./pages/CheckoutPage";
 
 function App() {
   return (
@@ -30,6 +32,8 @@ function App() {
           <Route path="/AppleLearn" element={<AppleLearn />} />
           <Route path="/Login" element={<Login />} />
           <Route path="/Signup" element={<Signup />} />
+          <Route path="/select-tag/:tagType" element={<SelectTagPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
           <Route
             path="/Dashboard"
             element={
