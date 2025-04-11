@@ -56,7 +56,7 @@ function Signup() {
     if (validateInputs()) {
       try {
         // Frontend: Ensure the full URL is specified
-        const response = await axios.post("http://localhost:5000/api/users/signup", formData);
+        const response = await axios.post("https://foundyourpet-backend.onrender.com/api/users/signup", formData);
 
         // Handle success
         setToastMessage(response.data.message || "Signup successful!");

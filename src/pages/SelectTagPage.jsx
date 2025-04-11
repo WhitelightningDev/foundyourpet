@@ -16,8 +16,8 @@ function SelectTagPage() {
     async function fetchData() {
       try {
         const [pkgRes, addonRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/packages/type/${tagType}`),
-          axios.get(`http://localhost:5000/api/addons/filter?type=${tagType}`)
+          axios.get(`https://foundyourpet-backend.onrender.com/api/packages/type/${tagType}`),
+          axios.get(`https://foundyourpet-backend.onrender.com/api/addons/filter?type=${tagType}`)
         ]);
         setSelectedPackage(pkgRes.data);
         setAddons(addonRes.data);
