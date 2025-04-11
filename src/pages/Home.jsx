@@ -1,43 +1,61 @@
+/* eslint-disable no-lone-blocks */
 import React, { useState } from "react";
 import "../styles/Home.css";
 import TagModal from "../services/TagModal";
-import 'bootstrap-icons/font/bootstrap-icons.css';
-
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 function Home() {
-    const [ModalData, setModalData] = useState({
-        show: false,
-        title: "",
-        content: "",
-        features: [],
-        icons: [],
-      });
-    
-      const handleShowModal = (title, content, features, icons) => {
-        setModalData({ show: true, title, content, features, icons });
-      };
-    
-      const handleCloseModal = () => {
-        setModalData({ show: false, title: "", content: "", features: [], icons: [] });
-      };
-    
-      const standardTagFeatures = [
-        { title: "Basic Identification", description: "A simple ID for your pet." },
-        { title: "Durable", description: "Made from high-quality materials." },
-      ];
-      const standardTagIcons = ["bi-tag fs-4", "bi-shield fs-4"];
-    
-      const samsungTagFeatures = [
-        { title: "Smart Tracking", description: "Works with Samsung devices for real-time tracking." },
-        { title: "Battery Life", description: "Long-lasting battery for your peace of mind." },
-      ];
-      const samsungTagIcons = ["bi-phone fs-4", "bi-battery fs-4"];
-    
-      const appleTagFeatures = [
-        { title: "iOS Compatibility", description: "Works seamlessly with Apple devices." },
-        { title: "Advanced Location Tracking", description: "Track your pet with the Found My app." },
-      ];
-      const appleTagIcons = ["bi-apple fs-4", " fs-4 bi-geo-alt"];
+  const [ModalData, setModalData] = useState({
+    show: false,
+    title: "",
+    content: "",
+    features: [],
+    icons: [],
+  });
+
+  const handleShowModal = (title, content, features, icons) => {
+    setModalData({ show: true, title, content, features, icons });
+  };
+
+  const handleCloseModal = () => {
+    setModalData({
+      show: false,
+      title: "",
+      content: "",
+      features: [],
+      icons: [],
+    });
+  };
+
+  const standardTagFeatures = [
+    { title: "Basic Identification", description: "A simple ID for your pet." },
+    { title: "Durable", description: "Made from high-quality materials." },
+  ];
+  const standardTagIcons = ["bi-tag fs-4", "bi-shield fs-4"];
+
+  const samsungTagFeatures = [
+    {
+      title: "Smart Tracking",
+      description: "Works with Samsung devices for real-time tracking.",
+    },
+    {
+      title: "Battery Life",
+      description: "Long-lasting battery for your peace of mind.",
+    },
+  ];
+  const samsungTagIcons = ["bi-phone fs-4", "bi-battery fs-4"];
+
+  const appleTagFeatures = [
+    {
+      title: "iOS Compatibility",
+      description: "Works seamlessly with Apple devices.",
+    },
+    {
+      title: "Advanced Location Tracking",
+      description: "Track your pet with the Found My app.",
+    },
+  ];
+  const appleTagIcons = ["bi-apple fs-4", " fs-4 bi-geo-alt"];
 
   return (
     <div className="container col-xxl-8 px-4 py-5">
@@ -62,9 +80,11 @@ function Home() {
             Easily register your pets, get personalized tags with QR codes, and
             track them anytime, anywhere with our NFC-enabled tags.
           </p>
-          <a href="/Login"><button className="btn btn-primary btn-lg" type="button">
-            Get Started
-          </button></a>
+          <a href="/Login">
+            <button className="btn btn-primary btn-lg" type="button">
+              Get Started
+            </button>
+          </a>
         </div>
       </div>
 
@@ -84,42 +104,141 @@ function Home() {
         </div>
       </div>
 
-        {/* Tags Section */}
-        <div className="container px-4 py-5 border-bottom" id="custom-cards">
-        <h4 className="pb-2 display-3  text-body-emphasis text-center">Tags we offer</h4>
+      {/* Tags Section */}
+      <div className="container py-5 border-bottom" id="custom-cards">
+        <h4 className="pb-4 display-4 fw-bold text-body-emphasis text-center">
+          Tags We Offer
+        </h4>
 
-        <div className="row row-cols-1 row-cols-lg-3 align-items-stretch g-4 py-5">
-          {/* Standard Tag */}
-          <div className="col">
-            <div
-              className="card card-cover h-100 overflow-hidden text-bg-dark rounded-4 shadow-lg"
-              style={{
-                backgroundImage: "url('/NormalDogTag.png')",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-              <div className="d-flex flex-column h-100 p-5 pb-3 text-white text-shadow-1">
-                <h6 className="pt-3 mt-5 mb-4  lh-1 fw-bold">Standard Tag</h6>
+        <div className="row justify-content-center">
+          {/* Standard Tag Card */}
+          <div className="col-md-6 col-lg-4 text-center">
+            <h2 className="mb-3 text-dark fw-bold">Standard Tag</h2>
+
+            <div className="card border-0 rounded-4 bg-light mb-3">
+              <img
+                src="/standard-dogtag.png"
+                alt="Standard Dog Tag"
+                className="card-img-top p-4"
+                style={{ objectFit: "contain" }}
+              />
+              <div className="card-body">
+                <p className="card-text text-muted">
+                  A basic dog tag used for pet identification, simple and
+                  reliable.
+                </p>
               </div>
-              <button
-                className="m-4 btn btn-primary"
-                onClick={() =>
-                  handleShowModal(
-                    "Standard Tag",
-                    "This is a basic dog tag used for pet identification.",
-                    standardTagFeatures,
-                    standardTagIcons
-                  )
-                }
-              >
-                Learn More
-              </button>
+            </div>
+
+            <button
+              className="btn btn-primary btn-lg"
+              onClick={() =>
+                handleShowModal(
+                  "Standard Tag",
+                  "This is a basic dog tag used for pet identification.",
+                  standardTagFeatures,
+                  standardTagIcons
+                )
+              }
+            >
+              Learn More
+            </button>
+          </div>
+        </div>
+
+        {/* Modal Component */}
+        <TagModal
+          show={ModalData.show}
+          onClose={handleCloseModal}
+          title={ModalData.title}
+          content={ModalData.content}
+          features={ModalData.features}
+          icons={ModalData.icons}
+        />
+      </div>
+
+      {/* Features Section */}
+      <h4 className="pb-2 display-3  text-body-emphasis text-center">
+        Features
+      </h4>
+      <div className="row row-cols-1 row-cols-md-2 align-items-md-center g-5 py-5">
+        <div className="col d-flex flex-column align-items-start gap-2">
+          <h2 className="fw-bold text-body-emphasis">
+            Effortless Pet Tracking
+          </h2>
+          <p className="text-body-secondary">
+            With Found Your Pet, simply generate a unique QR code for your pet's
+            tag, ensuring you never lose track of them again.
+          </p>
+        </div>
+
+        <div className="col">
+          <div className="row row-cols-1 row-cols-sm-2 g-4">
+            <div className="col d-flex flex-column gap-2">
+              <div className="feature-icon-small d-inline-flex align-items-start justify-content-start bg-gradient fs-4 rounded-3">
+                <i className="bi bi-house-door text-dark"></i>
+              </div>
+              <h4 className="fw-semibold mb-0 text-body-emphasis">
+                Pet Safety at Home
+              </h4>
+              <p className="text-body-secondary">
+                Ensure your pet’s safety with a simple scan of the QR code or
+                NFC-enabled tag, no matter where you are.
+              </p>
+            </div>
+
+            <div className="col d-flex flex-column gap-2">
+              <div className="feature-icon-small d-inline-flex align-items-start justify-content-start bg-gradient fs-4 rounded-3">
+                <i className="bi bi-qr-code text-dark"></i>
+              </div>
+              <h4 className="fw-semibold mb-0 text-body-emphasis">
+                Customizable Tags
+              </h4>
+              <p className="text-body-secondary">
+                Choose from a variety of tag designs and upgrade to NFC-enabled
+                tags for enhanced tracking.
+              </p>
+            </div>
+
+            <div className="col d-flex flex-column gap-2">
+              <div className="feature-icon-small d-inline-flex align-items-start justify-content-start bg-gradient fs-4 rounded-3">
+                <i className="bi bi-geo-fill text-dark"></i>
+              </div>
+              <h4 className="fw-semibold mb-0 text-body-emphasis">
+                Fast and Efficient Tracking
+              </h4>
+              <p className="text-body-secondary">
+                Track your pet’s location quickly with real-time updates, no
+                matter where they go.
+              </p>
+            </div>
+
+            <div className="col d-flex flex-column gap-2">
+              <div className="feature-icon-small d-inline-flex align-items-start justify-content-start bg-gradient fs-4 rounded-3">
+                <i className="bi bi-speedometer2 text-dark"></i>
+              </div>
+              <h4 className="fw-semibold mb-0 text-body-emphasis">
+                Easy to Use Dashboard
+              </h4>
+              <p className="text-body-secondary">
+                View all your pets in one place and manage their information
+                with ease.
+              </p>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-          {/* Samsung Tag */}
-          <div className="col">
+export default Home;
+
+{
+  /* Samsung Tag */
+}
+{
+  /* <div className="col">
             <div
               className="card card-cover h-100 overflow-hidden text-bg-dark rounded-4 shadow-lg"
               style={{
@@ -147,10 +266,14 @@ function Home() {
                 Learn More
               </button>
             </div>
-          </div>
+          </div> */
+}
 
-          {/* Apple Tag */}
-          <div className="col" style={{ height: "400px" }}>
+{
+  /* Apple Tag */
+}
+{
+  /* <div className="col" style={{ height: "400px" }}>
             <div
               className="card card-cover h-100 overflow-hidden text-bg-dark rounded-4 shadow-lg"
               style={{
@@ -177,90 +300,5 @@ function Home() {
               </button>
             </div>
           </div>
-        </div>
-
-        {/* Modal Component */}
-        <TagModal
-          show={ModalData.show}
-          onClose={handleCloseModal}
-          title={ModalData.title}
-          content={ModalData.content}
-          features={ModalData.features}
-          icons={ModalData.icons}
-        />
-      </div>
-
-      {/* Features Section */}
-      <h4 className="pb-2 display-3  text-body-emphasis text-center">Features</h4>
-      <div className="row row-cols-1 row-cols-md-2 align-items-md-center g-5 py-5">
-        <div className="col d-flex flex-column align-items-start gap-2">
-          <h2 className="fw-bold text-body-emphasis">
-            Effortless Pet Tracking
-          </h2>
-          <p className="text-body-secondary">
-            With Found Your Pet, simply generate a unique QR code for your pet's
-            tag, ensuring you never lose track of them again.
-          </p>
-        </div>
-
-        <div className="col">
-          <div className="row row-cols-1 row-cols-sm-2 g-4">
-            <div className="col d-flex flex-column gap-2">
-              <div className="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
-                <i className="bi bi-house-door"></i>
-              </div>
-              <h4 className="fw-semibold mb-0 text-body-emphasis">
-                Pet Safety at Home
-              </h4>
-              <p className="text-body-secondary">
-                Ensure your pet’s safety with a simple scan of the QR code or
-                NFC-enabled tag, no matter where you are.
-              </p>
-            </div>
-
-            <div className="col d-flex flex-column gap-2">
-              <div className="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
-                <i className="bi bi-qr-code"></i>
-              </div>
-              <h4 className="fw-semibold mb-0 text-body-emphasis">
-                Customizable Tags
-              </h4>
-              <p className="text-body-secondary">
-                Choose from a variety of tag designs and upgrade to NFC-enabled
-                tags for enhanced tracking.
-              </p>
-            </div>
-
-            <div className="col d-flex flex-column gap-2">
-              <div className="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
-                <i className="bi bi-geo-fill"></i>
-              </div>
-              <h4 className="fw-semibold mb-0 text-body-emphasis">
-                Fast and Efficient Tracking
-              </h4>
-              <p className="text-body-secondary">
-                Track your pet’s location quickly with real-time updates, no
-                matter where they go.
-              </p>
-            </div>
-
-            <div className="col d-flex flex-column gap-2">
-              <div className="feature-icon-small d-inline-flex align-items-center justify-content-center text-bg-primary bg-gradient fs-4 rounded-3">
-                <i className="bi bi-speedometer2"></i>
-              </div>
-              <h4 className="fw-semibold mb-0 text-body-emphasis">
-                Easy to Use Dashboard
-              </h4>
-              <p className="text-body-secondary">
-                View all your pets in one place and manage their information
-                with ease.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+        </div> */
 }
-
-export default Home;

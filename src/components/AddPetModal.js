@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import axios from "axios";
 
 const AddPetModal = ({ showModal, closeModal }) => {
   const [petData, setPetData] = useState({
     name: "",
     species: "",
     breed: "",
-    age: "",
+    age: "", 
   });
 
   const handleInputChange = (e) => {
@@ -40,15 +39,6 @@ const AddPetModal = ({ showModal, closeModal }) => {
 
       console.log(dataWithUserId); // Log the data to confirm
 
-      const response = await axios.post(
-        "http://localhost:5000/api/pets/create",
-        dataWithUserId,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
       alert("Pet added successfully!");
       closeModal(); // Close the modal after successful submission
     } catch (error) {

@@ -10,7 +10,6 @@ function SelectTagPage() {
   const [addons, setAddons] = useState([]);
   const [selectedOptionPrice, setSelectedOptionPrice] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  const [includeMembership, setIncludeMembership] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
