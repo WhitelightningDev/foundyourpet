@@ -8,7 +8,7 @@ function SelectTagPage() {
   const navigate = useNavigate();
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [addons, setAddons] = useState([]);
-  const [selectedOptionPrice, setSelectedOptionPrice] = useState(0);
+  const [selectedAddons, setSelectedAddons] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -16,8 +16,8 @@ function SelectTagPage() {
     async function fetchData() {
       try {
         const [pkgRes, addonRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/packages/type/${tagType}`),  // Updated URL
-          axios.get(`http://localhost:5000/api/addons/filter?type=${tagType}`) // Updated endpoint
+          axios.get(`http://localhost:5000/api/packages/type/${tagType}`),
+          axios.get(`http://localhost:5000/api/addons/filter?type=${tagType}`)
         ]);
         setSelectedPackage(pkgRes.data);
         setAddons(addonRes.data);
@@ -31,20 +31,28 @@ function SelectTagPage() {
     fetchData();
   }, [tagType]);
 
-  const handleOptionSelect = (price) => {
-    setSelectedOptionPrice(price);
+  const handleAddonToggle = (addon) => {
+    const isSelected = selectedAddons.some((a) => a._id === addon._id);
+    if (isSelected) {
+      setSelectedAddons(selectedAddons.filter((a) => a._id !== addon._id));
+    } else {
+      setSelectedAddons([...selectedAddons, addon]);
+    }
   };
 
   const handleContinue = () => setShowModal(true);
 
   const handleModalChoice = (choice) => {
     const base = selectedPackage?.basePrice || 0;
-    const finalPrice = choice ? base + selectedOptionPrice + 49.99 : base + selectedOptionPrice;
+    const addonTotal = selectedAddons.reduce((sum, a) => sum + a.price, 0);
+    const finalPrice = choice ? base + addonTotal + 49.99 : base + addonTotal;
+
     navigate("/checkout", {
       state: {
         package: selectedPackage.name,
         total: finalPrice,
-        membership: choice
+        membership: choice,
+        selectedAddons: selectedAddons.map(a => ({ name: a.name, price: a.price }))
       }
     });
   };
@@ -57,24 +65,28 @@ function SelectTagPage() {
     );
   }
 
+  const addonTotal = selectedAddons.reduce((sum, a) => sum + a.price, 0);
+
   return (
     <Container className="my-5">
       <h3 className="mb-4 text-center">Customize Your {selectedPackage.name}</h3>
       <Card className="shadow-sm p-4">
         <p><strong>Base Price:</strong> R{selectedPackage.basePrice.toFixed(2)}</p>
-        <p><strong>Choose an Add-on:</strong></p>
+        <p><strong>Select Add-ons:</strong></p>
         <Form>
           {addons.map((addon, idx) => (
             <Form.Check
               key={idx}
-              type="radio"
-              name="addon"
+              type="checkbox"
               label={`${addon.name} (+R${addon.price})`}
-              onChange={() => handleOptionSelect(addon.price)}
+              checked={selectedAddons.some((a) => a._id === addon._id)}
+              onChange={() => handleAddonToggle(addon)}
             />
           ))}
         </Form>
-        <h5 className="mt-4">Total: R{(selectedPackage.basePrice + selectedOptionPrice).toFixed(2)}</h5>
+        <h5 className="mt-4">
+          Total: R{(selectedPackage.basePrice + addonTotal).toFixed(2)}
+        </h5>
         <Button className="mt-3 w-100" onClick={handleContinue}>Continue</Button>
       </Card>
 

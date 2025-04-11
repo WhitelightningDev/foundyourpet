@@ -101,7 +101,7 @@ function Dashboard() {
 </Row>
 
 
-<h4 className="mb-4 text-center">Upgrade to a Premium Tag</h4>
+<h4 className="mb-4 text-center">Upgrade to get a Tag</h4>
 
 <Row className="g-4 mb-5 text-center">
   {/* Standard Tag */}
@@ -123,7 +123,7 @@ function Dashboard() {
   </Col>
 
   {/* Samsung Smart Tag */}
-  <Col md={4}>
+  {/* <Col md={4}>
     <Card className="shadow-sm h-100 border-success">
       <Card.Body>
         <Card.Title className="text-success fw-bold">Samsung Smart Tag</Card.Title>
@@ -138,10 +138,10 @@ function Dashboard() {
         <Button variant="outline-success" className="mb-2 w-100">Add Accessories</Button>
         <Button variant="success" className="w-100" onClick={() => navigate("/select-tag/samsung")}>Continue with Samsung Tag</Button>      </Card.Body>
     </Card>
-  </Col>
+  </Col> */}
 
   {/* Apple AirTag */}
-  <Col md={4}>
+  {/* <Col md={4}>
     <Card className="shadow-sm h-100 border-dark">
       <Card.Body>
         <Card.Title className="text-dark fw-bold">Apple AirTag</Card.Title>
@@ -156,7 +156,7 @@ function Dashboard() {
         <Button variant="outline-dark" className="mb-2 w-100">Select AirTag Holder</Button>
         <Button variant="dark" className="w-100" onClick={() => navigate("/select-tag/apple")}>Continue with Apple AirTag</Button>      </Card.Body>
     </Card>
-  </Col>
+  </Col> */}
 </Row>
 
 {/* Optional Membership Section */}
