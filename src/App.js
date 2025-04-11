@@ -16,6 +16,7 @@ import { AuthProvider } from "./context/AuthContext";
 import PrivateRoute from "./components/PrivateRoute";
 import SelectTagPage from "./pages/SelectTagPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import ManagePetsPage from "./pages/ManagePetsPage";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path="/Signup" element={<Signup />} />
           <Route path="/select-tag/:tagType" element={<SelectTagPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/manage-pets" element={<ManagePetsPage/>} />
           <Route
             path="/Dashboard"
             element={

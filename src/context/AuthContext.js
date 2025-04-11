@@ -1,25 +1,44 @@
 import { createContext, useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true); // Added loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
-    setIsLoggedIn(!!token); // Set on first render
-    setLoading(false); // Set loading to false after checking localStorage
+    setIsLoggedIn(!!token);
+    setLoading(false);
+
+    // Set up Axios interceptor once on mount
+    const interceptor = axios.interceptors.response.use(
+      response => response,
+      error => {
+        if (error.response && error.response.status === 401) {
+          // Token expired or unauthorized
+          logout();
+          window.location.href = "/login"; // Force redirect
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(interceptor); // Cleanup
+    };
   }, []);
 
   const login = (token) => {
     localStorage.setItem("authToken", token);
-    setIsLoggedIn(true); // triggers re-render
+    setIsLoggedIn(true);
   };
 
   const logout = () => {
     localStorage.removeItem("authToken");
-    setIsLoggedIn(false); // triggers re-render
+    setIsLoggedIn(false);
   };
 
   return (

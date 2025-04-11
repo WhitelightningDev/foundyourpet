@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-lone-blocks */
 import React, { useState } from "react";
 import "../styles/Home.css";
@@ -80,7 +81,7 @@ function Home() {
             Easily register your pets, get personalized tags with QR codes, and
             track them anytime, anywhere with our NFC-enabled tags.
           </p>
-          <a href="/Login">
+          <a href="/Dashboard">
             <button className="btn btn-primary btn-lg" type="button">
               Get Started
             </button>

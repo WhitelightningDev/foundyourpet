@@ -19,18 +19,44 @@
   .card-title {
     font-size: 1.25rem;
   }
-  
-  .hover-effect {
-    cursor: pointer;
-    transition: transform 0.3s ease;
-  }
-  
-  .hover-effect:hover {
-    transform: scale(1.05);
-  }
+ 
   
   button {
     border-radius: 0.25rem;
     padding: 0.75rem;
   }
+
+  /* Dashboard.css */
+
+.card {
+  transition: none !important;
+  border-radius: 12px;
+}
+
+.card:hover {
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.pet-details p {
+  margin-bottom: 6px;
+}
+
+.pet-details .label {
+  font-weight: 600;
+}
+
+.pet-details .value-muted {
+  color: #6c757d; /* Bootstrap's text-muted */
+  font-style: italic;
+}
+
+.pet-section-title {
+  font-weight: 600;
+  color: #0d6efd;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid #e3e3e3;
+  padding-bottom: 0.25rem;
+}
+
   
