@@ -68,7 +68,7 @@ function AdminDashboard() {
                       <strong>{user.name} {user.surname}</strong><br />
                       <span className="text-muted">{user.email}</span>
                     </div>
-                    <Badge pill variant="success">Admin</Badge>
+                    <Badge className="bg-success" pill variant="success">Admin</Badge>
                   </div>
                   <Button variant="outline-primary" className="mt-3" onClick={() => handleViewDetails(user._id)}>
                     View Details
@@ -114,10 +114,10 @@ function AdminDashboard() {
               {/* User Profile */}
               <Card className="mb-3">
                 <Card.Body>
-                  <h5>{selectedUser.name} {selectedUser.surname}</h5>
-                  <p><strong>Email:</strong> {selectedUser.email}</p>
-                  <p><strong>Contact:</strong> {selectedUser.contact}</p>
-                  <p><strong>Address:</strong> {selectedUser.address?.street}, {selectedUser.address?.city}</p>
+                  <h5 className="text-success border-bottom">{selectedUser.name} {selectedUser.surname}</h5>
+                  <p><strong className="text-secondary">Email:</strong> {selectedUser.email}</p>
+                  <p><strong className="text-secondary">Contact:</strong> {selectedUser.contact}</p>
+                  <p><strong className="text-secondary">Address:</strong> {selectedUser.address?.street}, {selectedUser.address?.city}</p>
                 </Card.Body>
               </Card>
 
