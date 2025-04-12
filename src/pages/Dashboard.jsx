@@ -141,7 +141,7 @@ const [showDetailsModal, setShowDetailsModal] = useState(false);
 
       <Row className="g-4 mb-5 text-center">
         {/* Standard Tag */}
-        <Col md={4}>
+        <Col md={7}>
           <Card className="shadow-sm h-100 border-primary">
             <Card.Body>
               <Card.Title className="text-primary fw-bold">
@@ -156,9 +156,6 @@ const [showDetailsModal, setShowDetailsModal] = useState(false);
                 <li>✔️ Emergency contact info</li>
                 <li>✔️ Medical profile access</li>
               </ul>
-              <Button variant="outline-primary" className="mb-2 w-100">
-                Choose Tag Style
-              </Button>
               <Button
                 variant="primary"
                 className="w-100"
@@ -169,33 +166,28 @@ const [showDetailsModal, setShowDetailsModal] = useState(false);
             </Card.Body>
           </Card>
         </Col>
-      </Row>
 
-      {/* Optional Membership Section */}
-      <h5 className="mb-3 text-center">Add Monthly Support</h5>
-      <Row className="justify-content-center mb-5">
-        <Col md={5}>
-          <Card className="shadow-sm border-info text-center">
+           {/* Standard Tag */}
+           <Col md={5}>
+          <Card className="shadow-sm h-100 border-primary">
             <Card.Body>
-              <Card.Title className="text-info fw-bold">
-                Support Membership
+              <Card.Title className="text-primary fw-bold">
+                Gps Tracking Tags
               </Card.Title>
               <Card.Text className="text-muted">
-                Enjoy 24/7 lost pet support, priority updates, and tag
-                replacement guarantees.
+                Gps Tracking tags are coming soon!
               </Card.Text>
-              <ul className="list-unstyled small text-start mb-3">
-                <li>📞 24/7 Support Line</li>
-                <li>🔁 Free Tag Replacement</li>
-                <li>🚨 Instant Lost Pet Alerts</li>
+              <ul className="list-unstyled text-center text-start small mb-3">
+                <li>✔️ QR code & Unique ID</li>
+                <li>✔️ Emergency contact info</li>
+                <li>✔️ Medical profile access</li>
               </ul>
-              <Button variant="info" className="w-100">
-                Add Monthly Membership – R49.99
-              </Button>
             </Card.Body>
           </Card>
         </Col>
       </Row>
+
+      
 
       {/* Dogs Section */}
 <h4 className="mb-4">Your Dogs</h4>
