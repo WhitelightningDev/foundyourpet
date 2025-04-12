@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Toast, ToastContainer } from "react-bootstrap";
-// import your AuthContext if using one
+// Import your AuthContext if using one
 import { AuthContext } from "../context/AuthContext";
 
 function LoginPage() {
@@ -13,9 +13,6 @@ function LoginPage() {
   const [showToast, setShowToast] = useState(false);
   const navigate = useNavigate();
   const { login } = useContext(AuthContext); // ADD this line
-
-  // If you're using context:
-  // const { login } = useContext(AuthContext);
 
   const validateForm = () => {
     if (!email || !password) {
@@ -39,27 +36,34 @@ function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+  
     try {
       const response = await axios.post("http://localhost:5000/api/users/login", {
         email,
         password,
       });
-
+  
       if (response.status === 200) {
         showToastMessage("Login successful! Redirecting...");
-      
-        const token = response.data.token || "";
+  
+        const { token, user } = response.data; // Assuming `user` is returned
         localStorage.setItem("authToken", token);
-        login(token); // TRIGGER CONTEXT LOGIN
-      
-        setTimeout(() => navigate("/dashboard"), 2000);
+        localStorage.setItem("user", JSON.stringify(user)); // Save user info
+        login(token); // Trigger context login
+  
+        // Check if the user is admin based on the `isAdmin` flag
+        const isAdmin = user?.isAdmin; // This will use the `isAdmin` field directly from the backend
+  
+        setTimeout(() => {
+          // Redirect to the appropriate dashboard based on `isAdmin`
+          navigate(isAdmin ? "/admin-dashboard" : "/dashboard");
+        }, 2000);
       }
     } catch (error) {
       if (error.response) {
         const { status, data } = error.response;
         console.error("Login Error:", data.error || data.message);
-
+  
         switch (status) {
           case 400:
             showToastMessage("Bad Request: " + (data.error || "Invalid input."));
@@ -81,11 +85,17 @@ function LoginPage() {
       }
     }
   };
+  
+  
 
   return (
     <div>
       <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1050 }}>
-      <Toast show={showToast} bg={toastMessage.includes("successful") ? "success" : "danger"} onClose={() => setShowToast(false)}>
+        <Toast
+          show={showToast}
+          bg={toastMessage.includes("successful") ? "success" : "danger"}
+          onClose={() => setShowToast(false)}
+        >
           <Toast.Body>{toastMessage}</Toast.Body>
         </Toast>
       </ToastContainer>

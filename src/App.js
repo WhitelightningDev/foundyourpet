@@ -17,6 +17,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import SelectTagPage from "./pages/SelectTagPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import ManagePetsPage from "./pages/ManagePetsPage";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   return (
@@ -35,7 +36,16 @@ function App() {
           <Route path="/Signup" element={<Signup />} />
           <Route path="/select-tag/:tagType" element={<SelectTagPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/manage-pets" element={<ManagePetsPage/>} />
+          <Route path="/manage-pets" element={<ManagePetsPage />} />
+          <Route
+            path="/admin-dashboard"
+            element={
+              <PrivateRoute>
+                <AdminDashboard />
+              </PrivateRoute>
+            }
+          />
+
           <Route
             path="/Dashboard"
             element={
