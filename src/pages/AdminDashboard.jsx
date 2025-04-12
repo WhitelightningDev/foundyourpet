@@ -144,7 +144,7 @@ function AdminDashboard() {
                       </Row>
                       <Row>
                         <Col sm={12} md={6}>
-                          <h6><strong className="text-secondary">Tag Information:</strong></h6>
+                          <h6><strong className="text-primary border-bottom">Tag Information:</strong></h6>
                           <p><strong className="text-secondary">Tag Type:</strong> {pet.tagType || "N/A"}</p>
                         </Col>
                       </Row>

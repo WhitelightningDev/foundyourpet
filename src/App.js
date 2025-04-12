@@ -18,6 +18,7 @@ import SelectTagPage from "./pages/SelectTagPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import ManagePetsPage from "./pages/ManagePetsPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import ProfilePage from "./pages/ProfilePage"; // adjust path as needed
 
 function App() {
   return (
@@ -37,6 +38,8 @@ function App() {
           <Route path="/select-tag/:tagType" element={<SelectTagPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/manage-pets" element={<ManagePetsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+
           <Route
             path="/admin-dashboard"
             element={

@@ -69,6 +69,11 @@ function NavigationBar() {
                 Dashboard
               </Nav.Link>
             )}
+            {isLoggedIn && (
+              <Nav.Link as={Link} to="/profile" onClick={closeNavbar}>
+                <i className="bi bi-person-circle fs-5"></i>
+              </Nav.Link>
+            )}
 
             {isLoggedIn && isAdmin && (
               <Nav.Link as={Link} to="/admin-dashboard" onClick={closeNavbar}>
