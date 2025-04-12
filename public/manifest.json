@@ -1,6 +1,6 @@
 {
   "short_name": "Found Your Pet",
-  "name": "Found Your Pet: Leading application that helps you keep track of your pets where-abouts",
+  "name": "Found Your Pet: The Leading Application for Tracking Your Pets' Whereabouts",
   "icons": [
     {
       "src": "android-chrome-192x192.png",
@@ -20,6 +20,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#4CAF50", 
   "background_color": "#ffffff"
 }
