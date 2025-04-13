@@ -172,7 +172,7 @@ function Signup() {
                       onChange={handleChange}
                       placeholder="+27"
                     />
-                    <label>Contact</label>
+                    <label>Cell Number</label>
                   </div>
                 </div>
               </div>
