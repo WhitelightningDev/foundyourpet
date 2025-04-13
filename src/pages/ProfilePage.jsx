@@ -92,7 +92,7 @@ function ProfilePage() {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.put(
-        `http://localhost:5000/api/users/${userId}`,
+        `https://foundyourpet-backend.onrender.com/api/users/${userId}`,
         payload,
         {
           headers: {

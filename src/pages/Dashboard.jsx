@@ -41,7 +41,7 @@ const [showDetailsModal, setShowDetailsModal] = useState(false);
 
     const fetchUser = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/users/me", {
+        const response = await axios.get("https://foundyourpet-backend.onrender.com/api/users/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser({
@@ -55,7 +55,7 @@ const [showDetailsModal, setShowDetailsModal] = useState(false);
 
     const fetchPets = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/pets", {
+        const response = await axios.get("https://foundyourpet-backend.onrender.com/api/pets", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setPets(response.data); // Store pets in state

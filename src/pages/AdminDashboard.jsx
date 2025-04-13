@@ -15,7 +15,7 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/users", {
+        const res = await axios.get("https://foundyourpet-backend.onrender.com/api/users", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUsers(res.data);
@@ -33,7 +33,7 @@ function AdminDashboard() {
   const handleViewDetails = async (userId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/users/users/${userId}/with-pets`,
+        `https://foundyourpet-backend.onrender.com/api/users/users/${userId}/with-pets`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

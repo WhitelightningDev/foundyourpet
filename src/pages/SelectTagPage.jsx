@@ -24,9 +24,9 @@ function SelectTagPage() {
     async function fetchData() {
       try {
         const [pkgRes, addonRes, petRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/packages/type/${tagType}`),
-          axios.get(`http://localhost:5000/api/addons/filter?type=${tagType}`),
-          axios.get("http://localhost:5000/api/pets", {
+          axios.get(`https://foundyourpet-backend.onrender.com/packages/type/${tagType}`),
+          axios.get(`https://foundyourpet-backend.onrender.com/api/addons/filter?type=${tagType}`),
+          axios.get("https://foundyourpet-backend.onrender.com/api/pets", {
             headers: { Authorization: `Bearer ${token}` },
           })
         ]);
@@ -43,7 +43,7 @@ function SelectTagPage() {
 
     const fetchUser = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/users/me", {
+        const response = await axios.get("https://foundyourpet-backend.onrender.com/api/users/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser({

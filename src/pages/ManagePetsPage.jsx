@@ -29,7 +29,7 @@ function ManagePets() {
 
   const fetchPets = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/pets", {
+      const response = await axios.get("https://foundyourpet-backend.onrender.com/api/pets", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPets(response.data);
