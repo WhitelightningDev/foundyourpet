@@ -24,7 +24,7 @@ function SelectTagPage() {
     async function fetchData() {
       try {
         const [pkgRes, addonRes, petRes] = await Promise.all([
-          axios.get(`https://foundyourpet-backend.onrender.com/packages/type/${tagType}`),
+          axios.get(`https://foundyourpet-backend.onrender.com/api/packages/type/${tagType}`),
           axios.get(`https://foundyourpet-backend.onrender.com/api/addons/filter?type=${tagType}`),
           axios.get("https://foundyourpet-backend.onrender.com/api/pets", {
             headers: { Authorization: `Bearer ${token}` },
