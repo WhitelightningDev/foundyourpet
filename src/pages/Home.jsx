@@ -78,8 +78,8 @@ function Home() {
           </h4>
           <p className="lead">
             Found Your Pet is your trusted companion for keeping your pets safe.
-            Easily register your pets, get personalized tags with QR codes, and
-            track them anytime, anywhere with our NFC-enabled tags.
+            Easily register your pets, get personalized tags with QR codes.{" "}
+            <strong>GPS enabled tags are coming soon</strong>
           </p>
           <a href="/Dashboard">
             <button className="btn btn-primary btn-lg" type="button">
@@ -94,13 +94,15 @@ function Home() {
       {/* Centered Section */}
       <div className="px-4 pt-5 my-5 text-center">
         <h4 className="display-3  text-body-emphasis">
-          Easy Pet Tracking with Custom Tags
+          Pet QR Code Embeded Tags
         </h4>
         <div className="col-lg-6 mx-auto">
           <p className="lead mb-5">
-            With Found Your Pet, you can choose from a variety of customizable
-            tags and enjoy peace of mind knowing your pet’s safety is just a
-            scan away.
+            With Found Your Pet, your furry friend will wear a personalized
+            identification tag around their neck. If they ever get lost, anyone
+            who finds them can simply scan the tag to instantly access your
+            contact information—helping reunite you with your pet quickly and
+            safely.
           </p>
         </div>
       </div>
@@ -115,10 +117,15 @@ function Home() {
           {/* Standard Tag Card */}
           <div className="col-md-6 col-lg-4 text-center">
             <h2 className="mb-3 text-dark fw-bold">Standard Tag</h2>
-
+            <p>
+              Once you've registered, logged in, and added your pet, you'll be
+              able to purchase the Standard Package. After that, you can explore
+              and choose from a variety of tag options to best suit your pet’s
+              style and needs.
+            </p>
             <div className="card border-0 rounded-4 bg-light mb-3">
               <img
-                src="/standard-dogtag.png"
+                src="/Standad-tagwithqrcode.png"
                 alt="Standard Dog Tag"
                 className="card-img-top p-4"
                 style={{ objectFit: "contain" }}
@@ -159,76 +166,85 @@ function Home() {
       </div>
 
       {/* Features Section */}
-      <h4 className="pb-2 display-3  text-body-emphasis text-center">
-        Features
-      </h4>
-      <div className="row row-cols-1 row-cols-md-2 align-items-md-center g-5 py-5">
-        <div className="col d-flex flex-column align-items-start gap-2">
-          <h2 className="fw-bold text-body-emphasis">
-            Effortless Pet Tracking
-          </h2>
-          <p className="text-body-secondary">
-            With Found Your Pet, simply generate a unique QR code for your pet's
-            tag, ensuring you never lose track of them again.
-          </p>
-        </div>
+<section className="py-5 bg-light">
+  <div className="container">
+    <h2 className="display-4 text-center fw-bold text-body-emphasis mb-5">Features</h2>
 
-        <div className="col">
-          <div className="row row-cols-1 row-cols-sm-2 g-4">
-            <div className="col d-flex flex-column gap-2">
-              <div className="feature-icon-small d-inline-flex align-items-start justify-content-start bg-gradient fs-4 rounded-3">
-                <i className="bi bi-house-door text-dark"></i>
-              </div>
-              <h4 className="fw-semibold mb-0 text-body-emphasis">
-                Pet Safety at Home
-              </h4>
-              <p className="text-body-secondary">
-                Ensure your pet’s safety with a simple scan of the QR code or
-                NFC-enabled tag, no matter where you are.
-              </p>
-            </div>
+    <div className="row align-items-center mb-5">
+      <div className="col-md-6">
+        <h3 className="fw-bold text-body-emphasis mb-3">Effortless Pet Tracking</h3>
+        <p className="text-body-secondary">
+          With Found Your Pet, once you've purchased the Standard Package, we take care of the rest. 
+          A unique QR code is automatically generated for your pet's tag, which we professionally engrave 
+          and deliver straight to your doorstep or nearest PUDO locker—ensuring your pet is always traceable 
+          and never truly lost.
+        </p>
+      </div>
+      <div className="col-md-6">
+        <img src="/ChatGPT Image Apr 13, 2025, 03_20_00 PM.png" className="img-fluid" alt="Pet Tracking Illustration" />
+      </div>
+    </div>
 
-            <div className="col d-flex flex-column gap-2">
-              <div className="feature-icon-small d-inline-flex align-items-start justify-content-start bg-gradient fs-4 rounded-3">
-                <i className="bi bi-qr-code text-dark"></i>
-              </div>
-              <h4 className="fw-semibold mb-0 text-body-emphasis">
-                Customizable Tags
-              </h4>
-              <p className="text-body-secondary">
-                Choose from a variety of tag designs and upgrade to NFC-enabled
-                tags for enhanced tracking.
-              </p>
+    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+      <div className="col">
+        <div className="card h-100 border-0 shadow-sm">
+          <div className="card-body text-center">
+            <div className="mb-3 fs-1 text-primary">
+              <i className="bi bi-person-plus"></i>
             </div>
-
-            <div className="col d-flex flex-column gap-2">
-              <div className="feature-icon-small d-inline-flex align-items-start justify-content-start bg-gradient fs-4 rounded-3">
-                <i className="bi bi-geo-fill text-dark"></i>
-              </div>
-              <h4 className="fw-semibold mb-0 text-body-emphasis">
-                Fast and Efficient Tracking
-              </h4>
-              <p className="text-body-secondary">
-                Track your pet’s location quickly with real-time updates, no
-                matter where they go.
-              </p>
-            </div>
-
-            <div className="col d-flex flex-column gap-2">
-              <div className="feature-icon-small d-inline-flex align-items-start justify-content-start bg-gradient fs-4 rounded-3">
-                <i className="bi bi-speedometer2 text-dark"></i>
-              </div>
-              <h4 className="fw-semibold mb-0 text-body-emphasis">
-                Easy to Use Dashboard
-              </h4>
-              <p className="text-body-secondary">
-                View all your pets in one place and manage their information
-                with ease.
-              </p>
-            </div>
+            <h5 className="card-title fw-semibold">Sign Up & Add Your Pet</h5>
+            <p className="card-text text-body-secondary">
+              Create your account, register your pet, and enter their details to get started on your journey with Found Your Pet.
+            </p>
           </div>
         </div>
       </div>
+
+      <div className="col">
+        <div className="card h-100 border-0 shadow-sm">
+          <div className="card-body text-center">
+            <div className="mb-3 fs-1 text-success">
+              <i className="bi bi-box-seam"></i>
+            </div>
+            <h5 className="card-title fw-semibold">Purchase the Standard Package</h5>
+            <p className="card-text text-body-secondary">
+              Unlock full access with the Standard Package, which includes a custom tag, unique QR code, engraving, delivery, and support.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="col">
+        <div className="card h-100 border-0 shadow-sm">
+          <div className="card-body text-center">
+            <div className="mb-3 fs-1 text-warning">
+              <i className="bi bi-qr-code-scan"></i>
+            </div>
+            <h5 className="card-title fw-semibold">Tag Activation & Delivery</h5>
+            <p className="card-text text-body-secondary">
+              After your purchase, we generate your pet’s QR code, engrave the tag, and deliver it to your door or nearest PUDO locker.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="col">
+        <div className="card h-100 border-0 shadow-sm">
+          <div className="card-body text-center">
+            <div className="mb-3 fs-1 text-danger">
+              <i className="bi bi-shield-check"></i>
+            </div>
+            <h5 className="card-title fw-semibold">Peace of Mind, Always</h5>
+            <p className="card-text text-body-secondary">
+              Anyone who finds your pet can scan the tag to view your contact details—helping them return home quickly and safely.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
     </div>
   );
 }
