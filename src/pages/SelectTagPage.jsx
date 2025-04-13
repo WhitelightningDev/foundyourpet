@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, Card, Button, Form, Modal, Spinner, Row, Col } from "react-bootstrap";
+import { Container, Card, Button, Form, Modal, Spinner, Row, Col, Toast, ToastContainer } from "react-bootstrap";
 import axios from "axios";
-import { Toast, ToastContainer } from "react-bootstrap";
-
 
 function SelectTagPage() {
   const { tagType } = useParams();
   const navigate = useNavigate();
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [addons, setAddons] = useState([]);
-  const [selectedAddons, setSelectedAddons] = useState([]);;
+  const [selectedAddons, setSelectedAddons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({ name: "", surname: "" });
   const [pets, setPets] = useState([]);
@@ -85,32 +83,24 @@ function SelectTagPage() {
     }));
   };
 
-  const handleTypeSelection = (petId, type) => {
-    setSelectedPetSizes((prev) => ({
-      ...prev,
-      [`${petId}_type`]: type,
-    }));
-  };
-
   const handleContinue = () => {
     if (selectedPets.length === 0) {
       setShowToast(true);
       return;
     }
-  
+
     const base = selectedPackage?.price || 0;
     const addonTotal = selectedAddons.reduce((sum, a) => sum + a.price, 0);
     const petTotal = selectedPets.length * base;
     const finalPrice = petTotal + addonTotal;
-  
+
     const selectedPetDetails = pets
       .filter((pet) => selectedPets.includes(pet._id))
       .map((pet) => ({
         ...pet,
         size: selectedPetSizes[pet._id],
-        species: selectedPetSizes[`${pet._id}_type`],
       }));
-  
+
     navigate("/checkout", {
       state: {
         package: selectedPackage.name,
@@ -121,7 +111,7 @@ function SelectTagPage() {
       },
     });
   };
-  
+
   if (loading || !selectedPackage) {
     return (
       <Container className="my-5 text-center">
@@ -150,50 +140,32 @@ function SelectTagPage() {
         </h5>
         <ul className="ps-3">
           {selectedPackage.features?.map((feature, idx) => (
-            <ul key={idx} className="mb-1 text-start">{feature}</ul>
+            <li key={idx} className="mb-1 text-start">{feature}</li>
           ))}
         </ul>
       </Card>
-      <h3 className="text-center mb-4 border-bottom">Now select optional add ons, and select the pets that you would like tags for </h3>
 
-      {/* Add-ons and Pet Selection */}
+      <h3 className="text-center mb-4 border-bottom">Now select optional add-ons, and select the pets that you would like tags for</h3>
+
+      {/* Pet Selection and Add-ons */}
       <Row className="mb-4">
-        <Col md={6}>
-          {/* Add-ons */}
-          <h5 className="mb-3 text-light p-3 text-center text-bg-secondary rounded-3">
-            <strong>Optional Add-ons</strong>
-          </h5>
-          <Form>
-            {addons.map((addon, idx) => (
-              <Form.Check
-                key={idx}
-                type="checkbox"
-                label={`${addon.name} (+R${addon.price})`}
-                checked={selectedAddons.some((a) => a._id === addon._id)}
-                onChange={() => handleAddonToggle(addon)}
-                className="mb-2"
-              />
-            ))}
-          </Form>
-        </Col>
-
-        <Col md={6}>
-          {/* Select Your Pets */}
-          <h5 className="mb-3 text-center text-bg-secondary p-3 rounded-3">
-            <strong>Select Your Pets</strong>
-          </h5>
-          <Form>
-            {pets.map((pet, idx) => (
-              <div key={idx} className="mb-3">
+        {pets.map((pet, idx) => (
+          <Col key={pet._id} sm={12} md={6} lg={4} className="mb-3">
+            <Card className="p-3 shadow-sm border-0">
+              <Card.Body>
+                <h5 className="text-center mb-3">{pet.name} ({pet.species})</h5>
+                
                 <Form.Check
                   type="checkbox"
-                  label={pet.name}
+                  label="Select this pet"
                   checked={selectedPets.includes(pet._id)}
                   onChange={() => handlePetSelection(pet)}
+                  className="mb-3"
                 />
 
                 {selectedPets.includes(pet._id) && (
-                  <div className="mt-2">
+                  <div>
+                    <h6>Select Size</h6>
                     <Form.Check
                       inline
                       type="radio"
@@ -218,52 +190,43 @@ function SelectTagPage() {
                       checked={selectedPetSizes[pet._id] === "large"}
                       onChange={() => handleSizeSelection(pet._id, "large")}
                     />
-                  </div>
-                )}
 
-                {selectedPets.includes(pet._id) && (
-                  <div className="mt-2">
-                    <Form.Check
-                      inline
-                      type="radio"
-                      label="Dog"
-                      name={`type-${pet._id}`}
-                      checked={selectedPetSizes[`${pet._id}_type`] === "dog"}
-                      onChange={() => handleTypeSelection(pet._id, "dog")}
-                    />
-                    <Form.Check
-                      inline
-                      type="radio"
-                      label="Cat"
-                      name={`type-${pet._id}`}
-                      checked={selectedPetSizes[`${pet._id}_type`] === "cat"}
-                      onChange={() => handleTypeSelection(pet._id, "cat")}
-                    />
+                    <h6 className="mt-3">Select Add-ons</h6>
+                    {addons.map((addon, idx) => (
+                      <Form.Check
+                        key={idx}
+                        type="checkbox"
+                        label={`${addon.name} (+R${addon.price})`}
+                        checked={selectedAddons.some((a) => a._id === addon._id)}
+                        onChange={() => handleAddonToggle(addon)}
+                        className="mb-2"
+                      />
+                    ))}
                   </div>
                 )}
-              </div>
-            ))}
-          </Form>
-        </Col>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
       </Row>
 
+      {/* Total and Continue */}
       <div className="mt-4 d-flex justify-content-between align-items-center">
         <h5>
           <strong>Total:</strong> R{(selectedPackage.price * selectedPets.length + addonTotal).toFixed(2)}
         </h5>
-        <Button className="px-4" onClick={handleContinue}>
-          Continue
-        </Button>
+        <Button className="px-4" onClick={handleContinue}>Continue</Button>
       </div>
-      <ToastContainer position="bottom-end" className="p-3">
-  <Toast onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide bg="warning">
-    <Toast.Header>
-      <strong className="me-auto">Selection Required</strong>
-    </Toast.Header>
-    <Toast.Body>Please select at least one pet before continuing.</Toast.Body>
-  </Toast>
-</ToastContainer>
 
+      {/* Toast */}
+      <ToastContainer position="bottom-end" className="p-3">
+        <Toast onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide bg="warning">
+          <Toast.Header>
+            <strong className="me-auto">Selection Required</strong>
+          </Toast.Header>
+          <Toast.Body>Please select at least one pet before continuing.</Toast.Body>
+        </Toast>
+      </ToastContainer>
     </Container>
   );
 }

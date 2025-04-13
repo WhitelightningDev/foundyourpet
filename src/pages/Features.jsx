@@ -1,3 +1,4 @@
+/* eslint-disable no-lone-blocks */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable jsx-a11y/alt-text */
 import React from "react";
@@ -6,117 +7,100 @@ import { Link } from "react-router-dom";
 function Features() {
   return (
     <div>
-      <div class="px-4 py-5 my-5 text-center">
+  {/* Hero Section */}
+  <section className="text-center py-5 bg-light">
+    <div className="container">
+      <img
+        src="/android-chrome-192x192.png"
+        className="rounded mb-4"
+        alt="Find Your Pet"
+        width="100"
+        height="100"
+      />
+      <h1 className="display-4 fw-bold text-body-emphasis">Features</h1>
+      <p className="lead mx-auto" style={{ maxWidth: "700px" }}>
+        At <strong>Find Your Pet</strong>, we’re committed to providing reliable and user-friendly pet safety solutions.
+        <br />
+        <strong className="text-primary">GPS tracking tags are coming soon</strong> —bringing real-time peace of mind
+        for pet parents everywhere.
+      </p>
+    </div>
+  </section>
+
+  {/* Standard Tag Section */}
+  <section className="container py-5">
+    <div className="row g-5 align-items-center">
+      <div className="col-md-6">
+        <h2 className="fw-bold text-body-emphasis mb-3">Standard Tag</h2>
         <img
-          class="d-block mx-auto mb-4 rounded"
-          src="/android-chrome-192x192.png"
-          width="100"
-          height="100"
+          src="/standard-dogtag.png"
+          alt="Standard Dog Tag"
+          className="img-fluid rounded shadow-sm mb-4"
+          style={{ maxWidth: "250px" }}
         />
-        <h1 class="display-5 text-body-emphasis">Features</h1>
-        <div class="col-lg-6 mx-auto">
-          <p class="lead mb-4">
-            At Find Your Pet, we believe in providing pet owners with versatile
-            and reliable options to keep their pets safe.
-            <strong>Excitingly, GPS tracking tags are coming soon</strong>
-            —bringing even more peace of mind to pet parents who want real-time
-            location tracking for their furry companions.
-          </p>
+        <p className="text-body-secondary">
+          Our <strong>Standard Tag</strong> offers a durable, easy-to-use identification method for your pet.
+          Each tag features a scannable QR code and unique ID linked to your pet's profile—
+          including your contact info, medical notes, and emergency instructions.
+        </p>
+        <div className="d-flex gap-3 mt-4">
+          <Link to="/Dashboard" className="btn btn-primary btn-lg">
+            Purchase
+          </Link>
+          <Link to="/NormalLearn" className="btn btn-outline-secondary btn-lg">
+            Learn More
+          </Link>
         </div>
       </div>
 
-      <div class="container px-4 py-5">
-        <h2 class="pb-2 border-bottom">Standard Tag</h2>
-        <div class="row row-cols-1 row-cols-md-2 align-items-md-center g-5 py-5">
-          <div class="col d-flex flex-column align-items-start gap-2">
-            <h2 class="fw-bold text-body-emphasis">Traditional and Reliable</h2>
-            <img
-              className="card h-100 rounded border-0"
-              src="/standard-dogtag.png"
-              style={{ width: "200px" }}
-            />
-            <p class="text-body-secondary">
-              Our Standard Tag is the perfect choice for pet owners looking for
-              a classic, simple solution. Designed with durability in mind, this
-              tag features a clear QR code and a unique ID that can easily be
-              scanned by anyone who finds your pet. The information contained on
-              the tag can include your contact details, your pet’s medical
-              information, and any special instructions.
-            </p>
-            <Link to="/Dashboard" className="btn btn-primary btn-lg">
-              Purchase
-            </Link>
-            <Link to="/NormalLearn" className="btn btn-secondary btn-lg">
-              Learn More
-            </Link>
-          </div>
-
-          <div className="col">
-            <div className="row row-cols-1 row-cols-sm-2 g-4">
-              <div className="col d-flex flex-column gap-2">
-                <div className="feature-icon-small d-inline-flex align-items-start justify-content-start bg-gradient fs-4 rounded-3">
-                  <i className="fs-2 bi bi-lightbulb text-dark"></i>
+      <div className="col-md-6">
+        <div className="row g-4">
+          {[
+            {
+              icon: "bi-lightbulb",
+              title: "Simplicity",
+              desc: "Ideal for pet owners seeking a low-tech, dependable identification solution.",
+            },
+            {
+              icon: "bi-box-seam",
+              title: "Durable Design",
+              desc: "Crafted from premium materials to endure everyday adventures.",
+            },
+            {
+              icon: "bi-cash-stack",
+              title: "Affordable",
+              desc: "An economical way to protect your pet—without complex tech.",
+            },
+            {
+              icon: "bi-battery-full",
+              title: "No Battery Required",
+              desc: "Just scan and go. No charging or maintenance needed.",
+            },
+          ].map((feature, i) => (
+            <div key={i} className="col-sm-6">
+              <div className="d-flex align-items-start gap-3">
+                <div className="bg-primary-subtle rounded-circle p-3">
+                  <i className={`bi ${feature.icon} fs-2 text-primary`}></i>
                 </div>
-                <h4 className="fw-semibold mb-0 text-body-emphasis">
-                  Simplicity
-                </h4>
-                <p className="text-body-secondary">
-                  Perfect for those who want a straightforward, low-tech
-                  solution for pet identification
-                </p>
-              </div>
-
-              <div className="col d-flex flex-column gap-2">
-                <div className="feature-icon-small d-inline-flex align-items-start justify-content-start bg-gradient fs-4 rounded-3">
-                  <i className="fs-2 bi bi-box-seam text-dark"></i>
+                <div>
+                  <h5 className="fw-semibold text-body-emphasis">{feature.title}</h5>
+                  <p className="text-body-secondary small">{feature.desc}</p>
                 </div>
-                <h4 className="fw-semibold mb-0 text-body-emphasis">
-                  Durable Design
-                </h4>
-                <p className="text-body-secondary">
-                  Made from high-quality materials, this tag is built to
-                  withstand everyday wear and tear.
-                </p>
-              </div>
-
-              <div className="col d-flex flex-column gap-2">
-                <div className="feature-icon-small d-inline-flex align-items-start justify-content-start bg-gradient fs-4 rounded-3">
-                  <i className="fs-2 bi bi-cash-stack text-dark"></i>
-                </div>
-                <h4 className="fw-semibold mb-0 text-body-emphasis">
-                  Affordable
-                </h4>
-                <p className="text-body-secondary">
-                  A cost-effective solution to keep your pet safe without the
-                  need for complex technology.
-                </p>
-              </div>
-
-              <div className="col d-flex flex-column gap-2">
-                <div className="feature-icon-small d-inline-flex align-items-start justify-content-start bg-gradient fs-4 rounded-3">
-                  <i className="fs-2 bi bi-battery-full text-dark"></i>
-                </div>
-                <h4 className="fw-semibold mb-0 text-body-emphasis">
-                  No Battery Required
-                </h4>
-                <p className="text-body-secondary">
-                  This tag works with just a QR code and NFC chip, so you never
-                  have to worry about charging it.
-                </p>
               </div>
             </div>
-          </div>
+          ))}
         </div>
       </div>
+    </div>
+  </section>
+</div>
 
-      <div className="text-center">
-        <h1>GPS TRACKERS COMING SOON</h1>
-        <p className="mt-3 mb-3">
-          Stay tuned for our upcoming GPS tracking solutions for your pets.
-        </p>
-      </div>
+  );
+}
+export default Features;
 
-      {/* <div class="container px-4 py-5">
+
+ {/* <div class="container px-4 py-5">
         <h2 class="pb-2 border-bottom">Samsung Smart Tag</h2>
         <div class="row row-cols-1 row-cols-md-2 align-items-md-center g-5 py-5">
           <div class="col d-flex flex-column align-items-start gap-2">
@@ -314,7 +298,3 @@ function Features() {
           </div>
         </div>
       </div> */}
-    </div>
-  );
-}
-export default Features;

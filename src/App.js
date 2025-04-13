@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
-import About from "./pages/About";
+import Prices from "./pages/Prices";
 import Features from "./pages/Features";
 import NavigationBar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -27,7 +27,7 @@ function App() {
         <NavigationBar />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/prices" element={<Prices />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/features" element={<Features />} />
           <Route path="/NormalLearn" element={<NormalTagLearn />} />

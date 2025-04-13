@@ -51,8 +51,8 @@ function NavigationBar() {
             <Nav.Link as={Link} to="/" onClick={closeNavbar}>
               Home
             </Nav.Link>
-            <Nav.Link as={Link} to="/about" onClick={closeNavbar}>
-              About
+            <Nav.Link as={Link} to="/prices" onClick={closeNavbar}>
+              Prices
             </Nav.Link>
             <Nav.Link as={Link} to="/features" onClick={closeNavbar}>
               Features
