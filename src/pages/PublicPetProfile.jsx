@@ -42,7 +42,7 @@ export default function PublicPetProfile() {
     );
   }
 
-  const { pet, owner } = petData;
+  const { pet, owner } = petData; // Correctly destructure the pet and owner objects
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-2xl mt-10">
