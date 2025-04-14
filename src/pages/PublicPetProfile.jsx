@@ -44,6 +44,9 @@ export default function PublicPetProfile() {
 
   const { pet, owner } = petData;
 
+  const whatsappMessage = `Hi, I have found your pet ${pet.name}. Please contact me so we can arrange to get your pet back to you.`;
+  const whatsappLink = `https://wa.me/${owner?.contact?.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(whatsappMessage)}`;
+
   return (
     <div className="container py-5 d-flex justify-content-center bg-light">
       <div className="card shadow-lg" style={{ maxWidth: '550px', borderRadius: '1rem' }}>
@@ -96,9 +99,14 @@ export default function PublicPetProfile() {
             <p>
               <i className="bi bi-telephone-fill me-2 text-secondary"></i>
               <strong>Phone:</strong>{' '}
-              <a href={`tel:${owner?.contact}`} className="text-decoration-none text-primary">
+              <a href={`tel:${owner?.contact}`} className="text-decoration-none text-primary me-3">
                 {owner?.contact || 'Not available'}
               </a>
+              {owner?.contact && (
+                <a href={whatsappLink} className="text-success" target="_blank" rel="noopener noreferrer">
+                  <i className="bi bi-whatsapp fs-5"></i>
+                </a>
+              )}
             </p>
           </div>
         </div>
