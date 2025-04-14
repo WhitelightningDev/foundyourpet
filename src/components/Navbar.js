@@ -1,19 +1,21 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Navbar, Nav, Container } from "react-bootstrap";
-import { AuthContext } from "../context/AuthContext"; // ADD this line
+import { AuthContext } from "../context/AuthContext";
 import logo from "../assets/android-chrome-192x192.png";
 
 function NavigationBar() {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
-  const { isLoggedIn, logout } = useContext(AuthContext); // USE context here
+  const { isLoggedIn, logout } = useContext(AuthContext);
+
   const user = JSON.parse(localStorage.getItem("user"));
-  const isAdmin = user?.email === "danielmommsen2@hotmail.com";
+  const isAdmin = user?.isAdmin; // Use actual role flag, not email check
+
   const closeNavbar = () => setExpanded(false);
 
   const handleLogout = () => {
-    logout(); // Use context logout
+    logout();
     navigate("/");
   };
 
@@ -63,24 +65,25 @@ function NavigationBar() {
 
             <div className="vr mx-3 d-none d-md-block text-white"></div>
 
-            {/* Show Dashboard link only if the user is logged in */}
+            {/* Always show only ONE Dashboard link */}
             {isLoggedIn && (
-              <Nav.Link as={Link} to="/dashboard" onClick={closeNavbar}>
+              <Nav.Link
+                as={Link}
+                to={isAdmin ? "/admin-dashboard" : "/dashboard"}
+                onClick={closeNavbar}
+              >
                 Dashboard
               </Nav.Link>
             )}
+
+            {/* Profile icon */}
             {isLoggedIn && (
               <Nav.Link as={Link} to="/profile" onClick={closeNavbar}>
                 <i className="bi bi-person-circle fs-5"></i>
               </Nav.Link>
             )}
 
-            {isLoggedIn && isAdmin && (
-              <Nav.Link as={Link} to="/admin-dashboard" onClick={closeNavbar}>
-                Admin Dashboard
-              </Nav.Link>
-            )}
-
+            {/* Auth Links */}
             {!isLoggedIn ? (
               <>
                 <Nav.Link as={Link} to="/login" onClick={closeNavbar}>
