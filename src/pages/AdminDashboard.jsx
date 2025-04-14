@@ -267,7 +267,7 @@ function AdminDashboard() {
                           </Button>
                           <QRCodeCanvas
                             id={`qr-${pet._id}`}
-                            value={`https://yourfrontenddomain.com/pet-profile/${pet._id}`}
+                            value={`https://foundyourpet-backend.onrender.com/pet-profile/${pet._id}`}
                             size={200}
                             level="H"
                             includeMargin={true}
