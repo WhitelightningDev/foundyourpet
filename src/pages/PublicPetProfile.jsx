@@ -28,15 +28,15 @@ export default function PublicPetProfile() {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        <p className="fs-5 fw-semibold">Loading pet profile...</p>
+      <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+        <p className="fs-5 fw-semibold text-secondary">Loading pet profile...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
+      <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
         <p className="text-danger fs-5">{error}</p>
       </div>
     );
@@ -45,33 +45,61 @@ export default function PublicPetProfile() {
   const { pet, owner } = petData;
 
   return (
-    <div className="container mt-5 d-flex justify-content-center">
-      <div className="card shadow-lg" style={{ maxWidth: '600px', borderRadius: '20px' }}>
+    <div className="container py-5 d-flex justify-content-center bg-light">
+      <div className="card shadow-lg" style={{ maxWidth: '550px', borderRadius: '1rem' }}>
         <div className="card-body text-center p-4">
-          <h2 className="card-title mb-4 fw-bold">{pet.name}'s Profile</h2>
+          <h2 className="card-title mb-3 fw-bold text-primary">
+            <i className="bi bi-person-circle me-2"></i>{pet.name}'s Profile
+          </h2>
 
           {pet.photoUrl && (
             <img
               src={pet.photoUrl}
-              alt={`${pet.name}`}
+              alt={pet.name}
               className="rounded-circle img-thumbnail mb-4"
-              style={{ width: '150px', height: '150px', objectFit: 'cover' }}
+              style={{ width: '140px', height: '140px', objectFit: 'cover' }}
             />
           )}
 
           <ul className="list-group list-group-flush text-start mb-4">
-            <li className="list-group-item"><strong>Breed:</strong> {pet.breed}</li>
-            <li className="list-group-item"><strong>Color:</strong> {pet.color || 'N/A'}</li>
-            <li className="list-group-item"><strong>Species:</strong> {pet.species}</li>
-            <li className="list-group-item"><strong>Age:</strong> {pet.age} years</li>
-            <li className="list-group-item"><strong>Gender:</strong> {pet.gender}</li>
-            <li className="list-group-item"><strong>Microchip:</strong> {pet.microchipNumber || 'N/A'}</li>
+            <li className="list-group-item">
+              <i className="bi bi-tags-fill me-2 text-secondary"></i><strong>Breed:</strong> {pet.breed}
+            </li>
+            <li className="list-group-item">
+              <i className="bi bi-palette-fill me-2 text-secondary"></i><strong>Color:</strong> {pet.color || 'N/A'}
+            </li>
+            <li className="list-group-item">
+              <i className="bi bi-gender-ambiguous me-2 text-secondary"></i><strong>Gender:</strong> {pet.gender}
+            </li>
+            <li className="list-group-item">
+              <i className="bi bi-paw-fill me-2 text-secondary"></i><strong>Species:</strong> {pet.species}
+            </li>
+            <li className="list-group-item">
+              <i className="bi bi-hourglass-split me-2 text-secondary"></i><strong>Age:</strong> {pet.age} years
+            </li>
+            <li className="list-group-item">
+              <i className="bi bi-cpu me-2 text-secondary"></i><strong>Microchip:</strong> {pet.microchipNumber || 'N/A'}
+            </li>
           </ul>
 
-          <div className="border-top pt-3">
-            <h5 className="fw-semibold mb-3">Owner Contact</h5>
-            <p className="mb-1"><strong>Email:</strong> <a href={`mailto:${owner?.email}`}>{owner?.email || 'Not available'}</a></p>
-            <p><strong>Phone:</strong> <a href={`tel:${owner?.contact}`}>{owner?.contact || 'Not available'}</a></p>
+          <div className="border-top pt-3 text-start">
+            <h5 className="fw-bold text-dark mb-3">
+              <i className="bi bi-person-lines-fill me-2 text-primary"></i>Owner Contact
+            </h5>
+            <p className="mb-2">
+              <i className="bi bi-envelope-fill me-2 text-secondary"></i>
+              <strong>Email:</strong>{' '}
+              <a href={`mailto:${owner?.email}`} className="text-decoration-none text-primary">
+                {owner?.email || 'Not available'}
+              </a>
+            </p>
+            <p>
+              <i className="bi bi-telephone-fill me-2 text-secondary"></i>
+              <strong>Phone:</strong>{' '}
+              <a href={`tel:${owner?.contact}`} className="text-decoration-none text-primary">
+                {owner?.contact || 'Not available'}
+              </a>
+            </p>
           </div>
         </div>
       </div>
