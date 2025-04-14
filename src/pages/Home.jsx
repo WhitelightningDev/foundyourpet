@@ -64,8 +64,8 @@ function Home() {
       <div className="row flex-lg-row-reverse align-items-center g-5 py-5">
         <div className="col-10 col-sm-8 col-lg-6">
           <img
-            src="/labwithtag.jpg"
-            className="d-block mx-lg-auto img-fluid rounded shadow-lg"
+            src="/ChatGPT Image Apr 14, 2025, 09_14_41 AM.png"
+            className="d-block mx-lg-auto img-fluid rounded-5 shadow-lg"
             alt="Pet Tag"
             width="700"
             height="500"
