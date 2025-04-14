@@ -13,6 +13,7 @@ function LoginPage() {
   const [showToast, setShowToast] = useState(false);
   const navigate = useNavigate();
   const { login } = useContext(AuthContext); // ADD this line
+  const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = () => {
     if (!email || !password) {
@@ -30,43 +31,50 @@ function LoginPage() {
   const showToastMessage = (message) => {
     setToastMessage(message);
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+    setTimeout(() => setShowToast(false), 3500);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-  
+
+    setIsLoading(true); // Start spinner
+
     try {
-      const response = await axios.post("https://foundyourpet-backend.onrender.com/api/users/login", {
-        email,
-        password,
-      });
-  
+      const response = await axios.post(
+        "https://foundyourpet-backend.onrender.com/api/users/login",
+        {
+          email,
+          password,
+        }
+      );
+
       if (response.status === 200) {
         showToastMessage("Login successful! Redirecting...");
-  
-        const { token, user } = response.data; // Assuming `user` is returned
+
+        const { token, user } = response.data;
         localStorage.setItem("authToken", token);
-        localStorage.setItem("user", JSON.stringify(user)); // Save user info
-        login(token); // Trigger context login
-  
-        // Check if the user is admin based on the `isAdmin` flag
-        const isAdmin = user?.isAdmin; // This will use the `isAdmin` field directly from the backend
-  
+        localStorage.setItem("user", JSON.stringify(user));
+        login(token);
+
+        const isAdmin = user?.isAdmin;
+
         setTimeout(() => {
-          // Redirect to the appropriate dashboard based on `isAdmin`
           navigate(isAdmin ? "/admin-dashboard" : "/dashboard");
+          setIsLoading(false); // Stop spinner after redirect
         }, 2000);
       }
     } catch (error) {
+      setIsLoading(false); // Stop spinner on error
       if (error.response) {
         const { status, data } = error.response;
         console.error("Login Error:", data.error || data.message);
-  
+
         switch (status) {
           case 400:
-            showToastMessage("Bad Request: " + (data.error || "Invalid input."));
+            showToastMessage(
+              "Oops: " + (data.error || "Invalid credentials, please check your email or password")
+            );
             break;
           case 401:
             showToastMessage("Incorrect email or password.");
@@ -85,12 +93,14 @@ function LoginPage() {
       }
     }
   };
-  
-  
 
   return (
     <div>
-      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 1050 }}>
+      <ToastContainer
+        position="top-end"
+        className="p-4"
+        style={{ zIndex: 1050, color: "white" }}
+      >
         <Toast
           show={showToast}
           bg={toastMessage.includes("successful") ? "success" : "danger"}
@@ -136,9 +146,25 @@ function LoginPage() {
                   />
                   <label>Password</label>
                 </div>
-                <button className="w-100 mb-1 btn btn-lg rounded-3 btn-primary" type="submit">
-                  Login
+                <button
+                  className="w-100 mb-1 btn btn-lg rounded-3 btn-primary"
+                  type="submit"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      />
+                      Logging you in...
+                    </>
+                  ) : (
+                    "Login"
+                  )}
                 </button>
+
                 <small className="text-body-secondary">
                   By clicking Login, you agree to the terms of use.
                 </small>
