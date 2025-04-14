@@ -267,11 +267,11 @@ function AdminDashboard() {
                           </Button>
                           <QRCodeCanvas
                             id={`qr-${pet._id}`}
-                            value={`${window.location.origin}/pet/${pet._id}`}
+                            value={`https://yourfrontenddomain.com/pet-profile/${pet._id}`}
                             size={200}
                             level="H"
-                            includeMargin
-                            className="d-none"
+                            includeMargin={true}
+                            className="hidden" // Tailwind version of 'd-none'
                           />
                         </Col>
                       </Row>
