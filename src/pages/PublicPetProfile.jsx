@@ -25,7 +25,6 @@ export default function PublicPetProfile() {
         setLoading(false);
       });
   }, [petId]);
-  
 
   if (loading) {
     return (
