@@ -8,7 +8,7 @@ export default function PublicPetProfile() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`/api/pets/public/${petId}`)
+    fetch(`https://foundyourpet.onrender.com/api/pets/public/${petId}`)
       .then(res => {
         if (!res.ok) {
           throw new Error('Failed to fetch pet info');
@@ -25,6 +25,7 @@ export default function PublicPetProfile() {
         setLoading(false);
       });
   }, [petId]);
+  
 
   if (loading) {
     return (
