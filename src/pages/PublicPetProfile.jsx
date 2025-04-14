@@ -8,7 +8,7 @@ export default function PublicPetProfile() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`https://foundyourpet-backend.onrender.com/api/pets/public/${pet._id}`)
+    fetch(`https://foundyourpet-backend.onrender.com/api/pets/public/${petId}`)
       .then(res => {
         if (!res.ok) {
           throw new Error('Failed to fetch pet info');
