@@ -19,6 +19,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import ManagePetsPage from "./pages/ManagePetsPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProfilePage from "./pages/ProfilePage"; // adjust path as needed
+import PublicPetProfile from "./pages/PublicPetProfile";
 
 function App() {
   return (
@@ -39,6 +40,8 @@ function App() {
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/manage-pets" element={<ManagePetsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/pet-profile/:petId" element={<PublicPetProfile />} />
+
 
           <Route
             path="/admin-dashboard"

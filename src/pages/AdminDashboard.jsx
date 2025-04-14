@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Modal, Button, Card, Row, Col, Badge } from "react-bootstrap";
+import { QRCodeCanvas } from "qrcode.react";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -15,9 +16,12 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get("https://foundyourpet-backend.onrender.com/api/users", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(
+          "https://foundyourpet-backend.onrender.com/api/users",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setUsers(res.data);
         setLoading(false);
       } catch (err) {
@@ -45,6 +49,17 @@ function AdminDashboard() {
       console.error("Error fetching user details:", err);
       setError("Failed to fetch user details");
     }
+  };
+
+  const handleDownloadQRCode = (petId) => {
+    const canvas = document.getElementById(`qr-${petId}`);
+    const pngUrl = canvas
+      .toDataURL("image/png")
+      .replace("image/png", "image/octet-stream");
+    const downloadLink = document.createElement("a");
+    downloadLink.href = pngUrl;
+    downloadLink.download = `${petId}_qr.png`;
+    downloadLink.click();
   };
 
   if (loading) return <div className="container mt-5">Loading users...</div>;
@@ -236,6 +251,28 @@ function AdminDashboard() {
                             </strong>{" "}
                             {pet.insuranceInfo || "N/A"}
                           </p>
+                        </Col>
+                      </Row>
+
+                      {/* QR Code Generation & Download */}
+                      <Row>
+                        <Col>
+                          <Button
+                            variant="outline-success"
+                            onClick={() => {
+                              handleDownloadQRCode(pet._id);
+                            }}
+                          >
+                            Download QR Code
+                          </Button>
+                          <QRCodeCanvas
+                            id={`qr-${pet._id}`}
+                            value={`${window.location.origin}/pet/${pet._id}`}
+                            size={200}
+                            level="H"
+                            includeMargin
+                            className="d-none"
+                          />
                         </Col>
                       </Row>
                     </Card.Body>
