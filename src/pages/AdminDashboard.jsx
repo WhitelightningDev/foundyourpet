@@ -60,9 +60,9 @@ function AdminDashboard() {
       const modules = qrData.modules;
       const size = modules.size;
       const data = modules.data;
-  
+
       let dxfContent = "0\nSECTION\n2\nENTITIES\n";
-  
+
       const scale = 10;
       for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
@@ -71,7 +71,7 @@ function AdminDashboard() {
             const y1 = y * scale;
             const x2 = x1 + scale;
             const y2 = y1 + scale;
-  
+
             dxfContent += `
   0
   LWPOLYLINE
@@ -105,9 +105,9 @@ function AdminDashboard() {
           }
         }
       }
-  
+
       dxfContent += "0\nENDSEC\n0\nEOF";
-  
+
       const blob = new Blob([dxfContent], { type: "application/dxf" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -123,13 +123,13 @@ function AdminDashboard() {
   const handleDownloadQRCode = (petId) => {
     const canvas = document.getElementById(`qr-${petId}`);
     const pngDataUrl = canvas.toDataURL("image/png");
-  
+
     // Download PNG
     const downloadLink = document.createElement("a");
     downloadLink.href = pngDataUrl;
     downloadLink.download = `${petId}_qr.png`;
     downloadLink.click();
-  
+
     // Download PDF
     const pdf = new jsPDF();
     pdf.text("Found Your Pet - QR Code", 20, 20);
@@ -140,14 +140,12 @@ function AdminDashboard() {
   const handleDownloadQRCodeAsPDF = (petId) => {
     const canvas = document.getElementById(`qr-${petId}`);
     const pngDataUrl = canvas.toDataURL("image/png");
-  
+
     const pdf = new jsPDF();
     pdf.text("Found Your Pet - QR Code", 20, 20);
     pdf.addImage(pngDataUrl, "PNG", 15, 30, 180, 180);
     pdf.save(`${petId}_qr.pdf`);
   };
-  
-  
 
   if (loading) return <div className="container mt-5">Loading users...</div>;
   if (error) return <div className="container mt-5 text-danger">{error}</div>;
@@ -352,7 +350,7 @@ function AdminDashboard() {
                           >
                             Download QR Code
                           </Button>
-                          
+
                           <QRCodeCanvas
                             id={`qr-${pet._id}`}
                             value={`https://foundyourpet.vercel.app/pet-profile/${pet._id}`}
@@ -363,26 +361,24 @@ function AdminDashboard() {
                           />
                         </Col>
                         <Button
-  variant="outline-danger"
-  onClick={() => {
-    handleDownloadQRCodeAsPDF(pet._id);
-  }}
->
-  Download QR as PDF
-</Button>
-<Button
-  variant="outline-dark"
-  onClick={() =>
-    handleDownloadQRCodeAsDXF(
-      pet._id,
-      `https://foundyourpet.vercel.app/pet-profile/${pet._id}`
-    )
-  }
->
-  Download QR as DXF
-</Button>
-
-
+                          variant="outline-danger"
+                          onClick={() => {
+                            handleDownloadQRCodeAsPDF(pet._id);
+                          }}
+                        >
+                          Download QR as PDF
+                        </Button>
+                        <Button
+                          variant="outline-dark"
+                          onClick={() =>
+                            handleDownloadQRCodeAsDXF(
+                              pet._id,
+                              `https://foundyourpet.vercel.app/pet-profile/${pet._id}`
+                            )
+                          }
+                        >
+                          Download QR as DXF
+                        </Button>
                       </Row>
                     </Card.Body>
                   </Card>
