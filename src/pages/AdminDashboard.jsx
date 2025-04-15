@@ -3,6 +3,7 @@ import axios from "axios";
 import { Modal, Button, Card, Row, Col, Badge } from "react-bootstrap";
 import { QRCodeCanvas } from "qrcode.react";
 import { jsPDF } from "jspdf";
+import QRCode from "qrcode";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -49,6 +50,73 @@ function AdminDashboard() {
     } catch (err) {
       console.error("Error fetching user details:", err);
       setError("Failed to fetch user details");
+    }
+  };
+
+  const handleDownloadQRCodeAsDXF = async (petId, value) => {
+    try {
+      // Generate QR matrix
+      const qrData = await QRCode.create(value, { errorCorrectionLevel: "H" });
+      const modules = qrData.modules;
+      const size = modules.size;
+      const data = modules.data;
+  
+      let dxfContent = "0\nSECTION\n2\nENTITIES\n";
+  
+      const scale = 10;
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          if (data[y * size + x]) {
+            const x1 = x * scale;
+            const y1 = y * scale;
+            const x2 = x1 + scale;
+            const y2 = y1 + scale;
+  
+            dxfContent += `
+  0
+  LWPOLYLINE
+  8
+  QR
+  90
+  4
+  70
+  1
+  10
+  ${x1}
+  20
+  ${y1}
+  10
+  ${x2}
+  20
+  ${y1}
+  10
+  ${x2}
+  20
+  ${y2}
+  10
+  ${x1}
+  20
+  ${y2}
+  10
+  ${x1}
+  20
+  ${y1}
+  `;
+          }
+        }
+      }
+  
+      dxfContent += "0\nENDSEC\n0\nEOF";
+  
+      const blob = new Blob([dxfContent], { type: "application/dxf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${petId}_qr.dxf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to generate DXF QR code", error);
     }
   };
 
@@ -302,6 +370,18 @@ function AdminDashboard() {
 >
   Download QR as PDF
 </Button>
+<Button
+  variant="outline-dark"
+  onClick={() =>
+    handleDownloadQRCodeAsDXF(
+      pet._id,
+      `https://foundyourpet.vercel.app/pet-profile/${pet._id}`
+    )
+  }
+>
+  Download QR as DXF
+</Button>
+
 
                       </Row>
                     </Card.Body>
