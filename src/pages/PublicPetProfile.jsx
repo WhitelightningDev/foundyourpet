@@ -6,6 +6,24 @@ export default function PublicPetProfile() {
   const [petData, setPetData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [location, setLocation] = useState(null);
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.warn("Location access denied or unavailable:", error.message);
+          setLocation(null);
+        }
+      );
+    }
+  }, []);
 
   useEffect(() => {
     fetch(`https://foundyourpet-backend.onrender.com/api/pets/public/${petId}`)
@@ -68,11 +86,17 @@ export default function PublicPetProfile() {
   const { pet, owner } = petData;
 
   const formattedNumber = formatPhoneNumberForWhatsApp(owner?.contact);
-  const whatsappMessage = `Hi, I have found your pet ${pet.name}. Please contact me so we can arrange to get your pet back to you.`;
-  const whatsappLink = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(
-    whatsappMessage
-  )}`;
 
+  const baseMessage = `Hi, I have found your pet ${pet.name}. Please contact me so we can arrange to get your pet back to you.`;
+  
+  const locationMessage = location
+    ? `\n\nHere is my location: https://www.google.com/maps?q=${location.latitude},${location.longitude}`
+    : "";
+  
+  const fullMessage = baseMessage + locationMessage;
+  
+  const whatsappLink = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(fullMessage)}`;
+  
   return (
     <div className="container py-5 d-flex justify-content-center bg-light">
       <div
