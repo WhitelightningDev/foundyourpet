@@ -202,7 +202,7 @@ function AdminDashboard() {
                   <small className="text-black">{user.email}</small>
                 </div>
                 <div className="text-end">
-                  <Badge bg="secondary" style={{width: "100px"}} pill className="mb-2 m-2 p-2"> User </Badge>
+                  <Badge bg="secondary" style={{width: "60px"}} pill className="mb-2 p-2"> User </Badge>
                   <Button
                     size="sm"
                     variant="outline-primary"
