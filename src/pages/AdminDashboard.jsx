@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Modal, Button, Card, Row, Col, Badge } from "react-bootstrap";
 import { QRCodeCanvas } from "qrcode.react";
+import { jsPDF } from "jspdf";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -53,14 +54,32 @@ function AdminDashboard() {
 
   const handleDownloadQRCode = (petId) => {
     const canvas = document.getElementById(`qr-${petId}`);
-    const pngUrl = canvas
-      .toDataURL("image/png")
-      .replace("image/png", "image/octet-stream");
+    const pngDataUrl = canvas.toDataURL("image/png");
+  
+    // Download PNG
     const downloadLink = document.createElement("a");
-    downloadLink.href = pngUrl;
+    downloadLink.href = pngDataUrl;
     downloadLink.download = `${petId}_qr.png`;
     downloadLink.click();
+  
+    // Download PDF
+    const pdf = new jsPDF();
+    pdf.text("Found Your Pet - QR Code", 20, 20);
+    pdf.addImage(pngDataUrl, "PNG", 15, 30, 180, 180); // adjust size/position as needed
+    pdf.save(`${petId}_qr.pdf`);
   };
+
+  const handleDownloadQRCodeAsPDF = (petId) => {
+    const canvas = document.getElementById(`qr-${petId}`);
+    const pngDataUrl = canvas.toDataURL("image/png");
+  
+    const pdf = new jsPDF();
+    pdf.text("Found Your Pet - QR Code", 20, 20);
+    pdf.addImage(pngDataUrl, "PNG", 15, 30, 180, 180);
+    pdf.save(`${petId}_qr.pdf`);
+  };
+  
+  
 
   if (loading) return <div className="container mt-5">Loading users...</div>;
   if (error) return <div className="container mt-5 text-danger">{error}</div>;
@@ -265,6 +284,7 @@ function AdminDashboard() {
                           >
                             Download QR Code
                           </Button>
+                          
                           <QRCodeCanvas
                             id={`qr-${pet._id}`}
                             value={`https://foundyourpet.vercel.app/pet-profile/${pet._id}`}
@@ -274,6 +294,15 @@ function AdminDashboard() {
                             className="hidden"
                           />
                         </Col>
+                        <Button
+  variant="outline-danger"
+  onClick={() => {
+    handleDownloadQRCodeAsPDF(pet._id);
+  }}
+>
+  Download QR as PDF
+</Button>
+
                       </Row>
                     </Card.Body>
                   </Card>
