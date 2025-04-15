@@ -20,7 +20,7 @@ function Prices() {
 
       <div className="row g-5 align-items-center">
         <div className="col-md-6">
-          <div className="card shadow-sm border-0">
+          <div className="card shadow-lg border-0">
             <div className="card-body">
               <h2 className="fw-bold text-primary">R120 Once-Off</h2>
               <ul className="list-unstyled mt-3 mb-4">

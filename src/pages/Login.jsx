@@ -111,7 +111,7 @@ function LoginPage() {
       </ToastContainer>
 
       <div className="position-static d-block bg-body-secondary d-flex justify-content-center align-items-center">
-        <div className="modal-dialog mb-3" style={{ maxWidth: "500px" }}>
+        <div className="modal-dialog mt-3 mb-3" style={{ maxWidth: "500px" }}>
           <div className="modal-content rounded-4 shadow">
             <div className="modal-header p-4 pb-3 border-bottom-0">
               <img

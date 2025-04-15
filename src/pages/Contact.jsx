@@ -30,7 +30,7 @@ function Contact() {
     <div className="container py-5">
       <div className="row justify-content-center">
         <div className="col-lg-8">
-          <div className="contact-form bg-white p-5 rounded-3 shadow-sm">
+          <div className="contact-form bg-white p-5 rounded-5 shadow-lg">
             <div className="d-flex align-items-center justify-content-center mb-4">
               <h2 className="me-3 mb-0">Get in Touch</h2>
               <img

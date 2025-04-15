@@ -4,6 +4,8 @@ import { Modal, Button, Card, Row, Col, Badge } from "react-bootstrap";
 import { QRCodeCanvas } from "qrcode.react";
 import { jsPDF } from "jspdf";
 import QRCode from "qrcode";
+import { FaFilePdf, FaQrcode, FaDownload } from "react-icons/fa";
+
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -12,7 +14,8 @@ function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [selectedPet, setSelectedPet] = useState(null);
   const token = localStorage.getItem("authToken");
 
   useEffect(() => {
@@ -35,6 +38,11 @@ function AdminDashboard() {
 
     fetchUsers();
   }, [token]);
+
+  const handleShowQRModal = (pet) => {
+    setSelectedPet(pet);
+    setShowQRModal(true);
+  };
 
   const handleViewDetails = async (userId) => {
     try {
@@ -154,201 +162,178 @@ function AdminDashboard() {
   const regularUsers = users.filter((user) => !user.isAdmin);
 
   return (
-    <div className="container mt-5">
-      <h2 className="mb-4">Admin Dashboard</h2>
-      <p>Total users: {users.length}</p>
+    <div className="container mt-5 rounded-3 p-5" style={{backgroundColor: "#F1EFEC"}}>
+      <h3 className="mb-3">Admin Dashboard</h3>
+      <p className="text-muted">Total users: {users.length}</p>
 
       <Row>
         {/* Admin Users */}
         <Col sm={12} md={6}>
-          <h4 className="mb-3">Admin Users</h4>
-          <div className="list-group">
-            {adminUsers.map((user) => (
-              <Card key={user._id} className="mb-3">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div>
-                      <strong>
-                        {user.name} {user.surname}
-                      </strong>
-                      <br />
-                      <span className="text-muted">{user.email}</span>
-                    </div>
-                    <Badge className="bg-success" pill variant="success">
-                      Admin
-                    </Badge>
-                  </div>
+          <h5 className="mb-3">Admin Users</h5>
+          {adminUsers.map((user) => (
+            <Card key={user._id} className="mb-3 shadow-sm border-0">
+              <Card.Body className="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 className="mb-1">
+                    {user.name} {user.surname}
+                  </h6>
+                  <small className="text-muted">{user.email}</small>
+                </div>
+                <div className="text-end">
+                  <Badge style={{width: "100px"}} bg="success" pill className="mb-2 p-2 m-2">
+                    Admin
+                  </Badge>
                   <Button
+                    size="sm"
                     variant="outline-primary"
-                    className="mt-3"
                     onClick={() => handleViewDetails(user._id)}
                   >
-                    View Details
+                    View
                   </Button>
-                </Card.Body>
-              </Card>
-            ))}
-          </div>
+                </div>
+              </Card.Body>
+            </Card>
+          ))}
         </Col>
 
         {/* Regular Users */}
         <Col sm={12} md={6}>
-          <h4 className="mb-3">Regular Users</h4>
-          <div className="list-group">
-            {regularUsers.map((user) => (
-              <Card key={user._id} className="mb-3">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div>
-                      <strong>
-                        {user.name} {user.surname}
-                      </strong>
-                      <br />
-                      <span className="text-muted">{user.email}</span>
-                    </div>
-                    <Badge pill variant="secondary">
-                      User
-                    </Badge>
-                  </div>
+          <h5 className="mb-3">Regular Users</h5>
+          {regularUsers.map((user) => (
+            <Card key={user._id} className="mb-3 shadow-sm border-2">
+              <Card.Body className="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 className="mb-1 border-bottom">
+                    {user.name} {user.surname}
+                  </h6>
+                  <small className="text-black">{user.email}</small>
+                </div>
+                <div className="text-end">
+                  <Badge
+                    bg="secondary"
+                    style={{ width: "100px" }}
+                    pill
+                    className="mb-2 m-2 p-2"
+                  >
+                    {" "}
+                    User{" "}
+                  </Badge>
                   <Button
+                    size="sm"
                     variant="outline-primary"
-                    className="mt-3"
                     onClick={() => handleViewDetails(user._id)}
                   >
-                    View Details
+                    View
                   </Button>
-                </Card.Body>
-              </Card>
-            ))}
-          </div>
+                </div>
+              </Card.Body>
+            </Card>
+          ))}
         </Col>
       </Row>
 
-      {/* Modal to show user details and pets */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        size="xl"
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>User Profile</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body style={{backgroundColor: "#F1EFEC"}}>
           {selectedUser && (
-            <>
-              {/* User Profile */}
-              <Card className="mb-3">
-                <Card.Body>
-                  <h5 className="text-success border-bottom">
-                    {selectedUser.name} {selectedUser.surname}
-                  </h5>
-                  <p>
-                    <strong className="text-secondary">Email:</strong>{" "}
-                    {selectedUser.email}
-                  </p>
-                  <p>
-                    <strong className="text-secondary">Contact:</strong>{" "}
-                    {selectedUser.contact}
-                  </p>
-                  <p>
-                    <strong className="text-secondary">Address:</strong>{" "}
-                    {selectedUser.address?.street}, {selectedUser.address?.city}
-                  </p>
-                </Card.Body>
-              </Card>
+            <Row>
+              {/* Left Column: User Info */}
+              <Col md={4}>
+                <Card className="mb-4 border-2 mt-5 shadow-sm">
+                  <Card.Body>
+                    <h5 className="text-success">
+                      {selectedUser.name} {selectedUser.surname}
+                    </h5>
+                    <p>
+                      <strong>Email:</strong> {selectedUser.email}
+                    </p>
+                    <p>
+                      <strong>Contact:</strong> {selectedUser.contact}
+                    </p>
+                    <p>
+                      <strong>Address:</strong> {selectedUser.address?.street},{" "}
+                      {selectedUser.address?.city}
+                    </p>
+                  </Card.Body>
+                </Card>
+              </Col>
 
-              {/* Pets Section */}
-              <h5 className="text-primary mb-3">
-                <strong>Pets:</strong>
-              </h5>
-              {pets.length === 0 ? (
-                <p className="text-muted">No pets found.</p>
-              ) : (
-                pets.map((pet) => (
-                  <Card key={pet._id} className="mb-4 shadow-sm border-0">
-                    <Card.Body>
-                      <Row className="mb-3">
-                        <Col xs={12} md={6}>
-                          <h6 className="text-primary border-bottom pb-1 mb-2">
-                            <strong>Pet Details</strong>
-                          </h6>
-                          <p>
-                            <strong className="text-secondary">Name:</strong>{" "}
-                            {pet.name}
-                          </p>
-                          <p>
-                            <strong className="text-secondary">Species:</strong>{" "}
-                            {pet.species}
-                          </p>
-                          <p>
-                            <strong className="text-secondary">Breed:</strong>{" "}
-                            {pet.breed}
-                          </p>
-                          <p>
-                            <strong className="text-secondary">Age:</strong>{" "}
-                            {pet.age} years
-                          </p>
-                          <p>
-                            <strong className="text-secondary">Gender:</strong>{" "}
-                            {pet.gender}
-                          </p>
-                        </Col>
-                        <Col xs={12} md={6}>
-                          <h6 className="text-primary border-bottom pb-1 mb-2">
-                            <strong>Health Information</strong>
-                          </h6>
-                          <p>
-                            <strong className="text-secondary">
-                              Microchip:
-                            </strong>{" "}
-                            {pet.microchipNumber || "N/A"}
-                          </p>
-                          <p>
-                            <strong className="text-secondary">
-                              Spayed | Neutered:
-                            </strong>{" "}
-                            {pet.spayedNeutered ? "Yes" : "No"}
-                          </p>
-                        </Col>
-                      </Row>
+              {/* Right Column: Pets */}
+              <Col md={8}>
+                <h4 className=" border-bottom mb-3 text-center">
+                  Pets
+                </h4>
+                {pets.length === 0 ? (
+                  <p className="text-muted">No pets found.</p>
+                ) : (
+                  pets.map((pet) => (
+                    <Card key={pet._id} className="mb-4 border-2 shadow-sm">
+                      <Card.Body>
+                        <Row>
+                          <Col md={6}>
+                            <h6 className="text-primary">Pet Details</h6>
+                            <p>
+                              <strong>Name:</strong> {pet.name}
+                            </p>
+                            <p>
+                              <strong>Species:</strong> {pet.species}
+                            </p>
+                            <p>
+                              <strong>Breed:</strong> {pet.breed}
+                            </p>
+                            <p>
+                              <strong>Age:</strong> {pet.age} years
+                            </p>
+                            <p>
+                              <strong>Gender:</strong> {pet.gender}
+                            </p>
+                          </Col>
+                          <Col md={6}>
+                            <h6 className="text-primary">Health Info</h6>
+                            <p>
+                              <strong>Microchip:</strong>{" "}
+                              {pet.microchipNumber || "N/A"}
+                            </p>
+                            <p>
+                              <strong>Spayed/Neutered:</strong>{" "}
+                              {pet.spayedNeutered ? "Yes" : "No"}
+                            </p>
+                          </Col>
+                        </Row>
 
-                      <Row className="mb-3">
-                        <Col xs={12} md={6}>
-                          <h6 className="text-primary border-bottom pb-1 mb-2">
-                            <strong>Tag Information</strong>
-                          </h6>
-                          <p>
-                            <strong className="text-secondary">
-                              Tag Type:
-                            </strong>{" "}
-                            {pet.tagType || "N/A"}
-                          </p>
-                        </Col>
-                        <Col xs={12} md={6}>
-                          <h6 className="text-primary border-bottom pb-1 mb-2">
-                            <strong>Vet & Insurance</strong>
-                          </h6>
-                          <p>
-                            <strong className="text-secondary">
-                              Vet Info:
-                            </strong>{" "}
-                            {pet.vetInfo || "N/A"}
-                          </p>
-                          <p>
-                            <strong className="text-secondary">
-                              Insurance Info:
-                            </strong>{" "}
-                            {pet.insuranceInfo || "N/A"}
-                          </p>
-                        </Col>
-                      </Row>
+                        <Row>
+                          <Col md={6}>
+                            <h6 className="text-primary">Tag Info</h6>
+                            <p>
+                              <strong>Type:</strong> {pet.tagType || "N/A"}
+                            </p>
+                          </Col>
+                          <Col md={6}>
+                            <h6 className="text-primary">Vet & Insurance</h6>
+                            <p>
+                              <strong>Vet:</strong> {pet.vetInfo || "N/A"}
+                            </p>
+                            <p>
+                              <strong>Insurance:</strong>{" "}
+                              {pet.insuranceInfo || "N/A"}
+                            </p>
+                          </Col>
+                        </Row>
 
-                      {/* QR Code Generation & Download */}
-                      <Row>
-                        <Col>
+                        <div className="mt-3">
                           <Button
                             variant="outline-success"
-                            onClick={() => {
-                              handleDownloadQRCode(pet._id);
-                            }}
+                            onClick={() => handleShowQRModal(pet)}
                           >
-                            Download QR Code
+                            <FaQrcode className="me-2" />
+                            View PDF
                           </Button>
 
                           <QRCodeCanvas
@@ -357,34 +342,15 @@ function AdminDashboard() {
                             size={200}
                             level="H"
                             includeMargin={true}
-                            className="hidden"
+                            className="d-none"
                           />
-                        </Col>
-                        <Button
-                          variant="outline-danger"
-                          onClick={() => {
-                            handleDownloadQRCodeAsPDF(pet._id);
-                          }}
-                        >
-                          Download QR as PDF
-                        </Button>
-                        <Button
-                          variant="outline-dark"
-                          onClick={() =>
-                            handleDownloadQRCodeAsDXF(
-                              pet._id,
-                              `https://foundyourpet.vercel.app/pet-profile/${pet._id}`
-                            )
-                          }
-                        >
-                          Download QR as DXF
-                        </Button>
-                      </Row>
-                    </Card.Body>
-                  </Card>
-                ))
-              )}
-            </>
+                        </div>
+                      </Card.Body>
+                    </Card>
+                  ))
+                )}
+              </Col>
+            </Row>
           )}
         </Modal.Body>
         <Modal.Footer>
@@ -392,6 +358,53 @@ function AdminDashboard() {
             Close
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      {/* QR Modal */}
+      <Modal show={showQRModal} onHide={() => setShowQRModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>QR Code Preview</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center">
+          {selectedPet && (
+            <>
+              <QRCodeCanvas
+                value={`https://foundyourpet.vercel.app/pet-profile/${selectedPet._id}`}
+                size={200}
+                level="H"
+                includeMargin={true}
+              />
+              <div className="mt-4 d-flex flex-column gap-2">
+                <Button
+                  variant="outline-success"
+                  onClick={() => handleDownloadQRCode(selectedPet._id)}
+                >
+                  <FaQrcode className="me-2" />
+                  Download QR Code (PNG)
+                </Button>
+                <Button
+                  variant="outline-danger"
+                  onClick={() => handleDownloadQRCodeAsPDF(selectedPet._id)}
+                >
+                  <FaFilePdf className="me-2" />
+                  Download QR as PDF
+                </Button>
+                <Button
+                  variant="outline-dark"
+                  onClick={() =>
+                    handleDownloadQRCodeAsDXF(
+                      selectedPet._id,
+                      `https://foundyourpet.vercel.app/pet-profile/${selectedPet._id}`
+                    )
+                  }
+                >
+                  <FaDownload className="me-2" />
+                  Download QR as DXF
+                </Button>
+              </div>
+            </>
+          )}
+        </Modal.Body>
       </Modal>
     </div>
   );

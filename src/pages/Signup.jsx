@@ -115,13 +115,13 @@ function Signup() {
   return (
     <div className="d-flex justify-content-center align-items-center bg-body-secondary">
       <div
-        className="modal-dialog mb-3 mt-3"
+        className="modal-dialog border-3 rounded-5 shadow-lg mb-3 mt-3"
         style={{ minHeight: "100vh", overflowY: "auto", paddingTop: "20px" }}
       >
-        <div className="modal-content rounded-4 shadow">
+        <div className="modal-content">
           <div className="modal-header p-3 border-bottom-0 text-center">
-            <img className="rounded" src="/android-chrome-192x192.png" width="40px" alt="Logo" />
-            <h2 className="fw-bold ms-2 fs-5">Sign Up</h2>
+            <img className="rounded m-3" src="/android-chrome-192x192.png" width="70px" alt="Logo" />
+            <h1 className="fw-bold ms-2 fs-2">Sign Up</h1>
           </div>
 
           <div className="modal-body p-3">
@@ -344,7 +344,8 @@ function Signup() {
               </div>
 
               <button
-                className="w-100 btn btn-sm rounded-3 btn-primary"
+              style={{ width: "200px"}}
+                className="btn btn-md rounded-3 btn-primary"
                 type="submit"
                 disabled={isLoading}
               >
@@ -366,7 +367,7 @@ function Signup() {
 
               <div className="d-flex justify-content-between align-items-center">
                 <small className="text-body-secondary">Already have an account?</small>
-                <Link to="/login" className="btn btn-outline-secondary btn-sm">Login</Link>
+                <Link to="/login" className="btn m-3 btn-outline-secondary btn-sm">Login</Link>
               </div>
             </form>
           </div>
