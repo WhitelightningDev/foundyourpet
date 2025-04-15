@@ -180,7 +180,7 @@ function AdminDashboard() {
                   <small className="text-muted">{user.email}</small>
                 </div>
                 <div className="text-end">
-                  <Badge style={{width: "100px"}} bg="success" pill className="mb-2 p-2 m-2">
+                  <Badge style={{width: "100px"}} bg="success" pill className="mb-2 p-2">
                     Admin
                   </Badge>
                   <Button
@@ -213,7 +213,7 @@ function AdminDashboard() {
                     bg="secondary"
                     style={{ width: "100px" }}
                     pill
-                    className="mb-2 m-2 p-2"
+                    className="mb-2 p-2"
                   >
                     {" "}
                     User{" "}
