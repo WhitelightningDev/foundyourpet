@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import "../styles/SelectTag.css";
+import "../styles/infocard.css";
 import {
   FaPaw,
   FaDog,
   FaCat,
   FaPlus,
   FaEdit,
+  FaCheck,
   FaTrash,
   FaExclamationTriangle,
 } from "react-icons/fa";
@@ -16,6 +19,7 @@ import {
   Form,
   Modal,
   Spinner,
+  ListGroup,
   Row,
   Col,
   Toast,
@@ -157,31 +161,69 @@ function SelectTagPage() {
       <h2 className="border-bottom text-center mb-5">
         Great Stuff {user.name}
       </h2>
-      <h4 className="text-muted text-center mb-5 shadow-lg rounded-5 p-3">
-        <FaExclamationTriangle className="text-warning me-2" />
-        Please remember to have added all your pets before ordering your tags
-      </h4>
+      <div className="infocard mb-5">
+        <svg
+          class="wave"
+          viewBox="0 0 1440 320"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M0,256L11.4,240C22.9,224,46,192,69,192C91.4,192,114,224,137,234.7C160,245,183,235,206,213.3C228.6,192,251,160,274,149.3C297.1,139,320,149,343,181.3C365.7,213,389,267,411,282.7C434.3,299,457,277,480,250.7C502.9,224,526,192,549,181.3C571.4,171,594,181,617,208C640,235,663,277,686,256C708.6,235,731,149,754,122.7C777.1,96,800,128,823,165.3C845.7,203,869,245,891,224C914.3,203,937,117,960,112C982.9,107,1006,181,1029,197.3C1051.4,213,1074,171,1097,144C1120,117,1143,107,1166,133.3C1188.6,160,1211,224,1234,218.7C1257.1,213,1280,139,1303,133.3C1325.7,128,1349,192,1371,192C1394.3,192,1417,128,1429,96L1440,64L1440,320L1428.6,320C1417.1,320,1394,320,1371,320C1348.6,320,1326,320,1303,320C1280,320,1257,320,1234,320C1211.4,320,1189,320,1166,320C1142.9,320,1120,320,1097,320C1074.3,320,1051,320,1029,320C1005.7,320,983,320,960,320C937.1,320,914,320,891,320C868.6,320,846,320,823,320C800,320,777,320,754,320C731.4,320,709,320,686,320C662.9,320,640,320,617,320C594.3,320,571,320,549,320C525.7,320,503,320,480,320C457.1,320,434,320,411,320C388.6,320,366,320,343,320C320,320,297,320,274,320C251.4,320,229,320,206,320C182.9,320,160,320,137,320C114.3,320,91,320,69,320C45.7,320,23,320,11,320L0,320Z"
+            fill-opacity="1"
+          ></path>
+        </svg>
 
-      <h3 className="mb-4 text-center">
-        <strong>{selectedPackage.name}</strong>
-      </h3>
+        <div class="icon-container">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            stroke-width="0"
+            fill="currentColor"
+            stroke="currentColor"
+            class="icon"
+          >
+            <path d="M13 7.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm-3 3.75a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 .75.75v4.25h.75a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5h.75V12h-.75a.75.75 0 0 1-.75-.75Z"></path>
+            <path d="M12 1c6.075 0 11 4.925 11 11s-4.925 11-11 11S1 18.075 1 12 5.925 1 12 1ZM2.5 12a9.5 9.5 0 0 0 9.5 9.5 9.5 9.5 0 0 0 9.5-9.5A9.5 9.5 0 0 0 12 2.5 9.5 9.5 0 0 0 2.5 12Z"></path>
+          </svg>
+        </div>
+        <div class="message-text-container">
+          <p class="message-text">Please Note</p>
+          <p class="sub-text"> Make sure you have added all your pets before purchasing tags</p>
+        </div>
+       
+      </div>
+
+      
 
       {/* Package Details Card */}
-      <Card className="shadow-lg p-4 border-0 mb-4 text-center">
-        <h2 className="text-success mb-3">
-          <strong>Price:</strong> R{selectedPackage.price.toFixed(2)}
-        </h2>
+      <Card className="plan shadow border-0 mx-auto my-4">
+        <div className="inner">
+          {/* Price badge */}
+          <span className="pricing">
+            <span>
+              R{selectedPackage.price.toFixed(2)} <small>/ once-off</small>
+            </span>
+          </span>
 
-        <h5 className="mb-3 text-light p-3 text-center text-bg-secondary rounded-3">
-          <strong>What's Included</strong>
-        </h5>
-        <ul className="ps-3">
-          {selectedPackage.features?.map((feature, idx) => (
-            <li key={idx} className="mb-1 text-start">
-              {feature}
-            </li>
-          ))}
-        </ul>
+          {/* Title and Info */}
+          <p className="title">{selectedPackage.name || "Standard Package"}</p>
+          <p className="info">
+            {selectedPackage.description ||
+              "Includes engraved tag, delivery, and access to support benefits."}
+          </p>
+
+          {/* Feature List */}
+          <ul className="features">
+            {selectedPackage.features?.map((feature, idx) => (
+              <li key={idx}>
+                <span className="icon">
+                  <FaCheck size={12} />
+                </span>
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </Card>
 
       <h3 className="text-center mb-4 border-bottom">
@@ -189,72 +231,28 @@ function SelectTagPage() {
         tags for
       </h3>
 
-      {/* Pet Selection and Add-ons */}
-      <Row className="mb-4">
-        {pets.map((pet, idx) => (
-          <Col key={pet._id} sm={12} md={6} lg={4} className="mb-3">
-            <Card className="p-3 shadow-sm border-0">
-              <Card.Body>
-                <h5 className="text-center mb-3">
-                  {pet.name} ({pet.species})
-                </h5>
+      {/* Pet Selection and Add-ons (List View) */}
+      <div className="mb-4">
+  <h5 className="mb-3">Select Pets for Tag Order</h5>
+  <ListGroup>
+    {pets.map((pet) => (
+      <ListGroup.Item
+        key={pet._id}
+        className="d-flex justify-content-between align-items-center"
+      >
+        <div>
+          <strong>{pet.name}</strong> ({pet.species})
+        </div>
+        <Form.Check
+          type="checkbox"
+          checked={selectedPets.includes(pet._id)}
+          onChange={() => handlePetSelection(pet)}
+        />
+      </ListGroup.Item>
+    ))}
+  </ListGroup>
+</div>
 
-                <Form.Check
-                  type="checkbox"
-                  label="Select this pet"
-                  checked={selectedPets.includes(pet._id)}
-                  onChange={() => handlePetSelection(pet)}
-                  className="mb-3"
-                />
-
-                {selectedPets.includes(pet._id) && (
-                  <div>
-                    <h6>Select Size</h6>
-                    <Form.Check
-                      inline
-                      type="radio"
-                      label="Small"
-                      name={`size-${pet._id}`}
-                      checked={selectedPetSizes[pet._id] === "small"}
-                      onChange={() => handleSizeSelection(pet._id, "small")}
-                    />
-                    <Form.Check
-                      inline
-                      type="radio"
-                      label="Medium"
-                      name={`size-${pet._id}`}
-                      checked={selectedPetSizes[pet._id] === "medium"}
-                      onChange={() => handleSizeSelection(pet._id, "medium")}
-                    />
-                    <Form.Check
-                      inline
-                      type="radio"
-                      label="Large"
-                      name={`size-${pet._id}`}
-                      checked={selectedPetSizes[pet._id] === "large"}
-                      onChange={() => handleSizeSelection(pet._id, "large")}
-                    />
-
-                    <h6 className="mt-3">Select Add-ons</h6>
-                    {addons.map((addon, idx) => (
-                      <Form.Check
-                        key={idx}
-                        type="checkbox"
-                        label={`${addon.name} (+R${addon.price})`}
-                        checked={selectedAddons.some(
-                          (a) => a._id === addon._id
-                        )}
-                        onChange={() => handleAddonToggle(addon)}
-                        className="mb-2"
-                      />
-                    ))}
-                  </div>
-                )}
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
 
       {/* Total and Continue */}
       <div className="mt-4 d-flex justify-content-between align-items-center">
