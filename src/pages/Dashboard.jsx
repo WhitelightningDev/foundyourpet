@@ -1,11 +1,9 @@
+/* eslint-disable no-lone-blocks */
 import React, { useEffect, useState } from "react";
 import "../styles/Dashboard.css";
 import axios from "axios";
 import {
   Container,
-  Row,
-  Col,
-  Card,
   Button,
   Modal,
   Spinner,
@@ -13,7 +11,7 @@ import {
   ListGroup,
 } from "react-bootstrap";
 import AddPetModal from "../components/AddPetModal";
-import { FaPaw, FaDog, FaCat, FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import PetDetailsModal from "../components/PetDetailsModal";
