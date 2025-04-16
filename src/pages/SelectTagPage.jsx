@@ -200,9 +200,9 @@ function SelectTagPage() {
         <div className="inner">
           {/* Price badge */}
           <span className="pricing">
-            <span>
-              R{selectedPackage.price.toFixed(2)}{" "}
-              <small> initial + R50 Monthly</small>
+            <span className="text-primary">
+              R{selectedPackage.price.toFixed(2)}{" Initial"}  
+              <small>+ R50 Monthly</small>
             </span>
           </span>
 
