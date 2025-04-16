@@ -3,25 +3,19 @@ import { useParams, useNavigate } from "react-router-dom";
 import "../styles/SelectTag.css";
 import "../styles/infocard.css";
 import {
-  FaPaw,
-  FaDog,
-  FaCat,
-  FaPlus,
-  FaEdit,
+
   FaCheck,
-  FaTrash,
-  FaExclamationTriangle,
+ 
 } from "react-icons/fa";
 import {
   Container,
   Card,
   Button,
   Form,
-  Modal,
+
   Spinner,
   ListGroup,
-  Row,
-  Col,
+
   Toast,
   ToastContainer,
 } from "react-bootstrap";
@@ -31,14 +25,14 @@ function SelectTagPage() {
   const { tagType } = useParams();
   const navigate = useNavigate();
   const [selectedPackage, setSelectedPackage] = useState(null);
-  const [addons, setAddons] = useState([]);
-  const [selectedAddons, setSelectedAddons] = useState([]);
+  const [,setAddons] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({ name: "", surname: "" });
   const [pets, setPets] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [selectedPets, setSelectedPets] = useState([]);
-  const [selectedPetSizes, setSelectedPetSizes] = useState({});
+
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -88,14 +82,7 @@ function SelectTagPage() {
     fetchData();
   }, [tagType]);
 
-  const handleAddonToggle = (addon) => {
-    const isSelected = selectedAddons.some((a) => a._id === addon._id);
-    if (isSelected) {
-      setSelectedAddons(selectedAddons.filter((a) => a._id !== addon._id));
-    } else {
-      setSelectedAddons([...selectedAddons, addon]);
-    }
-  };
+
 
   const handlePetSelection = (pet) => {
     setSelectedPets((prev) => {
@@ -107,13 +94,6 @@ function SelectTagPage() {
     });
   };
 
-  const handleSizeSelection = (petId, size) => {
-    setSelectedPetSizes((prev) => ({
-      ...prev,
-      [petId]: size,
-    }));
-  };
-
   const handleContinue = () => {
     if (selectedPets.length === 0) {
       setShowToast(true);
@@ -121,15 +101,15 @@ function SelectTagPage() {
     }
 
     const base = selectedPackage?.price || 0;
-    const addonTotal = selectedAddons.reduce((sum, a) => sum + a.price, 0);
+   
     const petTotal = selectedPets.length * base;
-    const finalPrice = petTotal + addonTotal;
+    const finalPrice = petTotal ;
 
     const selectedPetDetails = pets
       .filter((pet) => selectedPets.includes(pet._id))
       .map((pet) => ({
         ...pet,
-        size: selectedPetSizes[pet._id],
+       
       }));
 
     navigate("/checkout", {
@@ -137,10 +117,7 @@ function SelectTagPage() {
         package: selectedPackage.name,
         total: finalPrice,
         membership: true,
-        selectedAddons: selectedAddons.map((a) => ({
-          name: a.name,
-          price: a.price,
-        })),
+      
         selectedPets: selectedPetDetails,
       },
     });
@@ -154,7 +131,7 @@ function SelectTagPage() {
     );
   }
 
-  const addonTotal = selectedAddons.reduce((sum, a) => sum + a.price, 0);
+ 
 
   return (
     <Container className="my-5">
@@ -202,7 +179,7 @@ function SelectTagPage() {
           <span className="pricing">
             <span className="text-primary">
               R{selectedPackage.price.toFixed(2)}{" Initial"}  
-              <small>+ R50 Monthly</small>
+              <small className="text-primary">+ R50 Monthly</small>
             </span>
           </span>
 
@@ -252,7 +229,7 @@ function SelectTagPage() {
       <div className="mt-4 d-flex justify-content-between align-items-center">
         <h5>
           <strong>Total:</strong> R
-          {(selectedPackage.price * selectedPets.length + addonTotal).toFixed(
+          {(selectedPackage.price * selectedPets.length ).toFixed(
             2
           )}
         </h5>

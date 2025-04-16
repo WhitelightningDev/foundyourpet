@@ -3,7 +3,7 @@ import { Container, Card, ListGroup, Row, Col } from "react-bootstrap";
 
 function CheckoutPage() {
   const { state } = useLocation();
-  const { package: pkg, total, membership, selectedAddons = [], selectedPets = [] } = state;
+  const { package: pkg, total, membership = [], selectedPets = [] } = state;
 
   return (
     <Container className="my-5">
@@ -30,19 +30,6 @@ function CheckoutPage() {
           <p>No pets selected.</p>
         )}
 
-        {/* Add-ons Section */}
-        <h5 className="mt-4">Selected Add-ons:</h5>
-        {selectedAddons.length > 0 ? (
-          <ListGroup className="mb-3">
-            {selectedAddons.map((addon, idx) => (
-              <ListGroup.Item key={idx}>
-                {addon.name} — R{addon.price.toFixed(2)}
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-        ) : (
-          <p>No add-ons selected.</p>
-        )}
 
         {/* Total Price */}
         <Row className="mt-4">

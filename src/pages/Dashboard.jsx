@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import "../styles/Dashboard.css";
 import axios from "axios";
@@ -8,7 +7,9 @@ import {
   Col,
   Card,
   Button,
+  Modal,
   Spinner,
+  Form,
   ListGroup,
 } from "react-bootstrap";
 import AddPetModal from "../components/AddPetModal";
@@ -22,6 +23,7 @@ function Dashboard() {
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
   const [currentPet, setCurrentPet] = useState(null);
   const [formData, setFormData] = useState({
@@ -29,9 +31,36 @@ function Dashboard() {
     species: "",
     breed: "",
     age: "",
+    gender: "",
+    dateOfBirth: "",
+    photoUrl: "",
+    color: "",
+    size: "",
+    weight: "",
+    spayedNeutered: "",
+    microchipNumber: "",
   });
+
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const navigate = useNavigate();
+
+  const token = localStorage.getItem("authToken");
+
+  const fetchPets = async () => {
+    try {
+      const response = await axios.get(
+        "https://foundyourpet-backend.onrender.com/api/pets",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setPets(response.data);
+    } catch (error) {
+      console.error("Failed to fetch pets:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDeletePet = async (petId) => {
     const confirmDelete = window.confirm(
@@ -62,28 +91,67 @@ function Dashboard() {
 
   const handleViewDetails = (pet) => {
     setSelectedPet(pet);
-    setShowDetailsModal(true);
+    setShowDetailsModal(true); // Show details modal
   };
 
   const handleEditClick = (pet) => {
+    setIsEditMode(true); // Edit mode
     setCurrentPet(pet);
     setFormData({
-      name: pet.name,
-      species: pet.species,
-      breed: pet.breed,
-      age: pet.age,
+      name: pet.name || "",
+      species: pet.species || "",
+      breed: pet.breed || "",
+      age: pet.age || "",
+      gender: pet.gender || "",
+      dateOfBirth: pet.dateOfBirth ? pet.dateOfBirth.substring(0, 10) : "",
+      photoUrl: pet.photoUrl || "",
+      color: pet.color || "",
+      size: pet.size || "",
+      weight: pet.weight || "",
+      spayedNeutered: pet.spayedNeutered ? "true" : "false",
+      microchipNumber: pet.microchipNumber || "",
     });
     setShowModal(true);
   };
 
+  const handleSaveChanges = async () => {
+    try {
+      const updatedData = {
+        ...formData,
+        spayedNeutered: formData.spayedNeutered === "true", // Ensure conversion to boolean
+      };
+      console.log("Updated Pet Data: ", updatedData); // Debugging log
+
+      await axios.put(
+        `https://foundyourpet-backend.onrender.com/api/pets/${currentPet._id}`,
+        updatedData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success("Pet updated successfully!");
+      setShowModal(false);
+      fetchPets(); // Refresh pets
+    } catch (error) {
+      console.error("Failed to update pet:", error);
+      toast.error("Failed to update pet.");
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
   const handleCloseDetailsModal = () => {
     setShowDetailsModal(false);
-    setSelectedPet(null);
+    setSelectedPet(null); // Clear selected pet
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-
     const fetchUser = async () => {
       try {
         const response = await axios.get(
@@ -101,27 +169,12 @@ function Dashboard() {
       }
     };
 
-    const fetchPets = async () => {
-      try {
-        const response = await axios.get(
-          "https://foundyourpet-backend.onrender.com/api/pets",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setPets(response.data);
-      } catch (error) {
-        console.error("Failed to fetch pets:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUser();
     fetchPets();
-  }, []);
+  }, [token]);
 
   const handleOpenModal = () => {
+    setIsEditMode(false); // Add mode
     setShowModal(true);
   };
 
@@ -261,19 +314,110 @@ function Dashboard() {
       )}
 
       {/* Modals */}
-      <AddPetModal showModal={showModal} closeModal={handleCloseModal} />
-      {selectedPet && (
+      {!isEditMode && (
+        <AddPetModal showModal={showModal} closeModal={handleCloseModal} />
+      )}
+
+      {isEditMode && (
+        <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">
+          <Modal.Header closeButton>
+            <Modal.Title>Edit Pet</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              {/* Form fields */}
+              <Form.Group controlId="petName">
+                <Form.Label>Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+
+              <Form.Group controlId="petSpecies">
+                <Form.Label>Species</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="species"
+                  value={formData.species}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+
+              <Form.Group controlId="petBreed">
+                <Form.Label>Breed</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="breed"
+                  value={formData.breed}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+
+              <Form.Group controlId="petAge">
+                <Form.Label>Age</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="age"
+                  value={formData.age}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+
+              <Form.Group controlId="petSpayedNeutered">
+                <Form.Label>Spayed/Neutered</Form.Label>
+                <Form.Control
+                  as="select"
+                  name="spayedNeutered"
+                  value={formData.spayedNeutered}
+                  onChange={handleChange}
+                >
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </Form.Control>
+              </Form.Group>
+
+              <Form.Group controlId="petMicrochipNumber">
+                <Form.Label>Microchip Number</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="microchipNumber"
+                  value={formData.microchipNumber}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseModal}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={handleSaveChanges}>
+              Save Changes
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
+
+      {showDetailsModal && (
         <PetDetailsModal
-          show={showDetailsModal}
-          handleClose={handleCloseDetailsModal}
-          pet={selectedPet}
-        />
+        pet={selectedPet}
+        show={showDetailsModal}
+        handleClose={handleCloseDetailsModal}
+      />
+      
       )}
     </Container>
   );
 }
 
 export default Dashboard;
+
+
+
+
 
 {
   /* <Row className="g-4 mb-5 justify-content-center">
