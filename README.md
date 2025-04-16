@@ -1,70 +1,117 @@
-# Getting Started with Create React App
+# 🐾 FoundYourPet
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**FoundYourPet** is a comprehensive pet safety and management application that connects pet owners with a smart tagging system. Designed to keep your pets safe, the platform allows you to register your pets, manage their profiles, subscribe to tag packages, and even generate QR codes for quick identification and recovery.
 
-## Available Scripts
+## 🔗 Live Demo
 
-In the project directory, you can run:
+Coming Soon...
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 📦 Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- 🔐 **User Authentication**
+  - JWT-based secure login and registration
+  - Role-based routing for Admin and User dashboards
 
-### `npm test`
+- 🐶 **Pet Management**
+  - Add, view, and edit detailed pet profiles
+  - Manage medical info, microchip details, diet, training level, vet info, etc.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- 🏷️ **Smart Tag Packages**
+  - Choose from Standard, Apple AirTag, or Samsung SmartTag packages
+  - Dynamic add-on pricing and engraving options
+  - Optional monthly support membership (includes benefits like free replacements)
 
-### `npm run build`
+- 🧾 **Integrated Payments**
+  - Yoco payments for initial and recurring package billing
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- 📸 **QR Code Generation**
+  - Admin-generated dynamic QR codes
+  - Anyone can scan the code and view pet-owner contact details without logging in
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- 🛠️ **Admin Dashboard**
+  - View all registered users
+  - Manage backend-generated QR tags and pet data
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 📁 Project Structure
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+foundyourpet/ ├── backend/ # Node.js/Express + MongoDB API │ ├── models/ # Mongoose models (User, Pet, Package, AddOn) │ ├── routes/ # API routes for users, pets, packages │ ├── controllers/ # Request handlers │ └── middleware/ # Auth & role verification │ ├── frontend/ # React application │ ├── components/ # UI components (cards, modals, nav) │ ├── pages/ # Dashboard, Login, Admin │ ├── services/ # API calls, edit/add pet logic │ └── utils/ # JWT decoding, helpers
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 🚀 Getting Started
 
-## Learn More
+### Prerequisites
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Node.js v18+
+- MongoDB
+- Yarn or NPM
+- Yoco API keys (for payment integration)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Backend
 
-### Code Splitting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+cd backend
+npm install
+npm run dev
+Create a .env file:
 
-### Analyzing the Bundle Size
+MONGO_URI=your_mongodb_uri
+JWT_SECRET=your_jwt_secret
+YOCO_SECRET_KEY=your_yoco_secret
+Frontend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+cd frontend
+npm install
+npm start
+🧠 Tech Stack
+Frontend: React, Tailwind CSS, Axios
 
-### Making a Progressive Web App
+Backend: Node.js, Express, MongoDB, Mongoose
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Auth: JWT
 
-### Advanced Configuration
+Payments: Yoco API
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+QR Code: qrcode NPM package
 
-### Deployment
+💡 Future Roadmap
+🔔 SMS/Email alerts when pet is found
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+📍 Real-time location tracking for SmartTags
 
-### `npm run build` fails to minify
+📝 Subscription history and invoice downloads
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+📊 Analytics for pet profile completeness
+
+Here’s a professional and structured `README.md` file for your **FoundYourPet** project. Let me know if you want to customize it for deployment instructions, add badges, or link your project website.
+
+---
+
+
+foundyourpet/
+├── backend/                 # Node.js/Express + MongoDB API
+│   ├── models/              # Mongoose models (User, Pet, Package, AddOn)
+│   ├── routes/              # API routes for users, pets, packages
+│   ├── controllers/         # Request handlers
+│   └── middleware/          # Auth & role verification
+│
+├── frontend/                # React application
+│   ├── components/          # UI components (cards, modals, nav)
+│   ├── pages/               # Dashboard, Login, Admin
+│   ├── services/            # API calls, edit/add pet logic
+│   └── utils/               # JWT decoding, helpers
+
+## 👨‍💻 Maintainer
+
+**FoundYourPet** is actively maintained and developed by [Daniel Mommsen].
+
+Let me know if you want:
+- Links to Figma designs or product demos
+- Environment setup scripts
+- A shorter “TL;DR” style version
+- A README badge section (build, license, etc.)
