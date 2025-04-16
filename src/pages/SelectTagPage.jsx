@@ -1,6 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, Card, Button, Form, Modal, Spinner, Row, Col, Toast, ToastContainer } from "react-bootstrap";
+import {
+  FaPaw,
+  FaDog,
+  FaCat,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaExclamationTriangle,
+} from "react-icons/fa";
+import {
+  Container,
+  Card,
+  Button,
+  Form,
+  Modal,
+  Spinner,
+  Row,
+  Col,
+  Toast,
+  ToastContainer,
+} from "react-bootstrap";
 import axios from "axios";
 
 function SelectTagPage() {
@@ -22,11 +42,15 @@ function SelectTagPage() {
     async function fetchData() {
       try {
         const [pkgRes, addonRes, petRes] = await Promise.all([
-          axios.get(`https://foundyourpet-backend.onrender.com/api/packages/type/${tagType}`),
-          axios.get(`https://foundyourpet-backend.onrender.com/api/addons/filter?type=${tagType}`),
+          axios.get(
+            `https://foundyourpet-backend.onrender.com/api/packages/type/${tagType}`
+          ),
+          axios.get(
+            `https://foundyourpet-backend.onrender.com/api/addons/filter?type=${tagType}`
+          ),
           axios.get("https://foundyourpet-backend.onrender.com/api/pets", {
             headers: { Authorization: `Bearer ${token}` },
-          })
+          }),
         ]);
 
         setSelectedPackage(pkgRes.data);
@@ -41,9 +65,12 @@ function SelectTagPage() {
 
     const fetchUser = async () => {
       try {
-        const response = await axios.get("https://foundyourpet-backend.onrender.com/api/users/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          "https://foundyourpet-backend.onrender.com/api/users/me",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setUser({
           name: response.data.name,
           surname: response.data.surname,
@@ -106,7 +133,10 @@ function SelectTagPage() {
         package: selectedPackage.name,
         total: finalPrice,
         membership: true,
-        selectedAddons: selectedAddons.map((a) => ({ name: a.name, price: a.price })),
+        selectedAddons: selectedAddons.map((a) => ({
+          name: a.name,
+          price: a.price,
+        })),
         selectedPets: selectedPetDetails,
       },
     });
@@ -124,7 +154,14 @@ function SelectTagPage() {
 
   return (
     <Container className="my-5">
-      <h2 className="border-bottom text-center mb-5">Great Stuff {user.name}</h2>
+      <h2 className="border-bottom text-center mb-5">
+        Great Stuff {user.name}
+      </h2>
+      <h4 className="text-muted text-center mb-5 shadow-lg rounded-5 p-3">
+        <FaExclamationTriangle className="text-warning me-2" />
+        Please remember to have added all your pets before ordering your tags
+      </h4>
+
       <h3 className="mb-4 text-center">
         <strong>{selectedPackage.name}</strong>
       </h3>
@@ -140,12 +177,17 @@ function SelectTagPage() {
         </h5>
         <ul className="ps-3">
           {selectedPackage.features?.map((feature, idx) => (
-            <li key={idx} className="mb-1 text-start">{feature}</li>
+            <li key={idx} className="mb-1 text-start">
+              {feature}
+            </li>
           ))}
         </ul>
       </Card>
 
-      <h3 className="text-center mb-4 border-bottom">Now select optional add-ons, and select the pets that you would like tags for</h3>
+      <h3 className="text-center mb-4 border-bottom">
+        Now select optional add-ons, and select the pets that you would like
+        tags for
+      </h3>
 
       {/* Pet Selection and Add-ons */}
       <Row className="mb-4">
@@ -153,8 +195,10 @@ function SelectTagPage() {
           <Col key={pet._id} sm={12} md={6} lg={4} className="mb-3">
             <Card className="p-3 shadow-sm border-0">
               <Card.Body>
-                <h5 className="text-center mb-3">{pet.name} ({pet.species})</h5>
-                
+                <h5 className="text-center mb-3">
+                  {pet.name} ({pet.species})
+                </h5>
+
                 <Form.Check
                   type="checkbox"
                   label="Select this pet"
@@ -197,7 +241,9 @@ function SelectTagPage() {
                         key={idx}
                         type="checkbox"
                         label={`${addon.name} (+R${addon.price})`}
-                        checked={selectedAddons.some((a) => a._id === addon._id)}
+                        checked={selectedAddons.some(
+                          (a) => a._id === addon._id
+                        )}
                         onChange={() => handleAddonToggle(addon)}
                         className="mb-2"
                       />
@@ -213,18 +259,31 @@ function SelectTagPage() {
       {/* Total and Continue */}
       <div className="mt-4 d-flex justify-content-between align-items-center">
         <h5>
-          <strong>Total:</strong> R{(selectedPackage.price * selectedPets.length + addonTotal).toFixed(2)}
+          <strong>Total:</strong> R
+          {(selectedPackage.price * selectedPets.length + addonTotal).toFixed(
+            2
+          )}
         </h5>
-        <Button className="px-4" onClick={handleContinue}>Continue</Button>
+        <Button className="px-4" onClick={handleContinue}>
+          Continue
+        </Button>
       </div>
 
       {/* Toast */}
       <ToastContainer position="bottom-end" className="p-3">
-        <Toast onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide bg="warning">
+        <Toast
+          onClose={() => setShowToast(false)}
+          show={showToast}
+          delay={3000}
+          autohide
+          bg="warning"
+        >
           <Toast.Header>
             <strong className="me-auto">Selection Required</strong>
           </Toast.Header>
-          <Toast.Body>Please select at least one pet before continuing.</Toast.Body>
+          <Toast.Body>
+            Please select at least one pet before continuing.
+          </Toast.Body>
         </Toast>
       </ToastContainer>
     </Container>
