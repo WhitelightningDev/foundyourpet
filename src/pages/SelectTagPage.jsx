@@ -201,7 +201,7 @@ function SelectTagPage() {
           {/* Price badge */}
           <span className="pricing">
             <span>
-              R{selectedPackage.price.toFixed(2)} <small> / once-off + R50 Monthley</small>
+              R{selectedPackage.price.toFixed(2)} <small> once-off + R50 Monthly</small>
             </span>
           </span>
 
