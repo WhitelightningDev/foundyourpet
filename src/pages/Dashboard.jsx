@@ -1,49 +1,97 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable no-lone-blocks */
 import React, { useEffect, useState } from "react";
 import "../styles/Dashboard.css";
 import axios from "axios";
-import { Container, Row, Col, Card, Button, Spinner } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Spinner,
+  ListGroup,
+} from "react-bootstrap";
 import AddPetModal from "../components/AddPetModal";
-import { FaPaw, FaDog, FaCat } from "react-icons/fa"; // Icons for species
+import { FaPaw, FaDog, FaCat, FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import PetDetailsModal from "../components/PetDetailsModal";
 
 function Dashboard() {
   const [user, setUser] = useState({ name: "", surname: "" });
   const [pets, setPets] = useState([]);
-  const [loading, setLoading] = useState(true); // Add loading state
-  const [showModal, setShowModal] = useState(false); // Modal visibility state
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
-const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [currentPet, setCurrentPet] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    species: "",
+    breed: "",
+    age: "",
+  });
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const navigate = useNavigate();
 
-  const renderField = (label, value) => (
-    <p className="d-flex justify-content-between">
-      <span className="label">{label}:</span>
-      <span className={value ? "" : "value-muted"}>{value || "Not provided"}</span>
-    </p>
-  );
+  const handleDeletePet = async (petId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this pet?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(
+        `https://foundyourpet-backend.onrender.com/api/pets/${petId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
+
+      setPets((prevPets) => prevPets.filter((pet) => pet._id !== petId));
+      toast.success("Pet deleted successfully");
+    } catch (error) {
+      console.error(
+        "Error deleting pet:",
+        error.response?.data || error.message
+      );
+      toast.error("Failed to delete pet");
+    }
+  };
 
   const handleViewDetails = (pet) => {
     setSelectedPet(pet);
     setShowDetailsModal(true);
   };
-  
+
+  const handleEditClick = (pet) => {
+    setCurrentPet(pet);
+    setFormData({
+      name: pet.name,
+      species: pet.species,
+      breed: pet.breed,
+      age: pet.age,
+    });
+    setShowModal(true);
+  };
+
   const handleCloseDetailsModal = () => {
     setShowDetailsModal(false);
     setSelectedPet(null);
   };
-  
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
 
     const fetchUser = async () => {
       try {
-        const response = await axios.get("https://foundyourpet-backend.onrender.com/api/users/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          "https://foundyourpet-backend.onrender.com/api/users/me",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setUser({
           name: response.data.name,
           surname: response.data.surname,
@@ -55,51 +103,210 @@ const [showDetailsModal, setShowDetailsModal] = useState(false);
 
     const fetchPets = async () => {
       try {
-        const response = await axios.get("https://foundyourpet-backend.onrender.com/api/pets", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setPets(response.data); // Store pets in state
+        const response = await axios.get(
+          "https://foundyourpet-backend.onrender.com/api/pets",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setPets(response.data);
       } catch (error) {
         console.error("Failed to fetch pets:", error);
       } finally {
-        setLoading(false); // Set loading state to false once data is fetched
+        setLoading(false);
       }
     };
 
     fetchUser();
     fetchPets();
-  }, []); // Fetch user info and pets once when the component loads
+  }, []);
 
   const handleOpenModal = () => {
-    setShowModal(true); // Show the modal
+    setShowModal(true);
   };
 
   const handleCloseModal = () => {
-    setShowModal(false); // Close the modal
+    setShowModal(false);
   };
 
-  const getSpeciesIcon = (species) => {
-    switch (species.toLowerCase()) {
-      case "dog":
-        return <FaDog />;
-      case "cat":
-        return <FaCat />;
-      default:
-        return <FaPaw />;
-    }
-  };
-
-  // Filter pets by species
-  const dogs = pets.filter((pet) => pet.species.toLowerCase() === "dog");
-  const cats = pets.filter((pet) => pet.species.toLowerCase() === "cat");
+  const dogs = pets.filter((pet) => pet.species?.toLowerCase() === "dog");
+  const cats = pets.filter((pet) => pet.species?.toLowerCase() === "cat");
 
   return (
     <Container className="my-5">
-      <h2 className="mb-4 text-center text-dark font-weight-bold">
+      <h2 className="mb-4 text-center text-dark fw-bold">
         Welcome back, {user.name} {user.surname}!
       </h2>
 
-      <Row className="g-4 mb-5 justify-content-center">
+      <div className="d-flex justify-content-center mb-4">
+        <Button variant="success" onClick={handleOpenModal}>
+          <FaPlus className="me-2" /> Add New Pet
+        </Button>
+      </div>
+
+      {/* Dogs Section */}
+      <h4 className="mb-3 text-primary">Your Dogs</h4>
+      {loading ? (
+        <div className="text-center mb-4">
+          <Spinner animation="border" variant="primary" />
+          <p className="text-muted mt-2">Loading your pets...</p>
+        </div>
+      ) : dogs.length > 0 ? (
+        <ListGroup className="mb-5">
+          {dogs.map((pet) => (
+            <ListGroup.Item
+              key={pet._id}
+              className="d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <strong>{pet.name}</strong> – {pet.breed}
+              </div>
+              <div>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => handleViewDetails(pet)}
+                >
+                  <FaEdit /> View Details
+                </Button>
+                <Button
+                  variant="outline-warning"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => handleEditClick(pet)}
+                >
+                  <FaEdit /> Edit
+                </Button>
+
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => handleDeletePet(pet._id)}
+                >
+                  <FaTrash /> Delete
+                </Button>
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  onClick={() => navigate("/select-tag/standard")}
+                >
+                  Order Tags
+                </Button>
+              </div>
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+      ) : (
+        <p className="text-muted">You don't have any dogs.</p>
+      )}
+
+      {/* Cats Section */}
+      <h4 className="mb-3 text-primary">Your Cats</h4>
+      {loading ? (
+        <div className="text-center mb-4">
+          <Spinner animation="border" variant="primary" />
+          <p className="text-muted mt-2">Loading your pets...</p>
+        </div>
+      ) : cats.length > 0 ? (
+        <ListGroup className="mb-5">
+          {cats.map((pet) => (
+            <ListGroup.Item
+              key={pet._id}
+              className="d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <strong>{pet.name}</strong> – {pet.breed}
+              </div>
+              <div>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => handleViewDetails(pet)}
+                >
+                  <FaEdit /> View Details
+                </Button>
+                <Button
+                  variant="outline-warning"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => handleEditClick(pet)}
+                >
+                  <FaEdit /> Edit
+                </Button>
+
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => handleDeletePet(pet._id)}
+                >
+                  <FaTrash /> Delete
+                </Button>
+                <Button
+                  variant="outline-success"
+                  size="sm"
+                  onClick={() => navigate("/select-tag/standard")}
+                >
+                  Order Tags
+                </Button>
+              </div>
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+      ) : (
+        <p className="text-muted">You don't have any cats.</p>
+      )}
+
+      {/* Upgrade Promo Section */}
+      <h4 className="mb-4 text-center">Upgrade to get a Tag</h4>
+      <Row className="g-4 mb-5 text-center">
+        <Col md={12}>
+          <Card className="shadow-sm border-primary">
+            <Card.Body>
+              <Card.Title className="text-primary fw-bold">
+                Standard Tag
+              </Card.Title>
+              <Card.Text className="text-muted">
+                Classic, durable tag engraved with a QR code that links to your
+                pet’s full profile.
+              </Card.Text>
+              <ul className="list-unstyled text-start small mb-3">
+                <li>✔️ QR code & Unique ID</li>
+                <li>✔️ Emergency contact info</li>
+                <li>✔️ Medical profile access</li>
+              </ul>
+              <Button
+                variant="primary"
+                className="w-100"
+                onClick={() => navigate("/select-tag/standard")}
+              >
+                Continue with Standard
+              </Button>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Modals */}
+      <AddPetModal showModal={showModal} closeModal={handleCloseModal} />
+      {selectedPet && (
+        <PetDetailsModal
+          show={showDetailsModal}
+          handleClose={handleCloseDetailsModal}
+          pet={selectedPet}
+        />
+      )}
+    </Container>
+  );
+}
+
+export default Dashboard;
+
+{
+  /* <Row className="g-4 mb-5 justify-content-center">
         <Col md={5}>
           <Card className="shadow-sm h-100">
             <Card.Body>
@@ -107,13 +314,7 @@ const [showDetailsModal, setShowDetailsModal] = useState(false);
               <Card.Text className="text-muted">
                 Use this section to register a new pet.
               </Card.Text>
-              <Button
-                variant="primary"
-                onClick={handleOpenModal}
-                className="w-100"
-              >
-                Add New Pet
-              </Button>
+              
             </Card.Body>
           </Card>
         </Col>
@@ -135,155 +336,8 @@ const [showDetailsModal, setShowDetailsModal] = useState(false);
             </Card.Body>
           </Card>
         </Col>
-      </Row>
-
-      <h4 className="mb-4 text-center">Upgrade to get a Tag</h4>
-
-      <Row className="g-4 mb-5 text-center">
-        {/* Standard Tag */}
-        <Col md={7}>
-          <Card className="shadow-sm h-100 border-primary">
-            <Card.Body>
-              <Card.Title className="text-primary fw-bold">
-                Standard Tag
-              </Card.Title>
-              <Card.Text className="text-muted">
-                Classic, durable tag engraved with a QR code that links to your
-                pet’s full profile.
-              </Card.Text>
-              <ul className="list-unstyled text-start small mb-3">
-                <li>✔️ QR code & Unique ID</li>
-                <li>✔️ Emergency contact info</li>
-                <li>✔️ Medical profile access</li>
-              </ul>
-              <Button
-                variant="primary"
-                className="w-100"
-                onClick={() => navigate("/select-tag/standard")}
-              >
-                Continue with Standard
-              </Button>{" "}
-            </Card.Body>
-          </Card>
-        </Col>
-
-           {/* Standard Tag */}
-           <Col md={5}>
-          <Card className="shadow-sm h-100 border-primary">
-            <Card.Body>
-              <Card.Title className="text-primary fw-bold">
-                Gps Tracking Tags
-              </Card.Title>
-              <Card.Text className="text-muted">
-                Gps Tracking tags are coming soon!
-              </Card.Text>
-              <ul className="list-unstyled text-center text-start small mb-3">
-                <li>✔️ QR code & Unique ID</li>
-                <li>✔️ Emergency contact info</li>
-                <li>✔️ Medical profile access</li>
-              </ul>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      
-
-      {/* Dogs Section */}
-<h4 className="mb-4">Your Dogs</h4>
-<Row>
-  {loading ? (
-    <Col className="text-center">
-      <Spinner animation="border" variant="primary" />
-      <p className="text-muted mt-2">Loading your pets...</p>
-    </Col>
-  ) : dogs.length > 0 ? (
-    dogs.map((pet, index) => (
-      <Col md={5} key={index} className="mb-4">
-        <Card className="shadow-sm h-100">
-        <Card.Body>
-  <Card.Title className="fw-bold text-center mb-3 fs-4">{pet.name}</Card.Title>
-  <Row className="mb-2">
-    <Col md={6}>{renderField("Species", pet.species)}</Col>
-    <Col md={6}>{renderField("Breed", pet.breed)}</Col>
-    <Col md={6}>{renderField("Age", pet.age)}</Col>
-  </Row>
-
-  <Button
-    variant="info"
-    className="w-100 mt-3"
-    onClick={() => handleViewDetails(pet)}
-  >
-    View Details
-  </Button>
-</Card.Body>
-
-        </Card>
-      </Col>
-    ))
-  ) : (
-    <Col>
-      <p className="text-muted text-center">You don't have any dogs.</p>
-    </Col>
-  )}
-</Row>
-
-
-      {/* Cats Section */}
-      <h4 className="mb-4">Your Cats</h4>
-      <Row>
-  {loading ? (
-    <Col className="text-center">
-      <Spinner animation="border" variant="primary" />
-      <p className="text-muted mt-2">Loading your pets...</p>
-    </Col>
-  ) : cats.length > 0 ? (
-    cats.map((pet, index) => (
-      <Col md={5} key={index} className="mb-4">
-        <Card className="shadow-sm h-100">
-        <Card.Body>
-  <Card.Title className="fw-bold text-center mb-3 fs-4">{pet.name}</Card.Title>
-  <Row className="mb-2">
-    <Col md={6}>{renderField("Species", pet.species)}</Col>
-    <Col md={6}>{renderField("Breed", pet.breed)}</Col>
-    <Col md={6}>{renderField("Age", pet.age)}</Col>
-  </Row>
-
-  <Button
-    variant="info"
-    className="w-100 mt-3"
-    onClick={() => handleViewDetails(pet)}
-  >
-    View Details
-  </Button>
-</Card.Body>
-
-        </Card>
-      </Col>
-    ))
-  ) : (
-    <Col>
-      <p className="text-muted text-center">You don't have any cats.</p>
-    </Col>
-  )}
-</Row>
-
-
-      {/* Add Pet Modal */}
-      <AddPetModal showModal={showModal} closeModal={handleCloseModal} />
-      {selectedPet && (
-  <PetDetailsModal
-    show={showDetailsModal}
-    handleClose={handleCloseDetailsModal}
-    pet={selectedPet}
-  />
-)}
-
-    </Container>
-  );
+      </Row> */
 }
-
-export default Dashboard;
 
 {
   /* Samsung Smart Tag */
