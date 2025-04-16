@@ -188,12 +188,12 @@ function SelectTagPage() {
         </div>
         <div class="message-text-container">
           <p class="message-text">Please Note</p>
-          <p class="sub-text"> Make sure you have added all your pets before purchasing tags</p>
+          <p class="sub-text">
+            {" "}
+            Make sure you have added all your pets before purchasing tags
+          </p>
         </div>
-       
       </div>
-
-      
 
       {/* Package Details Card */}
       <Card className="plan shadow border-0 mx-auto my-4">
@@ -201,15 +201,15 @@ function SelectTagPage() {
           {/* Price badge */}
           <span className="pricing">
             <span>
-              R{selectedPackage.price.toFixed(2)} <small> once-off + R50 Monthly</small>
+              R{selectedPackage.price.toFixed(2)}{" "}
+              <small> initial + R50 Monthly</small>
             </span>
           </span>
 
           {/* Title and Info */}
           <p className="title">{selectedPackage.name || "Standard Package"}</p>
           <p className="info">
-            {selectedPackage.description ||
-              "Includes engraved tag, delivery, and with profile access."}
+            {selectedPackage.description}
           </p>
 
           {/* Feature List */}
@@ -226,33 +226,27 @@ function SelectTagPage() {
         </div>
       </Card>
 
-      <h3 className="text-center mb-4 border-bottom">
-        Now select optional add-ons, and select the pets that you would like
-        tags for
-      </h3>
-
       {/* Pet Selection and Add-ons (List View) */}
       <div className="mb-4">
-  <h5 className="mb-3">Select Pets for Tag Order</h5>
-  <ListGroup>
-    {pets.map((pet) => (
-      <ListGroup.Item
-        key={pet._id}
-        className="d-flex justify-content-between align-items-center"
-      >
-        <div>
-          <strong>{pet.name}</strong> ({pet.species})
-        </div>
-        <Form.Check
-          type="checkbox"
-          checked={selectedPets.includes(pet._id)}
-          onChange={() => handlePetSelection(pet)}
-        />
-      </ListGroup.Item>
-    ))}
-  </ListGroup>
-</div>
-
+        <h5 className="mb-3">Select Pets for Tag Order</h5>
+        <ListGroup>
+          {pets.map((pet) => (
+            <ListGroup.Item
+              key={pet._id}
+              className="d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <strong>{pet.name}</strong> ({pet.species})
+              </div>
+              <Form.Check
+                type="checkbox"
+                checked={selectedPets.includes(pet._id)}
+                onChange={() => handlePetSelection(pet)}
+              />
+            </ListGroup.Item>
+          ))}
+        </ListGroup>
+      </div>
 
       {/* Total and Continue */}
       <div className="mt-4 d-flex justify-content-between align-items-center">
