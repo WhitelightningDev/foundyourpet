@@ -40,9 +40,6 @@ Coming Soon...
 
 foundyourpet/ ├── backend/ # Node.js/Express + MongoDB API │ ├── models/ # Mongoose models (User, Pet, Package, AddOn) │ ├── routes/ # API routes for users, pets, packages │ ├── controllers/ # Request handlers │ └── middleware/ # Auth & role verification │ ├── frontend/ # React application │ ├── components/ # UI components (cards, modals, nav) │ ├── pages/ # Dashboard, Login, Admin │ ├── services/ # API calls, edit/add pet logic │ └── utils/ # JWT decoding, helpers
 
-yaml
-Copy
-Edit
 
 ---
 
@@ -57,22 +54,17 @@ Edit
 
 ### Backend
 
-```bash
+
 cd backend
 npm install
 npm run dev
 Create a .env file:
 
-env
-Copy
-Edit
 MONGO_URI=your_mongodb_uri
 JWT_SECRET=your_jwt_secret
 YOCO_SECRET_KEY=your_yoco_secret
 Frontend
-bash
-Copy
-Edit
+
 cd frontend
 npm install
 npm start
