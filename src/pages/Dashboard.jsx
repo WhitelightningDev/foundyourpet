@@ -260,36 +260,6 @@ function Dashboard() {
         <p className="text-muted">You don't have any cats.</p>
       )}
 
-      {/* Upgrade Promo Section */}
-      <h4 className="mb-4 text-center">Upgrade to get a Tag</h4>
-      <Row className="g-4 mb-5 text-center">
-        <Col md={12}>
-          <Card className="shadow-sm border-primary">
-            <Card.Body>
-              <Card.Title className="text-primary fw-bold">
-                Standard Tag
-              </Card.Title>
-              <Card.Text className="text-muted">
-                Classic, durable tag engraved with a QR code that links to your
-                pet’s full profile.
-              </Card.Text>
-              <ul className="list-unstyled text-start small mb-3">
-                <li>✔️ QR code & Unique ID</li>
-                <li>✔️ Emergency contact info</li>
-                <li>✔️ Medical profile access</li>
-              </ul>
-              <Button
-                variant="primary"
-                className="w-100"
-                onClick={() => navigate("/select-tag/standard")}
-              >
-                Continue with Standard
-              </Button>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
       {/* Modals */}
       <AddPetModal showModal={showModal} closeModal={handleCloseModal} />
       {selectedPet && (
