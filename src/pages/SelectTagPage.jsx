@@ -209,7 +209,7 @@ function SelectTagPage() {
           <p className="title">{selectedPackage.name || "Standard Package"}</p>
           <p className="info">
             {selectedPackage.description ||
-              "Includes engraved tag, delivery, and access to support benefits."}
+              "Includes engraved tag, delivery, and with profile access."}
           </p>
 
           {/* Feature List */}
