@@ -16,14 +16,7 @@
   transition: all 0.3s ease;
 }
 
-.wave {
-  position: absolute;
-  transform: rotate(90deg);
-  left: -31px;
-  top: 32px;
-  width: 80px;
-  fill: #4777ff3a;
-}
+
 
 .icon-container {
   width: 35px;
