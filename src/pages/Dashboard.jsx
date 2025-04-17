@@ -196,9 +196,9 @@ function Dashboard() {
 
   return (
     <Container className="my-5">
-      <h2 className="mb-4 text-center text-dark fw-bold">
+      <h3 className="mb-4 text-center text-dark fw-bold">
         Welcome back, {user.name} {user.surname}!
-      </h2>
+      </h3>
 
       <div className="d-flex justify-content-center mb-4">
         <Button variant="success" onClick={handleOpenModal}>
