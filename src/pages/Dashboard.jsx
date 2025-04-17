@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-lone-blocks */
 import React, { useEffect, useState } from "react";
 import "../styles/Dashboard.css";
@@ -11,10 +13,12 @@ import {
   ListGroup,
 } from "react-bootstrap";
 import AddPetModal from "../components/AddPetModal";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaEye, FaCartPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import PetDetailsModal from "../components/PetDetailsModal";
+import EditPetModal from "../components/EditPetModal";
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 
 function Dashboard() {
   const [user, setUser] = useState({ name: "", surname: "" });
@@ -41,6 +45,10 @@ function Dashboard() {
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const navigate = useNavigate();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [petToDelete, setPetToDelete] = useState(null);
+  const [deletionSuccess, setDeletionSuccess] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const token = localStorage.getItem("authToken");
 
@@ -60,15 +68,18 @@ function Dashboard() {
     }
   };
 
-  const handleDeletePet = async (petId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this pet?"
-    );
-    if (!confirmDelete) return;
+  const handleDeleteClick = (petId) => {
+    setPetToDelete(petId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeletePet = async () => {
+    if (!petToDelete) return;
+    setIsDeleting(true);
 
     try {
       await axios.delete(
-        `https://foundyourpet-backend.onrender.com/api/pets/${petId}`,
+        `https://foundyourpet-backend.onrender.com/api/pets/${petToDelete}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -76,7 +87,7 @@ function Dashboard() {
         }
       );
 
-      setPets((prevPets) => prevPets.filter((pet) => pet._id !== petId));
+      setPets((prevPets) => prevPets.filter((pet) => pet._id !== petToDelete));
       toast.success("Pet deleted successfully");
     } catch (error) {
       console.error(
@@ -84,6 +95,10 @@ function Dashboard() {
         error.response?.data || error.message
       );
       toast.error("Failed to delete pet");
+    } finally {
+      setShowDeleteModal(false);
+      setIsDeleting(false);
+      setPetToDelete(null);
     }
   };
 
@@ -101,13 +116,9 @@ function Dashboard() {
       breed: pet.breed || "",
       age: pet.age || "",
       gender: pet.gender || "",
-      dateOfBirth: pet.dateOfBirth ? pet.dateOfBirth.substring(0, 10) : "",
       photoUrl: pet.photoUrl || "",
       color: pet.color || "",
       size: pet.size || "",
-      weight: pet.weight || "",
-      spayedNeutered: pet.spayedNeutered ? "true" : "false",
-      microchipNumber: pet.microchipNumber || "",
     });
     setShowModal(true);
   };
@@ -214,36 +225,37 @@ function Dashboard() {
               </div>
               <div>
                 <Button
-                  variant="outline-primary"
+                  variant="btn btn-info"
                   size="sm"
                   className="me-2"
                   onClick={() => handleViewDetails(pet)}
                 >
-                  <FaEdit /> View Details
+                  <FaEye />
                 </Button>
                 <Button
-                  variant="outline-warning"
+                  variant="btn btn-primary text-dark"
                   size="sm"
                   className="me-2"
                   onClick={() => handleEditClick(pet)}
                 >
-                  <FaEdit /> Edit
+                  <FaEdit />
                 </Button>
 
                 <Button
-                  variant="outline-danger"
+                  variant="btn btn-danger text-dark"
                   size="sm"
                   className="me-2"
-                  onClick={() => handleDeletePet(pet._id)}
+                  onClick={() => handleDeleteClick(pet._id)}
                 >
-                  <FaTrash /> Delete
+                  <FaTrash />
                 </Button>
                 <Button
-                  variant="outline-success"
+                  variant="btn btn-success text-black"
                   size="sm"
                   onClick={() => navigate("/select-tag/standard")}
                 >
                   Order Tags
+                  <FaCartPlus />
                 </Button>
               </div>
             </ListGroup.Item>
@@ -272,36 +284,37 @@ function Dashboard() {
               </div>
               <div>
                 <Button
-                  variant="outline-primary"
+                  variant="btn btn-info text-dark"
                   size="sm"
                   className="me-2"
                   onClick={() => handleViewDetails(pet)}
                 >
-                  <FaEdit /> View Details
+                  <FaEye />
                 </Button>
                 <Button
-                  variant="outline-warning"
+                  variant="btn btn-primary text-dark"
                   size="sm"
                   className="me-2"
                   onClick={() => handleEditClick(pet)}
                 >
-                  <FaEdit /> Edit
+                  <FaEdit />
                 </Button>
 
                 <Button
-                  variant="outline-danger"
+                  variant="btn btn-danger text-dark"
                   size="sm"
                   className="me-2"
-                  onClick={() => handleDeletePet(pet._id)}
+                  onClick={() => handleDeleteClick(pet._id)}
                 >
-                  <FaTrash /> Delete
+                  <FaTrash />
                 </Button>
                 <Button
-                  variant="outline-success"
+                  variant="btn btn-success text-black"
                   size="sm"
                   onClick={() => navigate("/select-tag/standard")}
                 >
                   Order Tags
+                  <FaCartPlus />
                 </Button>
               </div>
             </ListGroup.Item>
@@ -316,181 +329,35 @@ function Dashboard() {
         <AddPetModal showModal={showModal} closeModal={handleCloseModal} />
       )}
 
+      {/* Edit Pet Modal */}
       {isEditMode && (
-        <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">
-          <Modal.Header closeButton>
-            <Modal.Title>Edit Pet</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form>
-              {/* Form fields */}
-              <Form.Group controlId="petName">
-                <Form.Label>Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-
-              <Form.Group controlId="petSpecies">
-                <Form.Label>Species</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="species"
-                  value={formData.species}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-
-              <Form.Group controlId="petBreed">
-                <Form.Label>Breed</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="breed"
-                  value={formData.breed}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-
-              <Form.Group controlId="petAge">
-                <Form.Label>Age</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="age"
-                  value={formData.age}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-
-              <Form.Group controlId="petSpayedNeutered">
-                <Form.Label>Spayed/Neutered</Form.Label>
-                <Form.Control
-                  as="select"
-                  name="spayedNeutered"
-                  value={formData.spayedNeutered}
-                  onChange={handleChange}
-                >
-                  <option value="true">Yes</option>
-                  <option value="false">No</option>
-                </Form.Control>
-              </Form.Group>
-
-              <Form.Group controlId="petMicrochipNumber">
-                <Form.Label>Microchip Number</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="microchipNumber"
-                  value={formData.microchipNumber}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-            </Form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              Close
-            </Button>
-            <Button variant="primary" onClick={handleSaveChanges}>
-              Save Changes
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        <EditPetModal
+          show={showModal}
+          formData={formData}
+          handleChange={handleChange}
+          handleClose={handleCloseModal}
+          handleSave={handleSaveChanges}
+        />
       )}
 
       {showDetailsModal && (
         <PetDetailsModal
-        pet={selectedPet}
-        show={showDetailsModal}
-        handleClose={handleCloseDetailsModal}
-      />
-      
+          pet={selectedPet}
+          show={showDetailsModal}
+          handleClose={handleCloseDetailsModal}
+        />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        show={showDeleteModal}
+        handleClose={() => setShowDeleteModal(false)}
+        handleConfirm={confirmDeletePet}
+        isDeleting={isDeleting}
+        deletionSuccess={deletionSuccess}
+      />
     </Container>
   );
 }
 
 export default Dashboard;
-
-
-
-
-
-{
-  /* <Row className="g-4 mb-5 justify-content-center">
-        <Col md={5}>
-          <Card className="shadow-sm h-100">
-            <Card.Body>
-              <Card.Title className="fw-bold">Add a Pet</Card.Title>
-              <Card.Text className="text-muted">
-                Use this section to register a new pet.
-              </Card.Text>
-              
-            </Card.Body>
-          </Card>
-        </Col>
-
-        <Col md={5}>
-          <Card className="shadow-sm h-100">
-            <Card.Body>
-              <Card.Title className="fw-bold">Manage Existing Pets</Card.Title>
-              <Card.Text className="text-muted">
-                View or modify your registered pets' information.
-              </Card.Text>
-              <Button
-                variant="secondary"
-                className="w-100"
-                onClick={() => navigate("/manage-pets")}
-              >
-                Manage Pets
-              </Button>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row> */
-}
-
-{
-  /* Samsung Smart Tag */
-}
-{
-  /* <Col md={4}>
-    <Card className="shadow-sm h-100 border-success">
-      <Card.Body>
-        <Card.Title className="text-success fw-bold">Samsung Smart Tag</Card.Title>
-        <Card.Text className="text-muted">
-          Leverage Samsung’s ecosystem for live GPS tracking with your mobile device.
-        </Card.Text>
-        <ul className="list-unstyled text-start small mb-3">
-          <li>📍 Real-time tracking</li>
-          <li>🔗 Samsung SmartThings support</li>
-          <li>✔️ Long battery life</li>
-        </ul>
-        <Button variant="outline-success" className="mb-2 w-100">Add Accessories</Button>
-        <Button variant="success" className="w-100" onClick={() => navigate("/select-tag/samsung")}>Continue with Samsung Tag</Button>      </Card.Body>
-    </Card>
-  </Col> */
-}
-
-{
-  /* Apple AirTag */
-}
-{
-  /* <Col md={4}>
-    <Card className="shadow-sm h-100 border-dark">
-      <Card.Body>
-        <Card.Title className="text-dark fw-bold">Apple AirTag</Card.Title>
-        <Card.Text className="text-muted">
-          Track your pet in real time using Apple’s Find My network with precision and ease.
-        </Card.Text>
-        <ul className="list-unstyled text-start small mb-3">
-          <li>📱 iOS & Find My integration</li>
-          <li>🧭 Ultra-wideband precision</li>
-          <li>🎽 Optional tag holders</li>
-        </ul>
-        <Button variant="outline-dark" className="mb-2 w-100">Select AirTag Holder</Button>
-        <Button variant="dark" className="w-100" onClick={() => navigate("/select-tag/apple")}>Continue with Apple AirTag</Button>      </Card.Body>
-    </Card>
-  </Col> */
-}

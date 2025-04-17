@@ -40,44 +40,8 @@ const PetDetailsModal = ({ show, handleClose, pet }) => {
               {renderField("Breed", pet.breed)}
               {renderField("Gender", pet.gender)}
               {renderField("Age", pet.age)}
-              {renderField(
-                "Date of Birth",
-                pet.dateOfBirth ? new Date(pet.dateOfBirth).toLocaleDateString() : "N/A"
-              )}
               {renderField("Color", pet.color)}
-              {renderField("Size", pet.size)}
-              {renderField("Weight (kg)", pet.weight)}
-              {renderField("Spayed/Neutered", pet.spayedNeutered ? "Yes" : "No")}
-
               <hr className="my-4" />
-
-              <h6 className="text-primary mb-3">Identification & Tags</h6>
-              {renderField("Microchip Number", pet.microchipNumber)}
-              {renderField("Tag Type", pet.tagType)}
-              {renderField("Tag Serial", pet.tagSerial)}
-              {renderField("Engraving Info", pet.engravingInfo)}
-            </Col>
-
-            {/* Right Column */}
-            <Col md={6}>
-              <h6 className="text-primary mb-3">Behavior & Lifestyle</h6>
-              {renderField("Training Level", pet.trainingLevel)}
-              {renderField("Personality", pet.personality)}
-              {renderField("Dietary Preferences", pet.dietaryPreferences)}
-              {renderField(
-                "Adoption Date",
-                pet.adoptionDate ? new Date(pet.adoptionDate).toLocaleDateString() : "N/A"
-              )}
-
-              <hr className="my-4" />
-
-              <h6 className="text-primary mb-3">Medical Information</h6>
-              {renderField("Vet Info", pet.vetInfo)}
-              {renderField("Insurance Info", pet.insuranceInfo)}
-              {renderField("Vaccinations", pet.vaccinations?.join(", ") || "N/A")}
-              {renderField("Allergies", pet.allergies?.join(", ") || "N/A")}
-              {renderField("Medical Conditions", pet.medicalConditions?.join(", ") || "N/A")}
-              {renderField("Medications", pet.medications?.join(", ") || "N/A")}
             </Col>
           </Row>
         </Container>

@@ -7,32 +7,9 @@ const AddPetModal = ({ showModal, closeModal }) => {
     breed: "",
     age: "",
     gender: "",
-    dateOfBirth: "",
     photoUrl: "",
     color: "",
-    size: "",
-    weight: "",
-    spayedNeutered: false,
-    microchipNumber: "",
-    vaccinations: [],
-    allergies: [],
-    medicalConditions: [],
-    medications: [],
-    tagType: "",
-    engravingInfo: "",
-    tagSerial: "",
-    adoptionDate: "",
-    trainingLevel: "",
-    personality: "",
-    dietaryPreferences: "",
-    vetInfo: "",
-    insuranceInfo: "",
   });
-
-  const VACCINATIONS = ["Rabies", "Distemper", "Parvovirus", "Bordetella"];
-  const ALLERGIES = ["Grain", "Pollen", "Flea Bites", "Chicken"];
-  const MEDICAL_CONDITIONS = ["Arthritis", "Diabetes", "Heartworm", "Seizures"];
-  const PERSONALITY_OPTIONS = ["Friendly", "Shy", "Energetic", "Calm", "Protective"];
 
   const [errors, setErrors] = useState({});
 
@@ -229,11 +206,7 @@ const AddPetModal = ({ showModal, closeModal }) => {
                   {renderInput("Breed", "breed")}
                   {renderInput("Age", "age", "number")}
                   {renderSelect("Gender", "gender", ["Male", "Female"])}
-                  {renderInput("Date of Birth", "dateOfBirth", "date")}
                   {renderInput("Photo URL", "photoUrl")}
-                  {renderInput("Color", "color")}
-                  {renderSelect("Size", "size", ["Small", "Medium", "Large"])}
-                  {renderInput("Weight", "weight", "number")}
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Spayed/Neutered</label>
                     <input
@@ -244,17 +217,6 @@ const AddPetModal = ({ showModal, closeModal }) => {
                       onChange={handleInputChange}
                     />
                   </div>
-                  {renderInput("Microchip Number", "microchipNumber")}
-                  {renderCheckboxGroup("Vaccinations", "vaccinations", VACCINATIONS)}
-                  {renderCheckboxGroup("Allergies", "allergies", ALLERGIES)}
-                  {renderCheckboxGroup("Medical Conditions", "medicalConditions", MEDICAL_CONDITIONS)}
-                  {renderTextarea("Medications", "medications")}
-                  {renderInput("Adoption Date", "adoptionDate", "date")}
-                  {renderInput("Training Level", "trainingLevel")}
-                  {renderSelect("Personality", "personality", PERSONALITY_OPTIONS)}
-                  {renderTextarea("Dietary Preferences", "dietaryPreferences")}
-                  {renderTextarea("Vet Info", "vetInfo")}
-                  {renderTextarea("Insurance Info", "insuranceInfo")}
                 </div>
                 <div className="d-grid">
                   <button type="submit" className="btn btn-primary">Add Pet</button>
