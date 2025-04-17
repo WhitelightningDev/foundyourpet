@@ -8,6 +8,15 @@
     align-items: center;
   }
   
+/* Button group container for pet cards */
+.pet-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-start;
+}
+
+
   .species-icon {
     font-size: 2rem;
   }
@@ -57,6 +66,17 @@
   margin-bottom: 0.5rem;
   border-bottom: 1px solid #e3e3e3;
   padding-bottom: 0.25rem;
+}
+
+@media (max-width: 576px) {
+  .pet-button-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pet-button-group button {
+    width: 100%;
+  }
 }
 
 
