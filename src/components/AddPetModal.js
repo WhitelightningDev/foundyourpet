@@ -49,38 +49,41 @@ const AddPetModal = ({ showModal, closeModal }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("authToken");
-  
+
     if (!token) {
       alert("You must be logged in to add a pet.");
       closeModal();
       return;
     }
-  
+
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-  
+
     try {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const userId = decodedToken.userId;
-  
+
       const dataWithUserId = {
         ...petData,
         userId: userId,
       };
-  
+
       // Make the API request
-      const response = await fetch('https://foundyourpet-backend.onrender.com/api/pets/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Include JWT token in Authorization header
-        },
-        body: JSON.stringify(dataWithUserId),
-      });
-  
+      const response = await fetch(
+        "https://foundyourpet-backend.onrender.com/api/pets/create",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Include JWT token in Authorization header
+          },
+          body: JSON.stringify(dataWithUserId),
+        }
+      );
+
       if (response.ok) {
         const result = await response.json();
         console.log("Pet added successfully:", result);
@@ -96,7 +99,6 @@ const AddPetModal = ({ showModal, closeModal }) => {
       alert("An error occurred while adding the pet. Please try again.");
     }
   };
-  
 
   const renderInput = (label, name, type = "text") => (
     <div className="col-md-6 mb-3">
@@ -109,42 +111,6 @@ const AddPetModal = ({ showModal, closeModal }) => {
         onChange={handleInputChange}
       />
       {errors[name] && <div className="invalid-feedback">{errors[name]}</div>}
-    </div>
-  );
-
-  const renderTextarea = (label, name) => (
-    <div className="col-md-6 mb-3">
-      <label className="form-label">{label}</label>
-      <textarea
-        name={name}
-        className="form-control"
-        value={petData[name]}
-        onChange={handleInputChange}
-      />
-    </div>
-  );
-
-  const renderCheckboxGroup = (label, field, options) => (
-    <div className="col-md-6 mb-3">
-      <label className="form-label">{label}</label>
-      <div className="d-flex flex-wrap">
-        {options.map((option) => (
-          <div key={option} className="form-check me-3 mb-2">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              name={field}
-              value={option}
-              id={`${field}-${option}`}
-              checked={petData[field].includes(option)}
-              onChange={(e) => handleCheckboxChange(e, field)}
-            />
-            <label className="form-check-label" htmlFor={`${field}-${option}`}>
-              {option}
-            </label>
-          </div>
-        ))}
-      </div>
     </div>
   );
 
@@ -195,8 +161,14 @@ const AddPetModal = ({ showModal, closeModal }) => {
         <div className="modal-dialog modal-xl">
           <div className="modal-content shadow-lg rounded-lg">
             <div className="modal-header border-bottom-0">
-              <h5 className="modal-title" id="addPetModalLabel">Add New Pet</h5>
-              <button type="button" className="btn-close" onClick={closeModal} />
+              <h5 className="modal-title" id="addPetModalLabel">
+                Add New Pet
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={closeModal}
+              />
             </div>
             <div className="modal-body">
               <form onSubmit={handleSubmit}>
@@ -206,7 +178,28 @@ const AddPetModal = ({ showModal, closeModal }) => {
                   {renderInput("Breed", "breed")}
                   {renderInput("Age", "age", "number")}
                   {renderSelect("Gender", "gender", ["Male", "Female"])}
-                  {renderInput("Photo URL", "photoUrl")}
+                  <div className="col-md-6 mb-3">
+                    <label className="form-label">Pet Image</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="form-control"
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setPetData((prev) => ({
+                            ...prev,
+                            photoUrl: reader.result,
+                          }));
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                    />
+                  </div>
+
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Spayed/Neutered</label>
                     <input
@@ -219,7 +212,9 @@ const AddPetModal = ({ showModal, closeModal }) => {
                   </div>
                 </div>
                 <div className="d-grid">
-                  <button type="submit" className="btn btn-primary">Add Pet</button>
+                  <button type="submit" className="btn btn-primary">
+                    Add Pet
+                  </button>
                 </div>
               </form>
             </div>
