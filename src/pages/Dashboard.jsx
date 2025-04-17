@@ -49,7 +49,12 @@ function Dashboard() {
   const [petToDelete, setPetToDelete] = useState(null);
   const [deletionSuccess, setDeletionSuccess] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
+  const handleShare = () => {
+    const message = encodeURIComponent("Check out this cool website that helps your pet from being lost!  https://foundyourpet.com");
+    const url = `https://wa.me/?text=${message}`;
+    window.open(url, "_blank");
+  };
+  
   const token = localStorage.getItem("authToken");
 
   // Inside Dashboard component
@@ -203,9 +208,15 @@ const refreshPets = () => {
 
   return (
     <Container className="my-5">
-      <h3 className="mb-4 text-center text-dark fw-bold">
-        Welcome back, {user.name} {user.surname}!
-      </h3>
+      <div className="d-flex justify-content-center align-items-center gap-3 mb-4">
+  <h3 className="text-dark fw-bold m-0">
+    Welcome back, {user.name} {user.surname}!
+  </h3>
+  <Button variant="outline-success" size="sm" onClick={handleShare}>
+    Share on WhatsApp
+  </Button>
+</div>
+
 
       <div className="d-flex justify-content-center mb-4">
         <Button variant="success" onClick={handleOpenModal}>
