@@ -20,11 +20,13 @@ import ManagePetsPage from "./pages/ManagePetsPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProfilePage from "./pages/ProfilePage"; // adjust path as needed
 import PublicPetProfile from "./pages/PublicPetProfile";
+import { Analytics } from "@vercel/analytics/react"
 
 function App() {
   return (
     <Router>
       <AuthProvider>
+      <Analytics/>
         <NavigationBar />
         <Routes>
           <Route path="/" element={<Home />} />

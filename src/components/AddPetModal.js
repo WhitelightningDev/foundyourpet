@@ -8,7 +8,7 @@ const AddPetModal = ({ showModal, closeModal }) => {
     age: "",
     gender: "",
     photoUrl: "",
-    color: "",
+    spayedNeutered: false,
   });
 
   const [errors, setErrors] = useState({});
@@ -25,15 +25,6 @@ const AddPetModal = ({ showModal, closeModal }) => {
     }
   };
 
-  const handleCheckboxChange = (e, field) => {
-    const { value, checked } = e.target;
-    const updatedArray = checked
-      ? [...petData[field], value]
-      : petData[field].filter((item) => item !== value);
-
-    setPetData({ ...petData, [field]: updatedArray });
-  };
-
   const validateForm = () => {
     const newErrors = {};
     if (!petData.name) newErrors.name = "Pet name is required.";
@@ -42,7 +33,6 @@ const AddPetModal = ({ showModal, closeModal }) => {
     if (!petData.age || parseInt(petData.age) < 0)
       newErrors.age = "Valid age is required.";
     if (!petData.gender) newErrors.gender = "Gender is required.";
-
     return newErrors;
   };
 
@@ -68,17 +58,16 @@ const AddPetModal = ({ showModal, closeModal }) => {
 
       const dataWithUserId = {
         ...petData,
-        userId: userId,
+        userId,
       };
 
-      // Make the API request
       const response = await fetch(
         "https://foundyourpet-backend.onrender.com/api/pets/create",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Include JWT token in Authorization header
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(dataWithUserId),
         }
@@ -178,16 +167,16 @@ const AddPetModal = ({ showModal, closeModal }) => {
                   {renderInput("Breed", "breed")}
                   {renderInput("Age", "age", "number")}
                   {renderSelect("Gender", "gender", ["Male", "Female"])}
+
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Pet Image</label>
                     <input
                       type="file"
                       accept="image/*"
                       className="form-control"
-                      onChange={async (e) => {
+                      onChange={(e) => {
                         const file = e.target.files[0];
                         if (!file) return;
-
                         const reader = new FileReader();
                         reader.onloadend = () => {
                           setPetData((prev) => ({
@@ -200,17 +189,18 @@ const AddPetModal = ({ showModal, closeModal }) => {
                     />
                   </div>
 
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Spayed/Neutered</label>
+                  <div className="col-md-6 mb-3 d-flex align-items-center">
+                    <label className="form-label me-3">Spayed/Neutered</label>
                     <input
                       type="checkbox"
                       name="spayedNeutered"
-                      className="form-check-input ms-2"
+                      className="form-check-input"
                       checked={petData.spayedNeutered}
                       onChange={handleInputChange}
                     />
                   </div>
                 </div>
+
                 <div className="d-grid">
                   <button type="submit" className="btn btn-primary">
                     Add Pet
