@@ -52,6 +52,13 @@ function Dashboard() {
 
   const token = localStorage.getItem("authToken");
 
+  // Inside Dashboard component
+
+const refreshPets = () => {
+  fetchPets();
+};
+
+
   const fetchPets = async () => {
     try {
       const response = await axios.get(
@@ -216,47 +223,59 @@ function Dashboard() {
       ) : dogs.length > 0 ? (
         <ListGroup className="mb-5">
           {dogs.map((pet) => (
-            <ListGroup.Item
-              key={pet._id}
-              className="mb-3 shadow-sm rounded p-3 bg-light"
-            >
-              <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-                <div>
-                  <h5 className="mb-1">{pet.name}</h5>
-                  <p className="mb-0 text-muted">{pet.breed}</p>
-                </div>
-                <div className="pet-button-group">
-                  <Button
-                    variant="info"
-                    size="sm"
-                    onClick={() => handleViewDetails(pet)}
-                  >
-                    <FaEye className="me-1" /> View
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => handleEditClick(pet)}
-                  >
-                    <FaEdit className="me-1" /> Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDeleteClick(pet._id)}
-                  >
-                    <FaTrash className="me-1" /> Delete
-                  </Button>
-                  <Button
-                    variant="success"
-                    size="sm"
-                    onClick={() => navigate("/select-tag/standard")}
-                  >
-                    <FaCartPlus className="me-1" /> Order Tag
-                  </Button>
-                </div>
-              </div>
-            </ListGroup.Item>
+           <ListGroup.Item
+           key={pet._id}
+           className="mb-3 shadow-sm rounded p-3 bg-light"
+         >
+           <div className="d-flex justify-content-between align-items-center gap-3">
+             {/* Pet Image */}
+             {pet.photoUrl ? (
+               <img
+                 src={`https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
+                 alt={`${pet.name}'s profile`}
+                 style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "50%" }}
+               />
+             ) : (
+               <div
+                 style={{
+                   width: "50px",
+                   height: "50px",
+                   borderRadius: "50%",
+                   backgroundColor: "#ccc",
+                   display: "flex",
+                   alignItems: "center",
+                   justifyContent: "center",
+                   fontSize: "0.7rem",
+                   color: "#666",
+                 }}
+               >
+                 No Photo
+               </div>
+             )}
+     
+             {/* Pet Info */}
+             <div className="flex-grow-1">
+               <h5 className="mb-1">{pet.name}</h5>
+               <p className="mb-0 text-muted">{pet.breed}</p>
+             </div>
+     
+             {/* Buttons */}
+             <div className="pet-button-group d-flex flex-wrap gap-1">
+               <Button variant="info" size="sm" onClick={() => handleViewDetails(pet)}>
+                 <FaEye className="me-1" /> View
+               </Button>
+               <Button variant="primary" size="sm" onClick={() => handleEditClick(pet)}>
+                 <FaEdit className="me-1" /> Edit
+               </Button>
+               <Button variant="danger" size="sm" onClick={() => handleDeleteClick(pet._id)}>
+                 <FaTrash className="me-1" /> Delete
+               </Button>
+               <Button variant="success" size="sm" onClick={() => navigate("/select-tag/standard")}>
+                 <FaCartPlus className="me-1" /> Order Tag
+               </Button>
+             </div>
+           </div>
+         </ListGroup.Item>
           ))}
         </ListGroup>
       ) : (
@@ -274,46 +293,58 @@ function Dashboard() {
         <ListGroup className="mb-5">
           {cats.map((pet) => (
             <ListGroup.Item
-              key={pet._id}
-              className="mb-3 shadow-sm rounded p-3 bg-light"
-            >
-              <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-                <div>
-                  <h5 className="mb-1">{pet.name}</h5>
-                  <p className="mb-0 text-muted">{pet.breed}</p>
+            key={pet._id}
+            className="mb-3 shadow-sm rounded p-3 bg-light"
+          >
+            <div className="d-flex justify-content-between align-items-center gap-3">
+              {/* Pet Image */}
+              {pet.photoUrl ? (
+                <img
+                  src={`https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
+                  alt={`${pet.name}'s profile`}
+                  style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "50%" }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "50px",
+                    height: "50px",
+                    borderRadius: "50%",
+                    backgroundColor: "#ccc",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.7rem",
+                    color: "#666",
+                  }}
+                >
+                  No Photo
                 </div>
-                <div className="pet-button-group">
-                  <Button
-                    variant="info"
-                    size="sm"
-                    onClick={() => handleViewDetails(pet)}
-                  >
-                    <FaEye className="me-1" /> View
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => handleEditClick(pet)}
-                  >
-                    <FaEdit className="me-1" /> Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDeleteClick(pet._id)}
-                  >
-                    <FaTrash className="me-1" /> Delete
-                  </Button>
-                  <Button
-                    variant="success"
-                    size="sm"
-                    onClick={() => navigate("/select-tag/standard")}
-                  >
-                    <FaCartPlus className="me-1" /> Order Tag
-                  </Button>
-                </div>
+              )}
+      
+              {/* Pet Info */}
+              <div className="flex-grow-1">
+                <h5 className="mb-1">{pet.name}</h5>
+                <p className="mb-0 text-muted">{pet.breed}</p>
               </div>
-            </ListGroup.Item>
+      
+              {/* Buttons */}
+              <div className="pet-button-group d-flex flex-wrap gap-1">
+                <Button variant="info" size="sm" onClick={() => handleViewDetails(pet)}>
+                  <FaEye className="me-1" /> View
+                </Button>
+                <Button variant="primary" size="sm" onClick={() => handleEditClick(pet)}>
+                  <FaEdit className="me-1" /> Edit
+                </Button>
+                <Button variant="danger" size="sm" onClick={() => handleDeleteClick(pet._id)}>
+                  <FaTrash className="me-1" /> Delete
+                </Button>
+                <Button variant="success" size="sm" onClick={() => navigate("/select-tag/standard")}>
+                  <FaCartPlus className="me-1" /> Order Tag
+                </Button>
+              </div>
+            </div>
+          </ListGroup.Item>
           ))}
         </ListGroup>
       ) : (
@@ -322,8 +353,13 @@ function Dashboard() {
 
       {/* Modals */}
       {!isEditMode && (
-        <AddPetModal showModal={showModal} closeModal={handleCloseModal} />
-      )}
+  <AddPetModal
+    showModal={showModal}
+    closeModal={handleCloseModal}
+    refreshPets={refreshPets} // ✅ add this
+  />
+)}
+
 
       {/* Edit Pet Modal */}
       {isEditMode && (
@@ -333,6 +369,7 @@ function Dashboard() {
           handleChange={handleChange}
           handleClose={handleCloseModal}
           handleSave={handleSaveChanges}
+          refreshPets={refreshPets} // Pass the refresh function
         />
       )}
 
@@ -351,6 +388,7 @@ function Dashboard() {
         handleConfirm={confirmDeletePet}
         isDeleting={isDeleting}
         deletionSuccess={deletionSuccess}
+        refreshPets={refreshPets} // Pass the refresh function
       />
     </Container>
   );

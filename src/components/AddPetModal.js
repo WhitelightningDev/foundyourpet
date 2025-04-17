@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const AddPetModal = ({ showModal, closeModal }) => {
+const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
   const [petData, setPetData] = useState({
     name: "",
     species: "",
@@ -10,7 +10,6 @@ const AddPetModal = ({ showModal, closeModal }) => {
     spayedNeutered: false,
   });
 
-  const [imageFile, setImageFile] = useState(null); // ⬅️ File for upload
   const [errors, setErrors] = useState({});
 
   const handleInputChange = (e) => {
@@ -64,6 +63,7 @@ const AddPetModal = ({ showModal, closeModal }) => {
       formData.append("gender", petData.gender);
       formData.append("spayedNeutered", petData.spayedNeutered);
       formData.append("userId", userId);
+
       if (petData.photoFile) {
         formData.append("photo", petData.photoFile);
       }
@@ -83,6 +83,7 @@ const AddPetModal = ({ showModal, closeModal }) => {
         const result = await response.json();
         console.log("Pet added successfully:", result);
         alert("Pet added successfully!");
+        refreshPets(); // ⬅️ Refresh after adding
         closeModal();
       } else {
         const errorData = await response.json();
@@ -151,7 +152,7 @@ const AddPetModal = ({ showModal, closeModal }) => {
         style={{ display: showModal ? "block" : "none" }}
         tabIndex="-1"
         aria-labelledby="addPetModalLabel"
-        aria-hidden="true"
+        aria-hidden={!showModal}
       >
         <div className="modal-dialog modal-xl">
           <div className="modal-content shadow-lg rounded-lg">
@@ -159,11 +160,7 @@ const AddPetModal = ({ showModal, closeModal }) => {
               <h5 className="modal-title" id="addPetModalLabel">
                 Add New Pet
               </h5>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={closeModal}
-              />
+              <button type="button" className="btn-close" onClick={closeModal} />
             </div>
             <div className="modal-body">
               <form onSubmit={handleSubmit}>
@@ -185,7 +182,7 @@ const AddPetModal = ({ showModal, closeModal }) => {
                         if (file) {
                           setPetData((prev) => ({
                             ...prev,
-                            photoFile: file, // this is what you'll send via FormData
+                            photoFile: file,
                           }));
                         }
                       }}
