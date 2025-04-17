@@ -7,10 +7,10 @@ const AddPetModal = ({ showModal, closeModal }) => {
     breed: "",
     age: "",
     gender: "",
-    photoUrl: "",
     spayedNeutered: false,
   });
 
+  const [imageFile, setImageFile] = useState(null); // ⬅️ File for upload
   const [errors, setErrors] = useState({});
 
   const handleInputChange = (e) => {
@@ -56,20 +56,26 @@ const AddPetModal = ({ showModal, closeModal }) => {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const userId = decodedToken.userId;
 
-      const dataWithUserId = {
-        ...petData,
-        userId,
-      };
+      const formData = new FormData();
+      formData.append("name", petData.name);
+      formData.append("species", petData.species);
+      formData.append("breed", petData.breed);
+      formData.append("age", petData.age);
+      formData.append("gender", petData.gender);
+      formData.append("spayedNeutered", petData.spayedNeutered);
+      formData.append("userId", userId);
+      if (imageFile) {
+        formData.append("photo", imageFile); // 🟢 MUST match backend multer field name
+      }
 
       const response = await fetch(
         "https://foundyourpet-backend.onrender.com/api/pets/create",
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(dataWithUserId),
+          body: formData,
         }
       );
 
@@ -176,15 +182,9 @@ const AddPetModal = ({ showModal, closeModal }) => {
                       className="form-control"
                       onChange={(e) => {
                         const file = e.target.files[0];
-                        if (!file) return;
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          setPetData((prev) => ({
-                            ...prev,
-                            photoUrl: reader.result,
-                          }));
-                        };
-                        reader.readAsDataURL(file);
+                        if (file) {
+                          setImageFile(file); // ✅ Save file for FormData
+                        }
                       }}
                     />
                   </div>
