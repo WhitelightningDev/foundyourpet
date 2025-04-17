@@ -33,7 +33,7 @@ const PetDetailsModal = ({ show, handleClose, pet }) => {
                 <Col xs={12}>
                   {pet.photoUrl ? (
                     <Image
-                      src={`https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
+                    src={pet.photoUrl.startsWith("http") ? pet.photoUrl : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
                       alt={`${pet.name}'s image`}
                       roundedCircle
                       style={{ width: "200px", height: "200px", objectFit: "cover" }}
