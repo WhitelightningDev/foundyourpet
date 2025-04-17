@@ -64,8 +64,8 @@ const AddPetModal = ({ showModal, closeModal }) => {
       formData.append("gender", petData.gender);
       formData.append("spayedNeutered", petData.spayedNeutered);
       formData.append("userId", userId);
-      if (imageFile) {
-        formData.append("photo", imageFile); // 🟢 MUST match backend multer field name
+      if (petData.photoFile) {
+        formData.append("photo", petData.photoFile);
       }
 
       const response = await fetch(
@@ -183,7 +183,10 @@ const AddPetModal = ({ showModal, closeModal }) => {
                       onChange={(e) => {
                         const file = e.target.files[0];
                         if (file) {
-                          setImageFile(file); // ✅ Save file for FormData
+                          setPetData((prev) => ({
+                            ...prev,
+                            photoFile: file, // this is what you'll send via FormData
+                          }));
                         }
                       }}
                     />
