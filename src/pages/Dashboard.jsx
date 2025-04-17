@@ -216,49 +216,48 @@ function Dashboard() {
       ) : dogs.length > 0 ? (
         <ListGroup className="mb-5">
           {dogs.map((pet) => (
-            <ListGroup.Item
-              key={pet._id}
-              className="d-flex justify-content-between align-items-center"
-            >
-              <div>
-                <strong>{pet.name}</strong> – {pet.breed}
-              </div>
-              <div>
-                <Button
-                  variant="btn btn-info"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => handleViewDetails(pet)}
-                >
-                  <FaEye />
-                </Button>
-                <Button
-                  variant="btn btn-primary text-dark"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => handleEditClick(pet)}
-                >
-                  <FaEdit />
-                </Button>
-
-                <Button
-                  variant="btn btn-danger text-dark"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => handleDeleteClick(pet._id)}
-                >
-                  <FaTrash />
-                </Button>
-                <Button
-                  variant="btn btn-success text-black"
-                  size="sm"
-                  onClick={() => navigate("/select-tag/standard")}
-                >
-                  Order Tags
-                  <FaCartPlus />
-                </Button>
-              </div>
-            </ListGroup.Item>
+           <ListGroup.Item
+           key={pet._id}
+           className="mb-3 shadow-sm rounded p-3 bg-light"
+         >
+           <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+             <div>
+               <h5 className="mb-1">{pet.name}</h5>
+               <p className="mb-0 text-muted">{pet.breed}</p>
+             </div>
+             <div className="d-flex flex-wrap gap-2 mt-2 mt-md-0">
+               <Button
+                 variant="info"
+                 size="sm"
+                 onClick={() => handleViewDetails(pet)}
+               >
+                 <FaEye className="me-1" /> View
+               </Button>
+               <Button
+                 variant="primary"
+                 size="sm"
+                 onClick={() => handleEditClick(pet)}
+               >
+                 <FaEdit className="me-1" /> Edit
+               </Button>
+               <Button
+                 variant="danger"
+                 size="sm"
+                 onClick={() => handleDeleteClick(pet._id)}
+               >
+                 <FaTrash className="me-1" /> Delete
+               </Button>
+               <Button
+                 variant="success"
+                 size="sm"
+                 onClick={() => navigate("/select-tag/standard")}
+               >
+                 <FaCartPlus className="me-1" /> Order Tag
+               </Button>
+             </div>
+           </div>
+         </ListGroup.Item>
+         
           ))}
         </ListGroup>
       ) : (
