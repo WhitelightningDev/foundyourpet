@@ -242,10 +242,16 @@ const refreshPets = () => {
              {/* Pet Image */}
              {pet.photoUrl ? (
                <img
-                 src={`https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
-                 alt={`${pet.name}'s profile`}
-                 style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "50%" }}
-               />
+               src={pet.photoUrl.startsWith("http") ? pet.photoUrl : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
+               alt={`${pet.name}'s profile`}
+               style={{
+                 width: "50px",
+                 height: "50px",
+                 objectFit: "cover",
+                 borderRadius: "50%",
+               }}
+             />
+             
              ) : (
                <div
                  style={{
@@ -311,10 +317,16 @@ const refreshPets = () => {
               {/* Pet Image */}
               {pet.photoUrl ? (
                 <img
-                  src={`https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
-                  alt={`${pet.name}'s profile`}
-                  style={{ width: "50px", height: "50px", objectFit: "cover", borderRadius: "50%" }}
-                />
+                src={pet.photoUrl.startsWith("http") ? pet.photoUrl : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
+                alt={`${pet.name}'s profile`}
+                style={{
+                  width: "50px",
+                  height: "50px",
+                  objectFit: "cover",
+                  borderRadius: "50%",
+                }}
+              />
+              
               ) : (
                 <div
                   style={{

@@ -38,11 +38,6 @@ function AdminDashboard() {
     fetchUsers();
   }, [token]);
 
-  const handleShowQRModal = (pet) => {
-  setSelectedPet(pet);
-  setShowQRModal(true);
-};
-
   const handleViewDetails = async (userId) => {
     try {
       const res = await axios.get(
@@ -60,87 +55,23 @@ function AdminDashboard() {
     }
   };
 
-  const handleDownloadQRCodeAsDXF = async (petId, value) => {
-    try {
-      // Generate QR matrix
-      const qrData = await QRCode.create(value, { errorCorrectionLevel: "H" });
-      const modules = qrData.modules;
-      const size = modules.size;
-      const data = modules.data;
-
-      let dxfContent = "0\nSECTION\n2\nENTITIES\n";
-
-      const scale = 10;
-      for (let y = 0; y < size; y++) {
-        for (let x = 0; x < size; x++) {
-          if (data[y * size + x]) {
-            const x1 = x * scale;
-            const y1 = y * scale;
-            const x2 = x1 + scale;
-            const y2 = y1 + scale;
-
-            dxfContent += `
-  0
-  LWPOLYLINE
-  8
-  QR
-  90
-  4
-  70
-  1
-  10
-  ${x1}
-  20
-  ${y1}
-  10
-  ${x2}
-  20
-  ${y1}
-  10
-  ${x2}
-  20
-  ${y2}
-  10
-  ${x1}
-  20
-  ${y2}
-  10
-  ${x1}
-  20
-  ${y1}
-  `;
-          }
-        }
-      }
-
-      dxfContent += "0\nENDSEC\n0\nEOF";
-
-      const blob = new Blob([dxfContent], { type: "application/dxf" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${petId}_qr.dxf`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Failed to generate DXF QR code", error);
-    }
+  const handleShowQRModal = (pet) => {
+    setSelectedPet(pet);
+    setShowQRModal(true);
   };
 
   const handleDownloadQRCode = (petId) => {
     const canvas = document.getElementById(`qr-${petId}`);
     const pngDataUrl = canvas.toDataURL("image/png");
 
-    // Download PNG
     const downloadLink = document.createElement("a");
     downloadLink.href = pngDataUrl;
     downloadLink.download = `${petId}_qr.png`;
     downloadLink.click();
 
-    // Download PDF
     const pdf = new jsPDF();
     pdf.text("Found Your Pet - QR Code", 20, 20);
-    pdf.addImage(pngDataUrl, "PNG", 15, 30, 180, 180); // adjust size/position as needed
+    pdf.addImage(pngDataUrl, "PNG", 15, 30, 180, 180);
     pdf.save(`${petId}_qr.pdf`);
   };
 
@@ -154,6 +85,72 @@ function AdminDashboard() {
     pdf.save(`${petId}_qr.pdf`);
   };
 
+  const handleDownloadQRCodeAsDXF = async (petId, value) => {
+    try {
+      const qrData = await QRCode.create(value, { errorCorrectionLevel: "H" });
+      const modules = qrData.modules;
+      const size = modules.size;
+      const data = modules.data;
+
+      let dxfContent = "0\nSECTION\n2\nENTITIES\n";
+      const scale = 10;
+
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          if (data[y * size + x]) {
+            const x1 = x * scale;
+            const y1 = y * scale;
+            const x2 = x1 + scale;
+            const y2 = y1 + scale;
+
+            dxfContent += `
+0
+LWPOLYLINE
+8
+QR
+90
+4
+70
+1
+10
+${x1}
+20
+${y1}
+10
+${x2}
+20
+${y1}
+10
+${x2}
+20
+${y2}
+10
+${x1}
+20
+${y2}
+10
+${x1}
+20
+${y1}
+`;
+          }
+        }
+      }
+
+      dxfContent += "0\nENDSEC\n0\nEOF";
+
+      const blob = new Blob([dxfContent], { type: "application/dxf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${petId}_qr.dxf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to generate DXF QR code", err);
+    }
+  };
+
   if (loading) return <div className="container mt-5">Loading users...</div>;
   if (error) return <div className="container mt-5 text-danger">{error}</div>;
 
@@ -164,16 +161,17 @@ function AdminDashboard() {
     <div className="container mt-5">
       <h3 className="mb-3">Admin Dashboard</h3>
       <p className="text-muted">Total users: {users.length}</p>
-  
+
       <Row>
-        {/* Admin Users */}
         <Col sm={12} md={6}>
           <h5 className="mb-3">Admin Users</h5>
           {adminUsers.map((user) => (
             <Card key={user._id} className="mb-3 shadow-sm border-0">
               <Card.Body className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h6 className="mb-1">{user.name} {user.surname}</h6>
+                  <h6 className="mb-1">
+                    {user.name} {user.surname}
+                  </h6>
                   <small className="text-muted">{user.email}</small>
                 </div>
                 <div className="text-end">
@@ -190,19 +188,20 @@ function AdminDashboard() {
             </Card>
           ))}
         </Col>
-  
-        {/* Regular Users */}
+
         <Col sm={12} md={6}>
           <h5 className="mb-3">Regular Users</h5>
           {regularUsers.map((user) => (
             <Card key={user._id} className="mb-3 shadow-sm border-2">
               <Card.Body className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h6 className="mb-1 border-bottom">{user.name} {user.surname}</h6>
+                  <h6 className="mb-1 border-bottom">
+                    {user.name} {user.surname}
+                  </h6>
                   <small className="text-black">{user.email}</small>
                 </div>
                 <div className="text-end">
-                  <Badge bg="secondary" style={{width: "60px"}} pill className="mb-2 p-2"> User </Badge>
+                  <Badge bg="secondary" pill className="mb-2 p-2">User</Badge>
                   <Button
                     size="sm"
                     variant="outline-primary"
@@ -216,108 +215,116 @@ function AdminDashboard() {
           ))}
         </Col>
       </Row>
-  
+
       <Modal show={showModal} onHide={() => setShowModal(false)} size="xl" centered>
-  <Modal.Header closeButton>
-    <Modal.Title>User Profile</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    {selectedUser && (
-      <Row>
-        {/* Left Column: User Info */}
-        <Col md={4}>
-          <Card className="mb-4 border-2 mt-5 shadow-sm">
-            <Card.Body>
-              <h5 className="text-success">
-                {selectedUser.name} {selectedUser.surname}
-              </h5>
-              <p><strong>Email:</strong> {selectedUser.email}</p>
-              <p><strong>Contact:</strong> {selectedUser.contact}</p>
-              <p>
-                <strong>Address:</strong>{" "}
-                {selectedUser.address?.street}, {selectedUser.address?.city}
-              </p>
-            </Card.Body>
-          </Card>
-        </Col>
+        <Modal.Header closeButton>
+          <Modal.Title>User Profile</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedUser && (
+            <Row>
+              <Col md={4}>
+                <Card className="mb-4 border-2 mt-5 shadow-sm">
+                  <Card.Body>
+                    <h5 className="text-success">
+                      {selectedUser.name} {selectedUser.surname}
+                    </h5>
+                    <p><strong>Email:</strong> {selectedUser.email}</p>
+                    <p><strong>Contact:</strong> {selectedUser.contact}</p>
+                    <p><strong>Address:</strong> {selectedUser.address?.street}, {selectedUser.address?.city}</p>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={8}>
+  <h4 className="text-primary border-bottom mb-3 text-center">Pets</h4>
+  {pets.length === 0 ? (
+    <p className="text-muted">No pets found.</p>
+  ) : (
+    pets.map((pet) => (
+      <Card key={pet._id} className="mb-4 border-2 shadow-sm">
+        <Card.Body>
+          <Row>
+            {/* Pet Image */}
+            <Col md={4} className="text-center">
+              {pet.photoUrl ? (
+                <img
+                src={pet.photoUrl.startsWith("http") ? pet.photoUrl : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
+                alt={`${pet.name}'s profile`}
+                style={{
+                  width: "50px",
+                  height: "50px",
+                  objectFit: "cover",
+                  borderRadius: "50%",
+                }}
+              />
+              
+              ) : (
+                <p className="text-muted">No image available</p>
+              )}
+            </Col>
 
-        {/* Right Column: Pets */}
-        <Col md={8}>
-          <h4 className="text-primary border-bottom mb-3 text-center">Pets</h4>
-          {pets.length === 0 ? (
-            <p className="text-muted">No pets found.</p>
-          ) : (
-            pets.map((pet) => (
-              <Card key={pet._id} className="mb-4 border-2 shadow-sm">
-                <Card.Body>
-                  <Row>
-                    <Col md={6}>
-                      <h6 className="text-primary">Pet Details</h6>
-                      <p><strong>Name:</strong> {pet.name}</p>
-                      <p><strong>Species:</strong> {pet.species}</p>
-                      <p><strong>Breed:</strong> {pet.breed}</p>
-                      <p><strong>Age:</strong> {pet.age} years</p>
-                      <p><strong>Gender:</strong> {pet.gender}</p>
-                    </Col>
-                    <Col md={6}>
-                      <h6 className="text-primary">Health Info</h6>
-                      <p><strong>Microchip:</strong> {pet.microchipNumber || "N/A"}</p>
-                      <p><strong>Spayed/Neutered:</strong> {pet.spayedNeutered ? "Yes" : "No"}</p>
-                    </Col>
-                  </Row>
+            {/* Pet Details */}
+            <Col md={8}>
+              <Row>
+                <Col md={6}>
+                  <h6 className="text-primary">Pet Details</h6>
+                  <p><strong>Name:</strong> {pet.name}</p>
+                  <p><strong>Species:</strong> {pet.species}</p>
+                  <p><strong>Breed:</strong> {pet.breed}</p>
+                  <p><strong>Age:</strong> {pet.age} years</p>
+                  <p><strong>Gender:</strong> {pet.gender}</p>
+                </Col>
+                <Col md={6}>
+                  <h6 className="text-primary">Health Info</h6>
+                  <p><strong>Microchip:</strong> {pet.microchipNumber || "N/A"}</p>
+                  <p><strong>Spayed/Neutered:</strong> {pet.spayedNeutered ? "Yes" : "No"}</p>
+                </Col>
+              </Row>
 
-                  <Row>
-                    <Col md={6}>
-                      <h6 className="text-primary">Tag Info</h6>
-                      <p><strong>Type:</strong> {pet.tagType || "N/A"}</p>
-                    </Col>
-                    <Col md={6}>
-                      <h6 className="text-primary">Vet & Insurance</h6>
-                      <p><strong>Vet:</strong> {pet.vetInfo || "N/A"}</p>
-                      <p><strong>Insurance:</strong> {pet.insuranceInfo || "N/A"}</p>
-                    </Col>
-                  </Row>
+              <Row>
+                <Col md={6}>
+                  <h6 className="text-primary">Tag Info</h6>
+                  <p><strong>Type:</strong> {pet.tagType || "N/A"}</p>
+                </Col>
+                <Col md={6}>
+                  <h6 className="text-primary">Vet & Insurance</h6>
+                  <p><strong>Vet:</strong> {pet.vetInfo || "N/A"}</p>
+                  <p><strong>Insurance:</strong> {pet.insuranceInfo || "N/A"}</p>
+                </Col>
+              </Row>
 
-                  <div className="mt-3">
-                    <Button
-                      variant="outline-success"
-                      onClick={() => handleShowQRModal(pet)}
-                    >
-                      <FaQrcode className="me-2" />
-                      View PDF
-                    </Button>
+              <div className="mt-3">
+                <Button variant="outline-success" onClick={() => handleShowQRModal(pet)}>
+                  <FaQrcode className="me-2" />
+                  View PDF
+                </Button>
 
-                    <QRCodeCanvas
-                      id={`qr-${pet._id}`}
-                      value={`https://foundyourpet.vercel.app/pet-profile/${pet._id}`}
-                      size={200}
-                      level="H"
-                      includeMargin={true}
-                      className="d-none"
-                    />
-                  </div>
-                </Card.Body>
-              </Card>
-            ))
+                <QRCodeCanvas
+                  id={`qr-${pet._id}`}
+                  value={`https://foundyourpet.vercel.app/pet-profile/${pet._id}`}
+                  size={200}
+                  level="H"
+                  includeMargin={true}
+                  className="d-none"
+                />
+              </div>
+            </Col>
+                        </Row>
+                      </Card.Body>
+                    </Card>
+                  ))
+                  
+                )}
+              </Col>
+            </Row>
           )}
-        </Col>
-      </Row>
-    )}
-  </Modal.Body>
-  <Modal.Footer>
-    <Button variant="secondary" onClick={() => setShowModal(false)}>
-      Close
-    </Button>
-  </Modal.Footer>
-</Modal>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>Close</Button>
+        </Modal.Footer>
+      </Modal>
 
-  
-      {/* QR Modal */}
-      <Modal
-        show={showQRModal}
-        onHide={() => setShowQRModal(false)}
-        centered
-      >
+      <Modal show={showQRModal} onHide={() => setShowQRModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>QR Code Preview</Modal.Title>
         </Modal.Header>
@@ -331,17 +338,11 @@ function AdminDashboard() {
                 includeMargin={true}
               />
               <div className="mt-4 d-flex flex-column gap-2">
-                <Button
-                  variant="outline-success"
-                  onClick={() => handleDownloadQRCode(selectedPet._id)}
-                >
+                <Button variant="outline-success" onClick={() => handleDownloadQRCode(selectedPet._id)}>
                   <FaQrcode className="me-2" />
                   Download QR Code (PNG)
                 </Button>
-                <Button
-                  variant="outline-danger"
-                  onClick={() => handleDownloadQRCodeAsPDF(selectedPet._id)}
-                >
+                <Button variant="outline-danger" onClick={() => handleDownloadQRCodeAsPDF(selectedPet._id)}>
                   <FaFilePdf className="me-2" />
                   Download QR as PDF
                 </Button>
@@ -364,8 +365,6 @@ function AdminDashboard() {
       </Modal>
     </div>
   );
-  
-  
 }
 
 export default AdminDashboard;
