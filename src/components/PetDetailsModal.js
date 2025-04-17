@@ -20,13 +20,7 @@ const PetDetailsModal = ({ show, handleClose, pet }) => {
   };
 
   return (
-    <Modal
-      show={show}
-      onHide={handleModalClose}
-      size="xl"
-      centered
-      scrollable
-    >
+    <Modal show={show} onHide={handleModalClose} size="xl" centered scrollable>
       <Modal.Header closeButton>
         <Modal.Title className="fw-bold">{pet.name}'s Profile</Modal.Title>
       </Modal.Header>
@@ -36,13 +30,13 @@ const PetDetailsModal = ({ show, handleClose, pet }) => {
           {/* Pet Image */}
           <Row className="mb-4 justify-content-center">
             <Col md={6} className="text-center">
-              {pet.photo ? (
+              {pet.photoUrl ? (
                 <Image
-                src={`https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
-                alt={`${pet.name}'s image`}
-                fluid
-                rounded
-              />              
+                  src={`https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
+                  alt={`${pet.name}'s image`}
+                  fluid
+                  rounded
+                />
               ) : (
                 <div className="text-muted">No photo available</div>
               )}
