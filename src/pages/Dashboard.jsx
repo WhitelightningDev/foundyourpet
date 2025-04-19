@@ -50,7 +50,7 @@ function Dashboard() {
   const [deletionSuccess, setDeletionSuccess] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const handleShare = () => {
-    const message = encodeURIComponent("Check out Found Your Pet — a simple, smart way to help lost pets get home faster.   https://www.foundyourpet.co.za");
+    const message = encodeURIComponent("Check out Found Your Pet — a simple, smart way to help lost pets get home faster.   https://foundyourpet.vercel.app/");
     const url = `https://wa.me/?text=${message}`;
     window.open(url, "_blank");
   };
