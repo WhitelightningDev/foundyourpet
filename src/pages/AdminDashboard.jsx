@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Modal, Button, Card, Row, Col, Badge } from "react-bootstrap";
-import { QRCodeCanvas } from "qrcode.react";
-import { jsPDF } from "jspdf";
-import QRCode from "qrcode";
-import { FaFilePdf, FaQrcode, FaDownload } from "react-icons/fa";
+import { Modal, Button, Card, Row, Col, Badge, Table } from "react-bootstrap";
+import UserProfileModal from "../components/UserProfileModal";
+import QRCodeModal from "../components/QRCodeModal";
+import { jsPDF } from "jspdf"; // For PDF generation
+import { QRCodeCanvas } from "qrcode.react"; // For QR code generation
+import QRCode from "qrcode"; // Add this line
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [pets, setPets] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [showQRModal, setShowQRModal] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
   const token = localStorage.getItem("authToken");
@@ -27,11 +26,8 @@ function AdminDashboard() {
           }
         );
         setUsers(res.data);
-        setLoading(false);
       } catch (err) {
         console.error("Error fetching users:", err);
-        setError("Failed to fetch users");
-        setLoading(false);
       }
     };
 
@@ -51,7 +47,6 @@ function AdminDashboard() {
       setShowModal(true);
     } catch (err) {
       console.error("Error fetching user details:", err);
-      setError("Failed to fetch user details");
     }
   };
 
@@ -68,16 +63,6 @@ function AdminDashboard() {
     downloadLink.href = pngDataUrl;
     downloadLink.download = `${petId}_qr.png`;
     downloadLink.click();
-
-    const pdf = new jsPDF();
-    pdf.text("Found Your Pet - QR Code", 20, 20);
-    pdf.addImage(pngDataUrl, "PNG", 15, 30, 180, 180);
-    pdf.save(`${petId}_qr.pdf`);
-  };
-
-  const handleDownloadQRCodeAsPDF = (petId) => {
-    const canvas = document.getElementById(`qr-${petId}`);
-    const pngDataUrl = canvas.toDataURL("image/png");
 
     const pdf = new jsPDF();
     pdf.text("Found Your Pet - QR Code", 20, 20);
@@ -103,8 +88,7 @@ function AdminDashboard() {
             const x2 = x1 + scale;
             const y2 = y1 + scale;
 
-            dxfContent += `
-0
+            dxfContent += `0
 LWPOLYLINE
 8
 QR
@@ -151,14 +135,12 @@ ${y1}
     }
   };
 
-  if (loading) return <div className="container mt-5">Loading users...</div>;
-  if (error) return <div className="container mt-5 text-danger">{error}</div>;
-
   const adminUsers = users.filter((user) => user.isAdmin);
   const regularUsers = users.filter((user) => !user.isAdmin);
 
   return (
     <div className="container mt-5">
+      {/* Dashboard Overview Card */}
       <Card className="shadow-sm border-0 mb-4">
         <Card.Body>
           <div className="d-flex justify-content-between align-items-center">
@@ -171,31 +153,40 @@ ${y1}
         </Card.Body>
       </Card>
 
+      {/* Admin Users and Regular Users Cards */}
       <Row className="mb-4">
         <Col md={6}>
           <Card className="shadow-sm border-0">
-            <Card.Header className="bg-light">
-              <h5 className="mb-0">Admin Users</h5>
+            <Card.Header className="bg-primary">
+              <h5 className="mb-0 text-white">Admin Users</h5>
             </Card.Header>
             <Card.Body className="p-3">
-              {adminUsers.map((user) => (
-                <Card key={user._id} className="mb-3 border-light">
-                  <Card.Body className="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h6 className="mb-1">
-                        <strong>{user.name} {user.surname}</strong>
-                      </h6>
-                      <small className="text-muted">{user.email}</small>
-                    </div>
-                    <div className="text-end">
-                      <Badge bg="success" pill className="mb-2 px-3 py-1">Admin</Badge>
-                      <Button size="sm" variant="outline-primary" onClick={() => handleViewDetails(user._id)}>
-                        View
-                      </Button>
-                    </div>
-                  </Card.Body>
-                </Card>
-              ))}
+              <Table responsive>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adminUsers.map((user) => (
+                    <tr key={user._id}>
+                      <td>{user.name} {user.surname}</td>
+                      <td>{user.email}</td>
+                      <td>
+                        <Badge bg="success" pill>Admin</Badge>
+                      </td>
+                      <td>
+                        <Button size="sm" variant="outline-primary" onClick={() => handleViewDetails(user._id)}>
+                          View
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
             </Card.Body>
           </Card>
         </Col>
@@ -206,117 +197,52 @@ ${y1}
               <h5 className="mb-0">Regular Users</h5>
             </Card.Header>
             <Card.Body className="p-3">
-              {regularUsers.map((user) => (
-                <Card key={user._id} className="mb-3 border-light">
-                  <Card.Body className="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h6 className="mb-1">
-                        <strong>{user.name} {user.surname}</strong>
-                      </h6>
-                      <small>{user.email}</small>
-                    </div>
-                    <div className="text-end">
-                      <Badge bg="secondary" pill className="mb-2 px-3 py-1">User</Badge>
-                      <Button size="sm" variant="outline-primary" onClick={() => handleViewDetails(user._id)}>
-                        View
-                      </Button>
-                    </div>
-                  </Card.Body>
-                </Card>
-              ))}
+              <Table responsive>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {regularUsers.map((user) => (
+                    <tr key={user._id}>
+                      <td>{user.name} {user.surname}</td>
+                      <td>{user.email}</td>
+                      <td>
+                        <Badge bg="info" pill>User</Badge>
+                      </td>
+                      <td>
+                        <Button size="sm" variant="outline-primary" onClick={() => handleViewDetails(user._id)}>
+                          View
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
             </Card.Body>
           </Card>
         </Col>
       </Row>
 
-      {/* Modal for User Profile */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="xl" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>User Profile</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedUser && (
-            <Row>
-              <Col md={4}>
-                <Card className="mb-4 border-2 mt-5 shadow-sm">
-                  <Card.Body>
-                    <h5 className="text-success">
-                      {selectedUser.name} {selectedUser.surname}
-                    </h5>
-                    <p><strong>Email:</strong> {selectedUser.email}</p>
-                    <p><strong>Contact:</strong> {selectedUser.contact}</p>
-                    <p><strong>Address:</strong> {selectedUser.address?.street}, {selectedUser.address?.city}</p>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col md={8}>
-                <h4 className="text-primary border-bottom mb-3 text-center">Pets</h4>
-                {pets.length === 0 ? (
-                  <p className="text-muted">No pets found.</p>
-                ) : (
-                  pets.map((pet) => (
-                    <Card key={pet._id} className="mb-4 border-2">
-                      <Card.Body className="d-flex justify-content-between align-items-center">
-                        <div>
-                          <h5>{pet.name}</h5>
-                          <p className="text-muted">{pet.species} - {pet.breed}</p>
-                        </div>
-                        <div className="text-end">
-                          <Button
-                            variant="outline-success"
-                            size="sm"
-                            onClick={() => handleShowQRModal(pet)}
-                          >
-                            <FaQrcode /> QR Code
-                          </Button>
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  ))
-                )}
-              </Col>
-            </Row>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Modal for QR Code */}
-      <Modal show={showQRModal} onHide={() => setShowQRModal(false)} size="lg" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>QR Code for {selectedPet?.name}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="text-center">
-            <QRCodeCanvas
-              id={`qr-${selectedPet?._id}`}
-              value={selectedPet?.qrCodeValue || ""}
-              size={256}
-            />
-          </div>
-          <div className="text-center mt-3">
-            <Button
-              variant="outline-danger"
-              size="sm"
-              onClick={() => handleDownloadQRCode(selectedPet?._id)}
-              className="me-2"
-            >
-              <FaFilePdf /> Download PDF
-            </Button>
-            <Button
-              variant="outline-primary"
-              size="sm"
-              onClick={() => handleDownloadQRCodeAsDXF(selectedPet?._id, selectedPet?.qrCodeValue)}
-            >
-              <FaDownload /> Download DXF
-            </Button>
-          </div>
-        </Modal.Body>
-      </Modal>
+      {/* Modals for Viewing Details and QR Code */}
+      <UserProfileModal
+        showModal={showModal}
+        handleClose={() => setShowModal(false)}
+        selectedUser={selectedUser}
+        pets={pets}
+        handleShowQRModal={handleShowQRModal}
+      />
+      <QRCodeModal
+        showQRModal={showQRModal}
+        handleClose={() => setShowQRModal(false)}
+        selectedPet={selectedPet}
+        handleDownloadQRCode={handleDownloadQRCode}
+        handleDownloadQRCodeAsDXF={handleDownloadQRCodeAsDXF}
+      />
     </div>
   );
 }
