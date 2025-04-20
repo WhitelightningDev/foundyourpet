@@ -20,7 +20,7 @@ import ManagePetsPage from "./pages/ManagePetsPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProfilePage from "./pages/ProfilePage"; // adjust path as needed
 import PublicPetProfile from "./pages/PublicPetProfile";
-import SignupSuccess from "./states/SignupSuccess";
+import SignupSuccess from "./components/SignupSuccess";
 
 function App() {
   return (
