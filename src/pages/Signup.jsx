@@ -96,7 +96,7 @@ function Signup() {
         setShowToast(true);
 
         setTimeout(() => {
-          window.location.href = "/login";
+          window.location.href = "/signup-success";
           setIsLoading(false);
         }, 2000);
       } catch (error) {

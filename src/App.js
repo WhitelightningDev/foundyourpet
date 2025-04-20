@@ -20,6 +20,7 @@ import ManagePetsPage from "./pages/ManagePetsPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProfilePage from "./pages/ProfilePage"; // adjust path as needed
 import PublicPetProfile from "./pages/PublicPetProfile";
+import SignupSuccess from "./states/SignupSuccess";
 
 function App() {
   return (
@@ -41,7 +42,7 @@ function App() {
           <Route path="/manage-pets" element={<ManagePetsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/pet-profile/:petId" element={<PublicPetProfile />} />
-
+          <Route path="/signup-success" element={<SignupSuccess />} />
 
           <Route
             path="/admin-dashboard"
