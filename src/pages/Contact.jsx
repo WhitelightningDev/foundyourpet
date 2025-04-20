@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Modal, Button } from "react-bootstrap";
+import { FaWhatsapp, FaEnvelope } from "react-icons/fa";
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -8,8 +10,10 @@ function Contact() {
     subject: "",
     message: "",
   });
-
   const [submitted, setSubmitted] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const [sending, setSending] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,9 +25,54 @@ function Contact() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    const errors = {};
+    if (!formData.name) errors.name = "Name is required.";
+    if (!formData.email) errors.email = "Email is required.";
+    if (!formData.subject) errors.subject = "Subject is required.";
+    if (!formData.message) errors.message = "Message is required.";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setFormErrors({});
+    setShowModal(true);
+  };
+
+  // Format phone number for WhatsApp (adapted from PublicPetProfile)
+  function formatPhoneNumberForWhatsApp(number) {
+    if (!number) return "";
+    const digits = number.replace(/\D/g, "");
+    if (digits.length === 10 && digits.startsWith("0")) {
+      return "27" + digits.slice(1);
+    }
+    if (digits.length >= 11 && digits.startsWith("27")) {
+      return digits;
+    }
+    return digits;
+  }
+
+  // Construct WhatsApp message
+  const whatsappMessage = `From: ${formData.name}\nEmail: ${formData.email}\nSubject: ${formData.subject}\nMessage: ${formData.message}`;
+  const formattedNumber = formatPhoneNumberForWhatsApp("+27746588885"); // Hardcoded number from original code
+  const whatsappLink = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+
+  const handleEmailSend = () => {
+    setSending(true);
+    const encodedSubject = encodeURIComponent(formData.subject);
+    const encodedBody = encodeURIComponent(
+      `From: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\n${formData.message}`
+    );
+    const mailtoLink = `mailto:danielmommsen2@gmail.com?subject=${encodedSubject}&body=${encodedBody}`;
+    window.location.href = mailtoLink;
+
     setSubmitted(true);
-    // Add form submission logic here (API, email, etc.)
+    setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+    setTimeout(() => {
+      setSending(false);
+      setShowModal(false);
+    }, 1000);
   };
 
   return (
@@ -59,6 +108,7 @@ function Contact() {
                     onChange={handleChange}
                     required
                   />
+                  {formErrors.name && <div className="text-danger">{formErrors.name}</div>}
                 </div>
 
                 <div className="mb-3">
@@ -74,6 +124,7 @@ function Contact() {
                     onChange={handleChange}
                     required
                   />
+                  {formErrors.email && <div className="text-danger">{formErrors.email}</div>}
                 </div>
 
                 <div className="mb-3">
@@ -94,15 +145,20 @@ function Contact() {
                   <label htmlFor="subject" className="form-label">
                     Subject <span className="text-danger">*</span>
                   </label>
-                  <input
-                    type="text"
+                  <select
                     id="subject"
                     className="form-control"
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                  />
+                  >
+                    <option value="">Select Subject</option>
+                    <option value="Pet Adoption">Pet Adoption</option>
+                    <option value="Lost Pet">Lost Pet</option>
+                    <option value="General Inquiry">General Inquiry</option>
+                  </select>
+                  {formErrors.subject && <div className="text-danger">{formErrors.subject}</div>}
                 </div>
 
                 <div className="mb-3">
@@ -118,6 +174,7 @@ function Contact() {
                     onChange={handleChange}
                     required
                   ></textarea>
+                  {formErrors.message && <div className="text-danger">{formErrors.message}</div>}
                 </div>
 
                 <div className="text-center">
@@ -130,6 +187,51 @@ function Contact() {
           </div>
         </div>
       </div>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Send Message</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {sending ? (
+            <p className="text-center">Opening application...</p>
+          ) : (
+            <>
+              <h4 className="text-center mb-4">How would you like to send your message?</h4>
+              <div className="d-flex justify-content-around">
+                <a
+                  href={whatsappLink}
+                  className="btn btn-outline-success shadow-lg d-flex align-items-center"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    console.log("WhatsApp link clicked:", whatsappLink);
+                    setSending(true);
+                    setSubmitted(true);
+                    setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+                    setTimeout(() => {
+                      setSending(false);
+                      setShowModal(false);
+                    }, 1000);
+                  }}
+                >
+                  <FaWhatsapp className="me-2" /> Send via WhatsApp
+                </a>
+                <Button
+                  variant="outline-primary"
+                  className="d-flex align-items-center"
+                  onClick={() => {
+                    console.log("Email button clicked");
+                    handleEmailSend();
+                  }}
+                >
+                  <FaEnvelope className="me-2" /> Send via Email
+                </Button>
+              </div>
+            </>
+          )}
+        </Modal.Body>
+      </Modal>
     </div>
   );
 }
