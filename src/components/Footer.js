@@ -27,14 +27,12 @@ function Footer() {
             <Link to="/features" className="nav-link px-2 text-body-secondary">Features</Link>
           </li>
           <li className="nav-item">
-            <Link to="/pricing" className="nav-link px-2 text-body-secondary">Pricing</Link>
+            <Link to="/privacy-policy" className="nav-link px-2 text-body-secondary">PrivacyPolicy</Link>
           </li>
           <li className="nav-item">
-            <Link to="/faqs" className="nav-link px-2 text-body-secondary">FAQs</Link>
+            <Link to="/terms-and-conditions" className="nav-link px-2 text-body-secondary">Terms & Conditions</Link>
           </li>
-          <li className="nav-item">
-            <Link to="/about" className="nav-link px-2 text-body-secondary">About</Link>
-          </li>
+         
         </ul>
       </footer>
     </div>

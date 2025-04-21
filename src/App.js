@@ -21,6 +21,9 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ProfilePage from "./pages/ProfilePage"; // adjust path as needed
 import PublicPetProfile from "./pages/PublicPetProfile";
 import SignupSuccess from "./components/SignupSuccess";
+import TsAndCs from "./pages/T's&C's";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+
 
 function App() {
   return (
@@ -43,6 +46,8 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/pet-profile/:petId" element={<PublicPetProfile />} />
           <Route path="/signup-success" element={<SignupSuccess />} />
+          <Route path="/terms-and-conditions" element={<TsAndCs />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
           <Route
             path="/admin-dashboard"
