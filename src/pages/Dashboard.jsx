@@ -19,6 +19,9 @@ import { toast } from "react-toastify";
 import PetDetailsModal from "../components/PetDetailsModal";
 import EditPetModal from "../components/EditPetModal";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
+import { Placeholder } from "react-bootstrap";
+import DashboardLoadingSkeleton from "../loadingskeletons/dashboardloadingskeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 function Dashboard() {
   const [user, setUser] = useState({ name: "", surname: "" });
@@ -50,19 +53,20 @@ function Dashboard() {
   const [deletionSuccess, setDeletionSuccess] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const handleShare = () => {
-    const message = encodeURIComponent("Check out Found Your Pet — a simple, smart way to help lost pets get home faster.   https://foundyourpet.vercel.app/");
+    const message = encodeURIComponent(
+      "Check out Found Your Pet — a simple, smart way to help lost pets get home faster.   https://foundyourpet.vercel.app/"
+    );
     const url = `https://wa.me/?text=${message}`;
     window.open(url, "_blank");
   };
-  
+
   const token = localStorage.getItem("authToken");
 
   // Inside Dashboard component
 
-const refreshPets = () => {
-  fetchPets();
-};
-
+  const refreshPets = () => {
+    fetchPets();
+  };
 
   const fetchPets = async () => {
     try {
@@ -181,6 +185,7 @@ const refreshPets = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+        console.log("Fetched user:", response.data); // ✅ Debugging log
         setUser({
           name: response.data.name,
           surname: response.data.surname,
@@ -189,10 +194,13 @@ const refreshPets = () => {
         console.error("Failed to fetch user info:", error);
       }
     };
-
-    fetchUser();
-    fetchPets();
+  
+    if (token) {
+      fetchUser();
+      fetchPets();
+    }
   }, [token]);
+  
 
   const handleOpenModal = () => {
     setIsEditMode(false); // Add mode
@@ -209,14 +217,14 @@ const refreshPets = () => {
   return (
     <Container className="my-5">
       <div className="d-flex justify-content-center align-items-center gap-3 mb-4">
-  <h3 className="text-dark fw-bold m-0">
-    Welcome back, {user.name} {user.surname}!
-  </h3>
-  <Button variant="outline-success" size="sm" onClick={handleShare}>
-    Share on WhatsApp
-  </Button>
-</div>
+        <h3 className="text-dark fw-bold m-0">
+          Welcome back
+        </h3>
 
+        <Button variant="outline-success" size="sm" onClick={handleShare}>
+          Share on WhatsApp
+        </Button>
+      </div>
 
       <div className="d-flex justify-content-center mb-4">
         <Button variant="success" onClick={handleOpenModal}>
@@ -227,72 +235,88 @@ const refreshPets = () => {
       {/* Dogs Section */}
       <h4 className="mb-3 text-primary">Your Dogs</h4>
       {loading ? (
-        <div className="text-center mb-4">
-          <Spinner animation="border" variant="primary" />
-          <p className="text-muted mt-2">Loading your pets...</p>
-        </div>
+        <DashboardLoadingSkeleton />
       ) : dogs.length > 0 ? (
         <ListGroup className="mb-5">
           {dogs.map((pet) => (
-           <ListGroup.Item
-           key={pet._id}
-           className="mb-3 shadow-sm rounded p-3 bg-light"
-         >
-           <div className="d-flex justify-content-between align-items-center gap-3">
-             {/* Pet Image */}
-             {pet.photoUrl ? (
-               <img
-               src={pet.photoUrl.startsWith("http") ? pet.photoUrl : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
-               alt={`${pet.name}'s profile`}
-               style={{
-                 width: "50px",
-                 height: "50px",
-                 objectFit: "cover",
-                 borderRadius: "50%",
-               }}
-             />
-             
-             ) : (
-               <div
-                 style={{
-                   width: "50px",
-                   height: "50px",
-                   borderRadius: "50%",
-                   backgroundColor: "#ccc",
-                   display: "flex",
-                   alignItems: "center",
-                   justifyContent: "center",
-                   fontSize: "0.7rem",
-                   color: "#666",
-                 }}
-               >
-                 No Photo
-               </div>
-             )}
-     
-             {/* Pet Info */}
-             <div className="flex-grow-1">
-               <h5 className="mb-1">{pet.name}</h5>
-               <p className="mb-0 text-muted">{pet.breed}</p>
-             </div>
-     
-             {/* Buttons */}
-             <div className="pet-button-group d-flex flex-wrap gap-1">
-               <Button variant="info" size="sm" onClick={() => handleViewDetails(pet)}>
-                 <FaEye className="me-1" /> View
-               </Button>
-               <Button variant="primary" size="sm" onClick={() => handleEditClick(pet)}>
-                 <FaEdit className="me-1" /> Edit
-               </Button>
-               <Button variant="danger" size="sm" onClick={() => handleDeleteClick(pet._id)}>
-                 <FaTrash className="me-1" /> Delete
-               </Button>
-               <Button variant="success" size="sm" onClick={() => navigate("/select-tag/standard")}>
-                 <FaCartPlus className="me-1" /> Order Tag
-               </Button>
-             </div>
-           </div>
-         </ListGroup.Item>
+            <ListGroup.Item
+              key={pet._id}
+              className="mb-3 shadow-sm rounded p-3 bg-light"
+            >
+              <div className="d-flex justify-content-between align-items-center gap-3">
+                {/* Pet Image */}
+                {pet.photoUrl ? (
+                  <img
+                    src={
+                      pet.photoUrl.startsWith("http")
+                        ? pet.photoUrl
+                        : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`
+                    }
+                    alt={`${pet.name}'s profile`}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      objectFit: "cover",
+                      borderRadius: "50%",
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      borderRadius: "50%",
+                      backgroundColor: "#ccc",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "0.7rem",
+                      color: "#666",
+                    }}
+                  >
+                    No Photo
+                  </div>
+                )}
+
+                {/* Pet Info */}
+                <div className="flex-grow-1">
+                  <h5 className="mb-1">{pet.name}</h5>
+                  <p className="mb-0 text-muted">{pet.breed}</p>
+                </div>
+
+                {/* Buttons */}
+                <div className="pet-button-group d-flex flex-wrap gap-1">
+                  <Button
+                    variant="info"
+                    size="sm"
+                    onClick={() => handleViewDetails(pet)}
+                  >
+                    <FaEye className="me-1" /> View
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleEditClick(pet)}
+                  >
+                    <FaEdit className="me-1" /> Edit
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDeleteClick(pet._id)}
+                  >
+                    <FaTrash className="me-1" /> Delete
+                  </Button>
+                  <Button
+                    variant="success"
+                    size="sm"
+                    onClick={() => navigate("/select-tag/standard")}
+                  >
+                    <FaCartPlus className="me-1" /> Order Tag
+                  </Button>
+                </div>
+              </div>
+            </ListGroup.Item>
           ))}
         </ListGroup>
       ) : (
@@ -302,72 +326,88 @@ const refreshPets = () => {
       {/* Cats Section */}
       <h4 className="mb-3 text-primary">Your Cats</h4>
       {loading ? (
-        <div className="text-center mb-4">
-          <Spinner animation="border" variant="primary" />
-          <p className="text-muted mt-2">Loading your pets...</p>
-        </div>
+        <DashboardLoadingSkeleton />
       ) : cats.length > 0 ? (
         <ListGroup className="mb-5">
           {cats.map((pet) => (
             <ListGroup.Item
-            key={pet._id}
-            className="mb-3 shadow-sm rounded p-3 bg-light"
-          >
-            <div className="d-flex justify-content-between align-items-center gap-3">
-              {/* Pet Image */}
-              {pet.photoUrl ? (
-                <img
-                src={pet.photoUrl.startsWith("http") ? pet.photoUrl : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
-                alt={`${pet.name}'s profile`}
-                style={{
-                  width: "50px",
-                  height: "50px",
-                  objectFit: "cover",
-                  borderRadius: "50%",
-                }}
-              />
-              
-              ) : (
-                <div
-                  style={{
-                    width: "50px",
-                    height: "50px",
-                    borderRadius: "50%",
-                    backgroundColor: "#ccc",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "0.7rem",
-                    color: "#666",
-                  }}
-                >
-                  No Photo
+              key={pet._id}
+              className="mb-3 shadow-sm rounded p-3 bg-light"
+            >
+              <div className="d-flex justify-content-between align-items-center gap-3">
+                {/* Pet Image */}
+                {pet.photoUrl ? (
+                  <img
+                    src={
+                      pet.photoUrl.startsWith("http")
+                        ? pet.photoUrl
+                        : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`
+                    }
+                    alt={`${pet.name}'s profile`}
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      objectFit: "cover",
+                      borderRadius: "50%",
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      borderRadius: "50%",
+                      backgroundColor: "#ccc",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "0.7rem",
+                      color: "#666",
+                    }}
+                  >
+                    No Photo
+                  </div>
+                )}
+
+                {/* Pet Info */}
+                <div className="flex-grow-1">
+                  <h5 className="mb-1">{pet.name}</h5>
+                  <p className="mb-0 text-muted">{pet.breed}</p>
                 </div>
-              )}
-      
-              {/* Pet Info */}
-              <div className="flex-grow-1">
-                <h5 className="mb-1">{pet.name}</h5>
-                <p className="mb-0 text-muted">{pet.breed}</p>
+
+                {/* Buttons */}
+                <div className="pet-button-group d-flex flex-wrap gap-1">
+                  <Button
+                    variant="info"
+                    size="sm"
+                    onClick={() => handleViewDetails(pet)}
+                  >
+                    <FaEye className="me-1" /> View
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleEditClick(pet)}
+                  >
+                    <FaEdit className="me-1" /> Edit
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDeleteClick(pet._id)}
+                  >
+                    <FaTrash className="me-1" /> Delete
+                  </Button>
+                  <Button
+                    variant="success"
+                    size="sm"
+                    onClick={() => navigate("/select-tag/standard")}
+                  >
+                    <FaCartPlus className="me-1" /> Order Tag
+                  </Button>
+                </div>
               </div>
-      
-              {/* Buttons */}
-              <div className="pet-button-group d-flex flex-wrap gap-1">
-                <Button variant="info" size="sm" onClick={() => handleViewDetails(pet)}>
-                  <FaEye className="me-1" /> View
-                </Button>
-                <Button variant="primary" size="sm" onClick={() => handleEditClick(pet)}>
-                  <FaEdit className="me-1" /> Edit
-                </Button>
-                <Button variant="danger" size="sm" onClick={() => handleDeleteClick(pet._id)}>
-                  <FaTrash className="me-1" /> Delete
-                </Button>
-                <Button variant="success" size="sm" onClick={() => navigate("/select-tag/standard")}>
-                  <FaCartPlus className="me-1" /> Order Tag
-                </Button>
-              </div>
-            </div>
-          </ListGroup.Item>
+            </ListGroup.Item>
           ))}
         </ListGroup>
       ) : (
@@ -376,13 +416,12 @@ const refreshPets = () => {
 
       {/* Modals */}
       {!isEditMode && (
-  <AddPetModal
-    showModal={showModal}
-    closeModal={handleCloseModal}
-    refreshPets={refreshPets} // ✅ add this
-  />
-)}
-
+        <AddPetModal
+          showModal={showModal}
+          closeModal={handleCloseModal}
+          refreshPets={refreshPets} // ✅ add this
+        />
+      )}
 
       {/* Edit Pet Modal */}
       {isEditMode && (
