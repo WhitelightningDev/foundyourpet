@@ -23,6 +23,11 @@ import PublicPetProfile from "./pages/PublicPetProfile";
 import SignupSuccess from "./components/SignupSuccess";
 import TsAndCs from "./pages/T's&C's";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import PasswordResetPage from "./pages/PasswordReset";
+// Payment status pags
+import SuccessPage from "./pages/SuccessPage";
+import FailurePage from "./pages/FailurePage";
+import CancelPage from "./pages/CancelPage";
 
 
 function App() {
@@ -48,6 +53,10 @@ function App() {
           <Route path="/signup-success" element={<SignupSuccess />} />
           <Route path="/terms-and-conditions" element={<TsAndCs />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/password-reset" element={<PasswordResetPage />} />
+          <Route path="/payment-success" element={<SuccessPage />} />
+          <Route path="/payment-failure" element={<FailurePage />} />
+          <Route path="/payment-cancel" element={<CancelPage />} />
 
           <Route
             path="/admin-dashboard"

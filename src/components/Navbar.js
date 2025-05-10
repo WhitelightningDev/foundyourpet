@@ -8,8 +8,15 @@ function NavigationBar() {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
   const { isLoggedIn, logout } = useContext(AuthContext);
-
-  const user = JSON.parse(localStorage.getItem("user"));
+  let user = null;
+  try {
+    const storedUser = localStorage.getItem("user");
+    user = storedUser ? JSON.parse(storedUser) : null;
+  } catch (e) {
+    console.error("Failed to parse user from localStorage:", e);
+    user = null;
+  }
+  
   const isAdmin = user?.isAdmin; // Use actual role flag, not email check
 
   const closeNavbar = () => setExpanded(false);

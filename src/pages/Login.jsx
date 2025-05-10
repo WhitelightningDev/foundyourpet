@@ -37,62 +37,62 @@ function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
-    setIsLoading(true); // Start spinner
-
+  
+    setIsLoading(true); 
+  
     try {
       const response = await axios.post(
         "https://foundyourpet-backend.onrender.com/api/users/login",
-        {
-          email,
-          password,
-        }
+        { email, password }
       );
-
+  
       if (response.status === 200) {
-        showToastMessage("Login successful! Redirecting...");
-
         const { token, user } = response.data;
         localStorage.setItem("authToken", token);
         localStorage.setItem("user", JSON.stringify(user));
         login(token);
-
-        const isAdmin = user?.isAdmin;
-
+  
+        showToastMessage("Login successful! Redirecting...");
+  
+        const redirectPath = user?.isAdmin ? "/admin-dashboard" : "/dashboard";
+  
         setTimeout(() => {
-          navigate(isAdmin ? "/admin-dashboard" : "/dashboard");
-          setIsLoading(false); // Stop spinner after redirect
+          navigate(redirectPath);
+          setIsLoading(false);
         }, 2000);
       }
     } catch (error) {
-      setIsLoading(false); // Stop spinner on error
-      if (error.response) {
-        const { status, data } = error.response;
-        console.error("Login Error:", data.error || data.message);
-
-        switch (status) {
-          case 400:
-            showToastMessage(
-              "Oops: " + (data.error || "Invalid credentials, please check your email or password")
-            );
-            break;
-          case 401:
-            showToastMessage("Incorrect email or password.");
-            break;
-          case 404:
-            showToastMessage("User not found. Please sign up.");
-            break;
-          case 500:
-            showToastMessage("Server error. Please try again later.");
-            break;
-          default:
-            showToastMessage("An unexpected error occurred. Try again.");
-        }
-      } else {
-        showToastMessage("Network error. Please check your connection.");
-      }
+      setIsLoading(false); 
+      handleLoginError(error);
     }
   };
+  
+  const handleLoginError = (error) => {
+    if (error.response) {
+      const { status, data } = error.response;
+      const message = data.error || data.message || "An unexpected error occurred.";
+  
+      switch (status) {
+        case 400:
+          showToastMessage("Oops: " + message);
+          break;
+        case 401:
+          showToastMessage("Incorrect email or password.");
+          break;
+        case 404:
+          showToastMessage("User not found. Please sign up.");
+          break;
+        case 500:
+          showToastMessage("Server error. Please try again later.");
+          break;
+        default:
+          showToastMessage("An unexpected error occurred. Try again.");
+      }
+    } else {
+      showToastMessage("Network error. Please check your connection.");
+    }
+  };
+  
 
   return (
     <div>
@@ -169,10 +169,14 @@ function LoginPage() {
                   By clicking Login, you agree to the terms of use.
                 </small>
                 <hr className="my-3" />
+
                 <div className="d-flex justify-content-between">
-                  <button className="btn btn-outline-secondary" type="button">
+                  <Link
+                    to="/password-reset"
+                    className="btn btn-outline-secondary"
+                  >
                     Forgot Password
-                  </button>
+                  </Link>
                   <Link to="/Signup" className="btn btn-outline-secondary">
                     Signup
                   </Link>
