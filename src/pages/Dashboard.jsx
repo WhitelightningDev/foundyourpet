@@ -118,10 +118,24 @@ function Dashboard() {
     }
   };
 
-  const handleViewDetails = (pet) => {
-    setSelectedPet(pet);
-    setShowDetailsModal(true); // Show details modal
+  const handleViewDetails = async (pet) => {
+    try {
+      const response = await axios.get(
+        `https://foundyourpet-backend.onrender.com/api/pets/${pet._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setSelectedPet(response.data);
+      setShowDetailsModal(true);
+    } catch (error) {
+      console.error("Failed to fetch latest pet details:", error);
+      toast.error("Could not load pet details.");
+    }
   };
+  
 
   const handleEditClick = (pet) => {
     setIsEditMode(true); // Edit mode
@@ -435,13 +449,14 @@ function Dashboard() {
         />
       )}
 
-      {showDetailsModal && (
-        <PetDetailsModal
-          pet={selectedPet}
-          show={showDetailsModal}
-          handleClose={handleCloseDetailsModal}
-        />
-      )}
+{showDetailsModal && (
+  <PetDetailsModal
+    show={showDetailsModal}
+    handleClose={handleCloseDetailsModal}
+    pet={selectedPet}
+  />
+)}
+
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal

@@ -28,7 +28,7 @@ import PasswordResetPage from "./pages/PasswordReset";
 import SuccessPage from "./pages/SuccessPage";
 import FailurePage from "./pages/FailurePage";
 import CancelPage from "./pages/CancelPage";
-
+import PetRedirect from "./pages/PetRedirect";
 
 function App() {
   return (
@@ -50,6 +50,7 @@ function App() {
           <Route path="/manage-pets" element={<ManagePetsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/pet-profile/:petId" element={<PublicPetProfile />} />
+          <Route path="/p/:petId" element={<PetRedirect />} />
           <Route path="/signup-success" element={<SignupSuccess />} />
           <Route path="/terms-and-conditions" element={<TsAndCs />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -57,6 +58,7 @@ function App() {
           <Route path="/payment-success" element={<SuccessPage />} />
           <Route path="/payment-failure" element={<FailurePage />} />
           <Route path="/payment-cancel" element={<CancelPage />} />
+          
 
           <Route
             path="/admin-dashboard"

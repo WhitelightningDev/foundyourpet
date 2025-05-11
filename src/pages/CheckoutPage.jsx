@@ -3,14 +3,20 @@ import { Container } from "react-bootstrap";
 import axios from "axios";
 import { useState } from "react";
 
+
+
 function CheckoutPage() {
   const { state } = useLocation();
   const {
     package: pkg,
     total = 0,
     membership = false,
+    membershipObjectId, 
     selectedPets = [],
   } = state || {};
+  
+  
+  
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -26,6 +32,7 @@ function CheckoutPage() {
   const [errors, setErrors] = useState({});
   const membershipCost = membership ? 50 : 0;
   const subtotal = total + membershipCost;
+  
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -59,12 +66,12 @@ function CheckoutPage() {
 
   const handleCheckout = async (e) => {
     e.preventDefault();
-
+  
     if (!validateForm()) {
       alert("Please fix the errors in the form.");
       return;
     }
-
+  
     let user = null;
     try {
       const storedUser = localStorage.getItem("user");
@@ -72,22 +79,22 @@ function CheckoutPage() {
     } catch (err) {
       console.error("Failed to parse user from localStorage:", err);
     }
-
+  
     if (!user?._id) {
       alert("User not logged in or missing user ID.");
       return;
     }
-
+  
     try {
       const response = await axios.post("http://localhost:5001/api/payment/createCheckout", {
         userId: user._id,
         petIds: selectedPets.map((pet) => pet._id),
-        amountInCents: Math.round(subtotal * 100), // Total amount in cents
-        membership,
+        amountInCents: Math.round(subtotal * 100),
+        membership, // still a boolean now
+        membershipId: membershipObjectId, // explicitly sending the ID
         packageType: pkg?.type || "Standard",
-        billingDetails: formData, // Pass billing details to the backend for metadata/log
-      });
-
+        billingDetails: formData,
+      });  
       if (response.data?.checkout_url) {
         window.location.href = response.data.checkout_url; // Redirect to Yoco checkout page
       } else {
@@ -98,6 +105,7 @@ function CheckoutPage() {
       alert("There was an error initiating checkout. Please try again.");
     }
   };
+  
 
   return (
     <Container className="my-5">

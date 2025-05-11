@@ -159,171 +159,278 @@ ${y1}
 
   return (
     <div className="container mt-5">
-      <h3 className="mb-3">Admin Dashboard</h3>
-      <p className="text-muted">Total users: {users.length}</p>
+      <h3 className="mb-4 fw-bold border-bottom">Admin Dashboard</h3>
+      <h5 className="badge text-bg-primary rounded-pill mb-4">
+        Total users: <strong>{users.length}</strong>
+      </h5>
 
-      <Row>
-        <Col sm={12} md={6}>
-          <h5 className="mb-3">Admin Users</h5>
-          {adminUsers.map((user) => (
-            <Card key={user._id} className="mb-3 shadow-sm border-0">
-              <Card.Body className="d-flex justify-content-between align-items-center">
+      <Row className="mb-5">
+  <Col sm={12}>
+    <h4 className="mb-4 text-primary text-center border-bottom pb-2 fw-bold">
+      Admin Users
+    </h4>
+    <Row>
+      {adminUsers.map((user) => (
+        <Col md={4} sm={6} xs={12} key={user._id} className="mb-4">
+          <Card className="h-100 shadow-sm border-2 rounded-4">
+            <Card.Body className="d-flex flex-column justify-content-between p-4">
+              <div className="d-flex align-items-center mb-3">
+                <div
+                  className="bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center me-3"
+                  style={{ width: 48, height: 48 }}
+                >
+                  <span className="fw-bold text-primary fs-5">
+                    {user.name.charAt(0)}
+                  </span>
+                </div>
                 <div>
-                  <h6 className="mb-1">
+                  <h6 className="mb-1 fw-semibold">
                     {user.name} {user.surname}
                   </h6>
                   <small className="text-muted">{user.email}</small>
                 </div>
-                <div className="text-end">
-                  <Badge bg="success" pill className="mb-2">Admin</Badge>
-                  <Button
-                    size="sm"
-                    variant="outline-primary"
-                    onClick={() => handleViewDetails(user._id)}
-                  >
-                    View
-                  </Button>
-                </div>
-              </Card.Body>
-            </Card>
-          ))}
+              </div>
+              <div className="d-flex justify-content-between align-items-center">
+                <Badge bg="success" pill className="px-3 py-1 text-uppercase">
+                  Admin
+                </Badge>
+                <Button
+                  size="sm"
+                  variant="outline-primary"
+                  onClick={() => handleViewDetails(user._id)}
+                >
+                  View
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
         </Col>
+      ))}
+    </Row>
+  </Col>
 
-        <Col sm={12} md={6}>
-          <h5 className="mb-3">Regular Users</h5>
-          {regularUsers.map((user) => (
-            <Card key={user._id} className="mb-3 shadow-sm border-2">
-              <Card.Body className="d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 className="mb-1 border-bottom">
-                    {user.name} {user.surname}
-                  </h6>
-                  <small className="text-black">{user.email}</small>
-                </div>
-                <div className="text-end">
-                  <Badge bg="secondary" pill className="mb-2 p-2">User</Badge>
-                  <Button
-                    size="sm"
-                    variant="outline-primary"
-                    onClick={() => handleViewDetails(user._id)}
-                  >
-                    View
-                  </Button>
-                </div>
-              </Card.Body>
-            </Card>
-          ))}
+  <Col sm={12} className="mt-5">
+    <h4 className="mb-4 text-secondary text-center border-bottom pb-2 fw-bold">
+      Regular Users
+    </h4>
+    <Row>
+      {regularUsers.map((user) => (
+        <Col md={4} sm={6} xs={12} key={user._id} className="mb-4">
+          <Card className="h-100 shadow-xl border-2 rounded-4">
+            <Card.Body className="d-flex flex-column justify-content-between p-4">
+              <div>
+                <h6 className="fw-semibold mb-1">
+                  {user.name} {user.surname}
+                </h6>
+                <small className="text-muted">{user.email}</small>
+              </div>
+              <div className="d-flex justify-content-between align-items-center mt-3">
+                <Badge bg="secondary" pill className="px-3 py-1 text-uppercase">
+                  User
+                </Badge>
+                <Button
+                  size="sm"
+                  variant="outline-primary"
+                  onClick={() => handleViewDetails(user._id)}
+                >
+                  View
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
         </Col>
-      </Row>
+      ))}
+    </Row>
+  </Col>
+</Row>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="xl" centered>
+
+      {/* User Details Modal */}
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        size="xl"
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>User Profile</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {selectedUser && (
             <Row>
-              <Col md={4}>
-                <Card className="mb-4 border-2 mt-5 shadow-sm">
+              <Col md={12}>
+                <Card className="mb-4 text-center border-2 mt-4 shadow-sm">
                   <Card.Body>
-                    <h5 className="text-success">
+                    <h3 className="text-primary fw-bold">
                       {selectedUser.name} {selectedUser.surname}
-                    </h5>
-                    <p><strong>Email:</strong> {selectedUser.email}</p>
-                    <p><strong>Contact:</strong> {selectedUser.contact}</p>
-                    <p><strong>Address:</strong> {selectedUser.address?.street}, {selectedUser.address?.city}</p>
+                    </h3>
+                    <p>
+                      <strong>Email:</strong> {selectedUser.email}
+                    </p>
+                    <p>
+                      <strong>Contact:</strong> {selectedUser.contact}
+                    </p>
+                    <p>
+                      <strong>Address:</strong> {selectedUser.address?.street},{" "}
+                      {selectedUser.address?.city}
+                    </p>
                   </Card.Body>
                 </Card>
               </Col>
-              <Col md={8}>
-  <h4 className="text-primary border-bottom mb-3 text-center">Pets</h4>
-  {pets.length === 0 ? (
-    <p className="text-muted">No pets found.</p>
-  ) : (
-    pets.map((pet) => (
-      <Card key={pet._id} className="mb-4 border-2 shadow-sm">
-        <Card.Body>
-          <Row>
-            {/* Pet Image */}
-            <Col md={4} className="text-center">
-              {pet.photoUrl ? (
-                <img
-                src={pet.photoUrl.startsWith("http") ? pet.photoUrl : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
-                alt={`${pet.name}'s profile`}
-                style={{
-                  width: "50px",
-                  height: "50px",
-                  objectFit: "cover",
-                  borderRadius: "50%",
-                }}
-              />
-              
-              ) : (
-                <p className="text-muted">No image available</p>
-              )}
-            </Col>
 
-            {/* Pet Details */}
-            <Col md={8}>
-              <Row>
-                <Col md={6}>
-                  <h6 className="text-primary">Pet Details</h6>
-                  <p><strong>Name:</strong> {pet.name}</p>
-                  <p><strong>Species:</strong> {pet.species}</p>
-                  <p><strong>Breed:</strong> {pet.breed}</p>
-                  <p><strong>Age:</strong> {pet.age} years</p>
-                  <p><strong>Gender:</strong> {pet.gender}</p>
-                </Col>
-                <Col md={6}>
-                  <h6 className="text-primary">Health Info</h6>
-                  <p><strong>Microchip:</strong> {pet.microchipNumber || "N/A"}</p>
-                  <p><strong>Spayed/Neutered:</strong> {pet.spayedNeutered ? "Yes" : "No"}</p>
-                </Col>
-              </Row>
+              <Col md={12}>
+                <h4 className="text-primary border-bottom pb-3 mb-4 text-center fw-bold">
+                  Registered Pets
+                </h4>
 
-              <Row>
-                <Col md={6}>
-                  <h6 className="text-primary">Tag Info</h6>
-                  <p><strong>Type:</strong> {pet.tagType || "N/A"}</p>
-                </Col>
-                <Col md={6}>
-                  <h6 className="text-primary">Vet & Insurance</h6>
-                  <p><strong>Vet:</strong> {pet.vetInfo || "N/A"}</p>
-                  <p><strong>Insurance:</strong> {pet.insuranceInfo || "N/A"}</p>
-                </Col>
-              </Row>
+                {pets.length === 0 ? (
+                  <div className="text-center text-muted fs-5">
+                    No pets found.
+                  </div>
+                ) : (
+                  <Row>
+                    {pets.map((pet) => (
+                      <Col md={6} key={pet._id}>
+                        <Card className="mb-4 shadow-sm border-2 rounded-4">
+                          <Card.Header className="bg-secondary border-bottom-0 rounded-top-4 py-3 px-4 d-flex align-items-center">
+                            <div className="me-3">
+                              {pet.photoUrl ? (
+                                <img
+                                  src={
+                                    pet.photoUrl.startsWith("http")
+                                      ? pet.photoUrl
+                                      : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`
+                                  }
+                                  alt={`${pet.name}'s profile`}
+                                  style={{
+                                    width: "70px",
+                                    height: "70px",
+                                    objectFit: "cover",
+                                    borderRadius: "50%",
+                                    border: "2px solid #dee2e6",
+                                  }}
+                                />
+                              ) : (
+                                <div
+                                  className="text-muted text-center"
+                                  style={{ width: 70 }}
+                                >
+                                  No Image
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <h5 className="mb-1 text-warning fw-bold">
+                                {pet.name}
+                              </h5>
+                              <p className="mb-0 text-black small">
+                                {pet.species} • {pet.breed}
+                              </p>
+                            </div>
+                          </Card.Header>
 
-              <div className="mt-3">
-                <Button variant="outline-success" onClick={() => handleShowQRModal(pet)}>
-                  <FaQrcode className="me-2" />
-                  View PDF
-                </Button>
+                          <Card.Body className="px-4 pt-3">
+                            <Row className="mb-3">
+                              <Col md={6}>
+                                <h6 className="text-secondary fw-bold">
+                                  Basic Info
+                                </h6>
+                                <p>
+                                  <strong>Age:</strong> {pet.age} years
+                                </p>
+                                <p>
+                                  <strong>Gender:</strong> {pet.gender}
+                                </p>
+                      
+                                <p>
+                                  <strong>Spayed/Neutered:</strong>{" "}
+                                  {pet.spayedNeutered ? "Yes" : "No"}
+                                </p>
+                              </Col>
+                              <Col md={6}>
+                                <h6 className="text-secondary fw-bold">
+                                  Medical & Tag
+                                </h6>
+                                <p>
+                                  <strong>Tag Type:</strong>{" "}
+                                  {pet.tagType || "N/A"}
+                                </p>
+                               
+                              </Col>
+                            </Row>
 
-                <QRCodeCanvas
-                  id={`qr-${pet._id}`}
-                  value={`https://foundyourpet.vercel.app/pet-profile/${pet._id}`}
-                  size={200}
-                  level="H"
-                  includeMargin={true}
-                  className="d-none"
-                />
-              </div>
-            </Col>
-                        </Row>
-                      </Card.Body>
-                    </Card>
-                  ))
-                  
+                            <hr />
+
+                            <Row className="mb-3">
+                              <Col>
+                                <h6 className="text-secondary fw-bold">
+                                  Membership
+                                </h6>
+                                <p>
+                                  <strong>Status:</strong>{" "}
+                                  <Badge
+                                    bg={
+                                      pet.hasMembership
+                                        ? "success"
+                                        : "secondary"
+                                    }
+                                  >
+                                    {pet.hasMembership ? "Active" : "Inactive"}
+                                  </Badge>
+                                </p>
+                                {pet.hasMembership && (
+                                  <>
+                                    <p>
+                                      <strong>Type:</strong>{" "}
+                                      {pet.membership || "N/A"}
+                                    </p>
+                                    <p>
+                                      <strong>Start Date:</strong>{" "}
+                                      {new Date(
+                                        pet.membershipStartDate
+                                      ).toLocaleDateString()}
+                                    </p>
+                                  </>
+                                )}
+                              </Col>
+                            </Row>
+
+                            <div className="text-end">
+                              <Button
+                                variant="outline-success"
+                                onClick={() => handleShowQRModal(pet)}
+                              >
+                                <FaQrcode className="me-2" />
+                                View PDF
+                              </Button>
+
+                              <QRCodeCanvas
+                                id={`qr-${pet._id}`}
+                                value={`https://foundyourpet.vercel.app/p/${pet._id}`}
+                                size={128}
+                                level="L"
+                                includeMargin
+                                className="d-none"
+                              />
+                            </div>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
                 )}
               </Col>
             </Row>
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>Close</Button>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
         </Modal.Footer>
       </Modal>
 
+      {/* QR Code Modal */}
       <Modal show={showQRModal} onHide={() => setShowQRModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>QR Code Preview</Modal.Title>
@@ -335,14 +442,20 @@ ${y1}
                 value={`https://foundyourpet.vercel.app/pet-profile/${selectedPet._id}`}
                 size={200}
                 level="H"
-                includeMargin={true}
+                includeMargin
               />
               <div className="mt-4 d-flex flex-column gap-2">
-                <Button variant="outline-success" onClick={() => handleDownloadQRCode(selectedPet._id)}>
+                <Button
+                  variant="outline-success"
+                  onClick={() => handleDownloadQRCode(selectedPet._id)}
+                >
                   <FaQrcode className="me-2" />
                   Download QR Code (PNG)
                 </Button>
-                <Button variant="outline-danger" onClick={() => handleDownloadQRCodeAsPDF(selectedPet._id)}>
+                <Button
+                  variant="outline-danger"
+                  onClick={() => handleDownloadQRCodeAsPDF(selectedPet._id)}
+                >
                   <FaFilePdf className="me-2" />
                   Download QR as PDF
                 </Button>

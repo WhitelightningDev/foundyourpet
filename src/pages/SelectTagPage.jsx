@@ -89,24 +89,30 @@ function SelectTagPage() {
       setShowToast(true);
       return;
     }
-
+  
     const base = selectedPackage?.price || 0;
     const petTotal = selectedPets.length * base;
     const finalPrice = petTotal;
-
+  
     const selectedPetDetails = pets
       .filter((pet) => selectedPets.includes(pet._id))
       .map((pet) => ({ ...pet }));
-
+  
+    // Ensure you have the membershipId here
+    const membershipId = selectedPackage?.membershipId; // replace with actual logic to get membership ID
+  
     navigate("/checkout", {
       state: {
         package: selectedPackage.name,
         total: finalPrice,
         membership: true,
+        membershipObjectId: membershipId, 
         selectedPets: selectedPetDetails,
       },
     });
+      
   };
+  
 
   if (loading || !selectedPackage) {
     return (

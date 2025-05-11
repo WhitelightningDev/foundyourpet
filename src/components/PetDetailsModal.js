@@ -19,6 +19,8 @@ const PetDetailsModal = ({ show, handleClose, pet }) => {
     handleClose();
   };
 
+  console.log(PetDetailsModal)
+
   return (
     <Modal show={show} onHide={handleModalClose} size="lg" centered scrollable>
       <Modal.Header closeButton>
@@ -53,6 +55,7 @@ const PetDetailsModal = ({ show, handleClose, pet }) => {
                   {renderField("Gender", pet.gender)}
                   {renderField("Age", pet.age)}
                   {renderField("Color", pet.color)}
+                  {renderField("Membership Status", pet.hasMembership ? "Active ✅" : "Not Active ❌")}
                 </Col>
               </Row>
             </Card.Body>
