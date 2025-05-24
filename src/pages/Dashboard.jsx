@@ -24,13 +24,30 @@ import DashboardLoadingSkeleton from "../loadingskeletons/dashboardloadingskelet
 import "react-loading-skeleton/dist/skeleton.css";
 
 function Dashboard() {
-  const [user, setUser] = useState({ name: "", surname: "" });
+  const [user, setUser] = useState({
+  name: "",
+  email: "",
+  isAdmin: false,
+  membershipActive:"",
+  contact: "",
+  address: {
+    street: "",
+    city: "",
+    province: "",
+    postalCode: "",
+    country: "",
+  },
+});
+
+  const [membershipActive, setMembershipActive] = useState(false);
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
   const [currentPet, setCurrentPet] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [userLoading, setUserLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     species: "",
@@ -119,23 +136,21 @@ function Dashboard() {
   };
 
   const handleViewDetails = async (pet) => {
+    setDetailsLoading(true);
     try {
       const response = await axios.get(
         `https://foundyourpet-backend.onrender.com/api/pets/${pet._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setSelectedPet(response.data);
       setShowDetailsModal(true);
     } catch (error) {
       console.error("Failed to fetch latest pet details:", error);
       toast.error("Could not load pet details.");
+    } finally {
+      setDetailsLoading(false);
     }
   };
-  
 
   const handleEditClick = (pet) => {
     setIsEditMode(true); // Edit mode
@@ -191,30 +206,48 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get(
-          "https://foundyourpet-backend.onrender.com/api/users/me",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        console.log("Fetched user:", response.data); // ✅ Debugging log
-        setUser({
-          name: response.data.name,
-          surname: response.data.surname,
-        });
-      } catch (error) {
-        console.error("Failed to fetch user info:", error);
-      }
-    };
-  
-    if (token) {
-      fetchUser();
-      fetchPets();
+  const fetchUser = async () => {
+    setUserLoading(true);
+    try {
+      const response = await axios.get(
+        "https://foundyourpet-backend.onrender.com/api/users/me",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      console.log("Fetched user:", response.data.user); // Confirm user object
+
+      const userData = response.data.user;
+
+      setUser({
+        name: userData.name?.trim() || "",
+        email: userData.email || "",
+        isAdmin: userData.isAdmin || false,
+        membershipActive: userData.membershipActive || false,
+        contact: userData.contact || "",
+        address: userData.address || {
+          street: "",
+          city: "",
+          province: "",
+          postalCode: "",
+          country: "",
+        },
+      });
+    } catch (error) {
+      console.error("Failed to fetch user info:", error);
+      toast.error("Failed to load user information.");
+    } finally {
+      setUserLoading(false);
     }
-  }, [token]);
-  
+  };
+
+  if (token) {
+    fetchUser();
+    fetchPets();
+  }
+}, [token]);
+
 
   const handleOpenModal = () => {
     setIsEditMode(false); // Add mode
@@ -231,13 +264,32 @@ function Dashboard() {
   return (
     <Container className="my-5">
       <div className="d-flex justify-content-center align-items-center gap-3 mb-4">
-        <h3 className="text-dark fw-bold m-0">
-          Welcome back
-        </h3>
+        {userLoading ? (
+          <Spinner animation="border" size="sm" />
+        ) : (
+          <h3 className="text-dark fw-bold m-0">Welcome back {user.name}</h3>
+        )}
 
         <Button variant="outline-success" size="sm" onClick={handleShare}>
           Share on WhatsApp
         </Button>
+      </div>
+<div>
+  User Has a membership {user.membershipActive ? "✅ Active" : "❌ Not Active"}
+</div>
+
+      <div className="d-flex justify-content-center mb-4">
+        {!userLoading &&
+          (user.membershipActive ? (
+            <p className="text-success fw-semibold">
+              You have an active membership since{" "}
+              {new Date(user.membershipStartDate).toLocaleDateString()}.
+            </p>
+          ) : (
+            <p className="text-danger fw-semibold">
+              You do not have an active membership.
+            </p>
+          ))}
       </div>
 
       <div className="d-flex justify-content-center mb-4">
@@ -449,14 +501,13 @@ function Dashboard() {
         />
       )}
 
-{showDetailsModal && (
-  <PetDetailsModal
-    show={showDetailsModal}
-    handleClose={handleCloseDetailsModal}
-    pet={selectedPet}
-  />
-)}
-
+      {showDetailsModal && (
+        <PetDetailsModal
+          show={showDetailsModal}
+          handleClose={handleCloseDetailsModal}
+          pet={selectedPet}
+        />
+      )}
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal

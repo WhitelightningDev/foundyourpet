@@ -4,7 +4,7 @@ import { Modal, Button, Row, Col, Container, Image, Card } from "react-bootstrap
 // Helper function to render fields with labels and values
 const renderField = (label, value) => (
   <div className="d-flex mb-2">
-    <div className="me-2 fw-semibold" style={{ minWidth: "120px" }}>
+    <div className="me-2 fw-semibold" style={{ minWidth: "140px" }}>
       {label}:
     </div>
     <div>{value || "N/A"}</div>
@@ -14,12 +14,7 @@ const renderField = (label, value) => (
 const PetDetailsModal = ({ show, handleClose, pet }) => {
   if (!pet) return null;
 
-  const handleModalClose = () => {
-    console.log("Modal close button clicked");
-    handleClose();
-  };
-
-  console.log(PetDetailsModal)
+  const handleModalClose = () => handleClose();
 
   return (
     <Modal show={show} onHide={handleModalClose} size="lg" centered scrollable>
@@ -35,7 +30,11 @@ const PetDetailsModal = ({ show, handleClose, pet }) => {
                 <Col xs={12}>
                   {pet.photoUrl ? (
                     <Image
-                    src={pet.photoUrl.startsWith("http") ? pet.photoUrl : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`}
+                      src={
+                        pet.photoUrl.startsWith("http")
+                          ? pet.photoUrl
+                          : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`
+                      }
                       alt={`${pet.name}'s image`}
                       roundedCircle
                       style={{ width: "200px", height: "200px", objectFit: "cover" }}
@@ -55,7 +54,10 @@ const PetDetailsModal = ({ show, handleClose, pet }) => {
                   {renderField("Gender", pet.gender)}
                   {renderField("Age", pet.age)}
                   {renderField("Color", pet.color)}
-                  {renderField("Membership Status", pet.hasMembership ? "Active ✅" : "Not Active ❌")}
+                  {renderField(
+                    "Membership Status",
+                    pet.hasMembership ? "Active ✅" : "Not Active ❌"
+                  )}
                 </Col>
               </Row>
             </Card.Body>

@@ -23,7 +23,7 @@ function SelectTagPage() {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [, setAddons] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState({ name: "", surname: "" });
+  const [user, setUser] = useState({ _id: "", name: "", surname: "" });
   const [pets, setPets] = useState([]);
   const [showToast, setShowToast] = useState(false);
   const [selectedPets, setSelectedPets] = useState([]);
@@ -64,6 +64,7 @@ function SelectTagPage() {
           }
         );
         setUser({
+          _id: response.data._id,
           name: response.data.name,
           surname: response.data.surname,
         });
@@ -89,30 +90,31 @@ function SelectTagPage() {
       setShowToast(true);
       return;
     }
-  
+
     const base = selectedPackage?.price || 0;
     const petTotal = selectedPets.length * base;
     const finalPrice = petTotal;
-  
+
     const selectedPetDetails = pets
       .filter((pet) => selectedPets.includes(pet._id))
-      .map((pet) => ({ ...pet }));
-  
-    // Ensure you have the membershipId here
-    const membershipId = selectedPackage?.membershipId; // replace with actual logic to get membership ID
-  
+      .map((pet) => ({
+        ...pet,
+        userId: user._id, // Include user ID to be used in checkout
+      }));
+
+    const membershipId = selectedPackage?.membershipId;
+
     navigate("/checkout", {
       state: {
         package: selectedPackage.name,
         total: finalPrice,
         membership: true,
-        membershipObjectId: membershipId, 
+        membershipObjectId: membershipId,
         selectedPets: selectedPetDetails,
+        userId: user._id,
       },
     });
-      
   };
-  
 
   if (loading || !selectedPackage) {
     return (
@@ -128,14 +130,8 @@ function SelectTagPage() {
 
       {/* Info Card */}
       <div className="infocard mb-4">
-      
-
         <div className="icon-container">
-          <svg
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="icon"
-          >
+          <svg viewBox="0 0 24 24" fill="currentColor" className="icon">
             <path d="M13 7.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm-3 3.75a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 .75.75v4.25h.75a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5h.75V12h-.75a.75.75 0 0 1-.75-.75Z"></path>
             <path d="M12 1c6.075 0 11 4.925 11 11s-4.925 11-11 11S1 18.075 1 12 5.925 1 12 1ZM2.5 12a9.5 9.5 0 0 0 19 0 9.5 9.5 0 0 0-19 0Z"></path>
           </svg>
