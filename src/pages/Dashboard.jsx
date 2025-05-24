@@ -261,265 +261,263 @@ function Dashboard() {
   const dogs = pets.filter((pet) => pet.species?.toLowerCase() === "dog");
   const cats = pets.filter((pet) => pet.species?.toLowerCase() === "cat");
 
-  return (
-    <Container className="my-5">
-      <div className="d-flex justify-content-center align-items-center gap-3 mb-4">
-        {userLoading ? (
-          <Spinner animation="border" size="sm" />
+ return (
+  <Container className="my-5">
+    <div className="d-flex justify-content-center align-items-center gap-3 mb-4">
+      {userLoading ? (
+        <Spinner animation="border" size="sm" />
+      ) : (
+        <h3 className="text-dark fw-bold m-0">Welcome back {user.name}</h3>
+      )}
+
+      <Button variant="outline-success" size="sm" onClick={handleShare}>
+        Share on WhatsApp
+      </Button>
+    </div>
+
+    <div>User Has a membership {user.membershipActive}</div>
+
+    <div className="d-flex justify-content-center mb-4">
+      {!userLoading &&
+        (user.membershipActive ? (
+          <p className="text-success fw-semibold">
+            You have an active membership since{" "}
+            {new Date(user.membershipStartDate).toLocaleDateString()}.
+          </p>
         ) : (
-          <h3 className="text-dark fw-bold m-0">Welcome back {user.name}</h3>
-        )}
+          <p className="text-danger fw-semibold">You do not have an active membership.</p>
+        ))}
+    </div>
 
-        <Button variant="outline-success" size="sm" onClick={handleShare}>
-          Share on WhatsApp
-        </Button>
-      </div>
-<div>
-  User Has a membership {user.membershipActive ? "✅ Active" : "❌ Not Active"}
-</div>
+    <div className="d-flex justify-content-center mb-4">
+      <Button variant="success" onClick={handleOpenModal}>
+        <FaPlus className="me-2" /> Add New Pet
+      </Button>
+    </div>
 
-      <div className="d-flex justify-content-center mb-4">
-        {!userLoading &&
-          (user.membershipActive ? (
-            <p className="text-success fw-semibold">
-              You have an active membership since{" "}
-              {new Date(user.membershipStartDate).toLocaleDateString()}.
-            </p>
-          ) : (
-            <p className="text-danger fw-semibold">
-              You do not have an active membership.
-            </p>
-          ))}
-      </div>
-
-      <div className="d-flex justify-content-center mb-4">
-        <Button variant="success" onClick={handleOpenModal}>
-          <FaPlus className="me-2" /> Add New Pet
-        </Button>
-      </div>
-
-      {/* Dogs Section */}
-      <h4 className="mb-3 text-primary">Your Dogs</h4>
-      {loading ? (
-        <DashboardLoadingSkeleton />
-      ) : dogs.length > 0 ? (
-        <ListGroup className="mb-5">
-          {dogs.map((pet) => (
-            <ListGroup.Item
-              key={pet._id}
-              className="mb-3 shadow-sm rounded p-3 bg-light"
-            >
-              <div className="d-flex justify-content-between align-items-center gap-3">
-                {/* Pet Image */}
-                {pet.photoUrl ? (
-                  <img
-                    src={
-                      pet.photoUrl.startsWith("http")
-                        ? pet.photoUrl
-                        : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`
-                    }
-                    alt={`${pet.name}'s profile`}
-                    style={{
-                      width: "50px",
-                      height: "50px",
-                      objectFit: "cover",
-                      borderRadius: "50%",
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: "50px",
-                      height: "50px",
-                      borderRadius: "50%",
-                      backgroundColor: "#ccc",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "0.7rem",
-                      color: "#666",
-                    }}
-                  >
-                    No Photo
-                  </div>
-                )}
-
-                {/* Pet Info */}
-                <div className="flex-grow-1">
-                  <h5 className="mb-1">{pet.name}</h5>
-                  <p className="mb-0 text-muted">{pet.breed}</p>
+    {/* Dogs Section */}
+    <h4 className="mb-3 text-primary">Your Dogs</h4>
+    {loading ? (
+      <DashboardLoadingSkeleton />
+    ) : dogs.length > 0 ? (
+      <ListGroup className="mb-5">
+        {dogs.map((pet) => (
+          <ListGroup.Item
+            key={pet._id}
+            className="mb-3 shadow-sm rounded p-3 bg-light"
+          >
+            <div className="d-flex justify-content-between align-items-center gap-3">
+              {/* Pet Image */}
+              {pet.photoUrl ? (
+                <img
+                  src={
+                    pet.photoUrl.startsWith("http")
+                      ? pet.photoUrl
+                      : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`
+                  }
+                  alt={`${pet.name}'s profile`}
+                  style={{
+                    width: "50px",
+                    height: "50px",
+                    objectFit: "cover",
+                    borderRadius: "50%",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "50px",
+                    height: "50px",
+                    borderRadius: "50%",
+                    backgroundColor: "#ccc",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.7rem",
+                    color: "#666",
+                  }}
+                >
+                  No Photo
                 </div>
+              )}
 
-                {/* Buttons */}
-                <div className="pet-button-group d-flex flex-wrap gap-1">
-                  <Button
-                    variant="info"
-                    size="sm"
-                    onClick={() => handleViewDetails(pet)}
-                  >
-                    <FaEye className="me-1" /> View
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => handleEditClick(pet)}
-                  >
-                    <FaEdit className="me-1" /> Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDeleteClick(pet._id)}
-                  >
-                    <FaTrash className="me-1" /> Delete
-                  </Button>
-                  <Button
-                    variant="success"
-                    size="sm"
-                    onClick={() => navigate("/select-tag/standard")}
-                  >
-                    <FaCartPlus className="me-1" /> Order Tag
-                  </Button>
-                </div>
+              {/* Pet Info */}
+              <div className="flex-grow-1">
+                <h5 className="mb-1">{pet.name}</h5>
+                <p className="mb-0 text-muted">{pet.breed}</p>
               </div>
-            </ListGroup.Item>
-          ))}
-        </ListGroup>
-      ) : (
-        <p className="text-muted">You don't have any dogs.</p>
-      )}
 
-      {/* Cats Section */}
-      <h4 className="mb-3 text-primary">Your Cats</h4>
-      {loading ? (
-        <DashboardLoadingSkeleton />
-      ) : cats.length > 0 ? (
-        <ListGroup className="mb-5">
-          {cats.map((pet) => (
-            <ListGroup.Item
-              key={pet._id}
-              className="mb-3 shadow-sm rounded p-3 bg-light"
-            >
-              <div className="d-flex justify-content-between align-items-center gap-3">
-                {/* Pet Image */}
-                {pet.photoUrl ? (
-                  <img
-                    src={
-                      pet.photoUrl.startsWith("http")
-                        ? pet.photoUrl
-                        : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`
-                    }
-                    alt={`${pet.name}'s profile`}
-                    style={{
-                      width: "50px",
-                      height: "50px",
-                      objectFit: "cover",
-                      borderRadius: "50%",
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: "50px",
-                      height: "50px",
-                      borderRadius: "50%",
-                      backgroundColor: "#ccc",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "0.7rem",
-                      color: "#666",
-                    }}
-                  >
-                    No Photo
-                  </div>
-                )}
-
-                {/* Pet Info */}
-                <div className="flex-grow-1">
-                  <h5 className="mb-1">{pet.name}</h5>
-                  <p className="mb-0 text-muted">{pet.breed}</p>
-                </div>
-
-                {/* Buttons */}
-                <div className="pet-button-group d-flex flex-wrap gap-1">
-                  <Button
-                    variant="info"
-                    size="sm"
-                    onClick={() => handleViewDetails(pet)}
-                  >
-                    <FaEye className="me-1" /> View
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => handleEditClick(pet)}
-                  >
-                    <FaEdit className="me-1" /> Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDeleteClick(pet._id)}
-                  >
-                    <FaTrash className="me-1" /> Delete
-                  </Button>
-                  <Button
-                    variant="success"
-                    size="sm"
-                    onClick={() => navigate("/select-tag/standard")}
-                  >
-                    <FaCartPlus className="me-1" /> Order Tag
-                  </Button>
-                </div>
+              {/* Buttons */}
+              <div className="pet-button-group d-flex flex-wrap gap-1">
+                <Button
+                  variant="info"
+                  size="sm"
+                  onClick={() => handleViewDetails(pet)}
+                >
+                  <FaEye className="me-1" /> View
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => handleEditClick(pet)}
+                >
+                  <FaEdit className="me-1" /> Edit
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => handleDeleteClick(pet._id)}
+                >
+                  <FaTrash className="me-1" /> Delete
+                </Button>
+                <Button
+                  variant="success"
+                  size="sm"
+                  onClick={() => navigate("/select-tag/standard")}
+                >
+                  <FaCartPlus className="me-1" /> Order Tag
+                </Button>
               </div>
-            </ListGroup.Item>
-          ))}
-        </ListGroup>
-      ) : (
-        <p className="text-muted">You don't have any cats.</p>
-      )}
+            </div>
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+    ) : (
+      <p className="text-muted">You don't have any dogs.</p>
+    )}
 
-      {/* Modals */}
-      {!isEditMode && (
-        <AddPetModal
-          showModal={showModal}
-          closeModal={handleCloseModal}
-          refreshPets={refreshPets} // ✅ add this
-        />
-      )}
+    {/* Cats Section */}
+    <h4 className="mb-3 text-primary">Your Cats</h4>
+    {loading ? (
+      <DashboardLoadingSkeleton />
+    ) : cats.length > 0 ? (
+      <ListGroup className="mb-5">
+        {cats.map((pet) => (
+          <ListGroup.Item
+            key={pet._id}
+            className="mb-3 shadow-sm rounded p-3 bg-light"
+          >
+            <div className="d-flex justify-content-between align-items-center gap-3">
+              {/* Pet Image */}
+              {pet.photoUrl ? (
+                <img
+                  src={
+                    pet.photoUrl.startsWith("http")
+                      ? pet.photoUrl
+                      : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`
+                  }
+                  alt={`${pet.name}'s profile`}
+                  style={{
+                    width: "50px",
+                    height: "50px",
+                    objectFit: "cover",
+                    borderRadius: "50%",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "50px",
+                    height: "50px",
+                    borderRadius: "50%",
+                    backgroundColor: "#ccc",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "0.7rem",
+                    color: "#666",
+                  }}
+                >
+                  No Photo
+                </div>
+              )}
 
-      {/* Edit Pet Modal */}
-      {isEditMode && (
-        <EditPetModal
-          show={showModal}
-          formData={formData}
-          handleChange={handleChange}
-          handleClose={handleCloseModal}
-          handleSave={handleSaveChanges}
-          refreshPets={refreshPets} // Pass the refresh function
-        />
-      )}
+              {/* Pet Info */}
+              <div className="flex-grow-1">
+                <h5 className="mb-1">{pet.name}</h5>
+                <p className="mb-0 text-muted">{pet.breed}</p>
+              </div>
 
-      {showDetailsModal && (
-        <PetDetailsModal
-          show={showDetailsModal}
-          handleClose={handleCloseDetailsModal}
-          pet={selectedPet}
-        />
-      )}
+              {/* Buttons */}
+              <div className="pet-button-group d-flex flex-wrap gap-1">
+                <Button
+                  variant="info"
+                  size="sm"
+                  onClick={() => handleViewDetails(pet)}
+                >
+                  <FaEye className="me-1" /> View
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => handleEditClick(pet)}
+                >
+                  <FaEdit className="me-1" /> Edit
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => handleDeleteClick(pet._id)}
+                >
+                  <FaTrash className="me-1" /> Delete
+                </Button>
+                <Button
+                  variant="success"
+                  size="sm"
+                  onClick={() => navigate("/select-tag/standard")}
+                >
+                  <FaCartPlus className="me-1" /> Order Tag
+                </Button>
+              </div>
+            </div>
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+    ) : (
+      <p className="text-muted">You don't have any cats.</p>
+    )}
 
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmationModal
-        show={showDeleteModal}
-        handleClose={() => setShowDeleteModal(false)}
-        handleConfirm={confirmDeletePet}
-        isDeleting={isDeleting}
-        deletionSuccess={deletionSuccess}
+    {/* Modals */}
+    {!isEditMode && (
+      <AddPetModal
+        showModal={showModal}
+        closeModal={handleCloseModal}
+        refreshPets={refreshPets} // ✅ add this
+      />
+    )}
+
+    {/* Edit Pet Modal */}
+    {isEditMode && (
+      <EditPetModal
+        show={showModal}
+        formData={formData}
+        handleChange={handleChange}
+        handleClose={handleCloseModal}
+        handleSave={handleSaveChanges}
         refreshPets={refreshPets} // Pass the refresh function
       />
-    </Container>
-  );
+    )}
+
+    {showDetailsModal && (
+      <PetDetailsModal
+        show={showDetailsModal}
+        handleClose={handleCloseDetailsModal}
+        pet={selectedPet}
+      />
+    )}
+
+    {/* Delete Confirmation Modal */}
+    <DeleteConfirmationModal
+      show={showDeleteModal}
+      handleClose={() => setShowDeleteModal(false)}
+      handleConfirm={confirmDeletePet}
+      isDeleting={isDeleting}
+      deletionSuccess={deletionSuccess}
+      refreshPets={refreshPets} // Pass the refresh function
+    />
+  </Container>
+);
+
 }
 
 export default Dashboard;
