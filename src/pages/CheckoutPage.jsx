@@ -185,7 +185,7 @@ function CheckoutPage() {
                   </h6>
                   <small style={{ color: "#6b7280", fontStyle: "italic" }}>
                     {pet.breed || "Unknown Breed"}, {pet.species},{" "}
-                    {pet.size || "Unknown Size"}
+                 
                   </small>
                 </div>
                 <span style={{ color: "#374151", fontWeight: 600 }}>
