@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
-import { Container } from "react-bootstrap";
-import axios from "axios";
 import { useState } from "react";
+import axios from "axios";
+import BillingForm from "../components/BillingForm";
 
 function CheckoutPage() {
   const { state } = useLocation();
@@ -49,7 +49,6 @@ function CheckoutPage() {
       newErrors.email = "Please enter a valid email address";
     }
 
-    // South African postal code validation (4 digits)
     if (formData.zip && !/^\d{4}$/.test(formData.zip)) {
       newErrors.zip = "Please enter a valid postal code";
     }
@@ -102,172 +101,157 @@ function CheckoutPage() {
   };
 
   return (
-    <Container className="my-5">
-      <div className="row g-5">
+    <main
+      style={{
+        maxWidth: 960,
+        margin: "3rem auto",
+        padding: "0 2rem",
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        color: "#222",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: "3rem",
+          flexWrap: "nowrap", // prevent wrapping
+          justifyContent: "center",
+          alignItems: "flex-start",
+        }}
+      >
         {/* Order Summary */}
-        <div className="col-md-5 col-lg-4 order-md-last">
-          <h4 className="d-flex justify-content-between align-items-center mb-3">
-            <span className="text-primary">Your cart</span>
-            <span className="badge bg-primary rounded-pill">{selectedPets.length}</span>
+        <section
+          style={{
+            flex: "0 0 320px", // fixed width for cart on left
+            position: "sticky",
+            top: "2rem",
+            borderRadius: 12,
+            padding: "2rem",
+            backgroundColor: "#f9fafb",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+            height: "fit-content",
+            border: "1px solid #e2e8f0",
+          }}
+        >
+          <h4
+            style={{
+              fontWeight: 700,
+              fontSize: "1.3rem",
+              marginBottom: "1.5rem",
+              color: "#2563eb",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            Your Cart
+            <span
+              style={{
+                backgroundColor: "#2563eb",
+                color: "#fff",
+                borderRadius: "9999px",
+                padding: "0.3rem 0.85rem",
+                fontWeight: 700,
+                fontSize: "0.9rem",
+                boxShadow: "0 1px 4px rgba(37,99,235,0.5)",
+              }}
+            >
+              {selectedPets.length}
+            </span>
           </h4>
-          <ul className="list-group mb-3">
+          <ul
+            style={{
+              listStyle: "none",
+              padding: 0,
+              margin: 0,
+              borderTop: "1px solid #e5e7eb",
+              borderBottom: "1px solid #e5e7eb",
+            }}
+          >
             {selectedPets.map((pet, index) => (
-              <li key={index} className="list-group-item d-flex justify-content-between lh-sm">
+              <li
+                key={index}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "1rem 0",
+                  borderBottom:
+                    index !== selectedPets.length - 1 ? "1px solid #e5e7eb" : "none",
+                }}
+              >
                 <div>
-                  <h6 className="my-0">{pet.name}</h6>
-                  <small className="text-muted">
-                    {pet.breed || "Unknown Breed"}, {pet.species}, {pet.size || "Unknown Size"}
+                  <h6 style={{ margin: 0, fontWeight: 600, fontSize: "1rem" }}>
+                    {pet.name}
+                  </h6>
+                  <small style={{ color: "#6b7280", fontStyle: "italic" }}>
+                    {pet.breed || "Unknown Breed"}, {pet.species},{" "}
+                    {pet.size || "Unknown Size"}
                   </small>
                 </div>
-                <span className="text-muted">R{(total / selectedPets.length).toFixed(2)}</span>
+                <span style={{ color: "#374151", fontWeight: 600 }}>
+                  R{(total / selectedPets.length).toFixed(2)}
+                </span>
               </li>
             ))}
 
             {membership && (
-              <li className="list-group-item d-flex justify-content-between bg-body-tertiary">
-                <div className="text-success">
-                  <h6 className="my-0">Membership</h6>
-                  <small>Support package</small>
+              <li
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "1rem 0",
+                  backgroundColor: "#e0f2fe",
+                  borderBottom: "1px solid #e5e7eb",
+                  borderRadius: "0 0 12px 12px",
+                }}
+              >
+                <div style={{ color: "#0284c7" }}>
+                  <h6 style={{ margin: 0, fontWeight: 600 }}>Membership</h6>
+                  <small style={{ fontStyle: "italic" }}>Support package</small>
                 </div>
-                <span className="text-success">+R{MEMBERSHIP_COST}</span>
+                <span style={{ color: "#0284c7", fontWeight: 700 }}>
+                  +R{MEMBERSHIP_COST}
+                </span>
               </li>
             )}
 
-            <li className="list-group-item d-flex justify-content-between">
-              <span><strong>Subtotal</strong></span>
-              <strong>R{subtotal.toFixed(2)}</strong>
+            <li
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "1.25rem 0 0 0",
+                fontWeight: 700,
+                fontSize: "1.15rem",
+                color: "#111827",
+              }}
+            >
+              <span>Subtotal</span>
+              <span>R{subtotal.toFixed(2)}</span>
             </li>
           </ul>
-        </div>
+        </section>
 
         {/* Billing Form */}
-        <div className="col-md-7 col-lg-8">
-          <h4 className="mb-3">Billing address</h4>
-          <form className="needs-validation" noValidate onSubmit={handleCheckout}>
-            <div className="row g-3">
-              <div className="col-sm-6">
-                <label htmlFor="firstName" className="form-label">First name</label>
-                <input
-                  type="text"
-                  className={`form-control ${errors.firstName ? "is-invalid" : ""}`}
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  required
-                />
-                {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
-              </div>
-
-              <div className="col-sm-6">
-                <label htmlFor="lastName" className="form-label">Last name</label>
-                <input
-                  type="text"
-                  className={`form-control ${errors.lastName ? "is-invalid" : ""}`}
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
-                />
-                {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
-              </div>
-
-              <div className="col-12">
-                <label htmlFor="email" className="form-label">
-                  Email <span className="text-body-secondary">(Optional)</span>
-                </label>
-                <input
-                  type="email"
-                  className={`form-control ${errors.email ? "is-invalid" : ""}`}
-                  id="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-                {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-              </div>
-
-              <div className="col-12">
-                <label htmlFor="address" className="form-label">Address</label>
-                <input
-                  type="text"
-                  className={`form-control ${errors.address ? "is-invalid" : ""}`}
-                  id="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  required
-                />
-                {errors.address && <div className="invalid-feedback">{errors.address}</div>}
-              </div>
-
-              <div className="col-12">
-                <label htmlFor="address2" className="form-label">Address 2</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="address2"
-                  value={formData.address2}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="col-md-5">
-                <label htmlFor="country" className="form-label">Country</label>
-                <select
-                  className="form-select"
-                  id="country"
-                  value={formData.country}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Choose...</option>
-                  <option>South Africa</option>
-                </select>
-              </div>
-
-              <div className="col-md-4">
-                <label htmlFor="province" className="form-label">Province</label>
-                <select
-                  className={`form-select ${errors.province ? "is-invalid" : ""}`}
-                  id="province"
-                  value={formData.province}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Choose...</option>
-                  <option>Gauteng</option>
-                  <option>Western Cape</option>
-                  <option>KwaZulu-Natal</option>
-                  <option>Eastern Cape</option>
-                  <option>Free State</option>
-                  <option>Limpopo</option>
-                  <option>Mpumalanga</option>
-                  <option>North West</option>
-                  <option>Northern Cape</option>
-                </select>
-                {errors.province && <div className="invalid-feedback">{errors.province}</div>}
-              </div>
-
-              <div className="col-md-3">
-                <label htmlFor="zip" className="form-label">Postal Code</label>
-                <input
-                  type="text"
-                  className={`form-control ${errors.zip ? "is-invalid" : ""}`}
-                  id="zip"
-                  value={formData.zip}
-                  onChange={handleChange}
-                  required
-                />
-                {errors.zip && <div className="invalid-feedback">{errors.zip}</div>}
-              </div>
-            </div>
-
-            <hr className="my-4" />
-            <button className="w-100 btn btn-primary btn-lg" type="submit">
-              Continue to checkout
-            </button>
-          </form>
-        </div>
+        <section
+          style={{
+            flex: "1 1 auto", // takes remaining space
+            maxWidth: 600,
+            backgroundColor: "#fff",
+            padding: "2rem",
+            borderRadius: 12,
+            boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+            border: "1px solid #e5e7eb",
+          }}
+        >
+          <BillingForm
+            formData={formData}
+            errors={errors}
+            handleChange={handleChange}
+            handleCheckout={handleCheckout}
+          />
+        </section>
       </div>
-    </Container>
+    </main>
   );
 }
 
