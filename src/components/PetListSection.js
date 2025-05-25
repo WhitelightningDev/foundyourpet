@@ -24,6 +24,7 @@ const PetListSection = ({
   title,
   pets,
   loading,
+  user, // <-- user as a prop
   handleViewDetails,
   handleEditClick,
   handleDeleteClick,
@@ -31,7 +32,6 @@ const PetListSection = ({
   const navigate = useNavigate();
 
   const createButton = (variant, onClick, Icon, label, styleOverrides = {}) => {
-    // Define color sets for variants Apple style (soft pastels / flat)
     const colorSets = {
       view: { bg: "#f0f5ff", color: "#0071e3", border: "#c2d1f0" },
       edit: { bg: "#e6f5ea", color: "#28a745", border: "#a9d4af" },
@@ -51,24 +51,24 @@ const PetListSection = ({
           border: `1.5px solid ${colors.border}`,
           ...styleOverrides,
         }}
-        onMouseEnter={e => {
+        onMouseEnter={(e) => {
           e.currentTarget.style.boxShadow = buttonHoverShadow;
           e.currentTarget.style.backgroundColor = colors.color;
           e.currentTarget.style.color = "#fff";
           e.currentTarget.style.borderColor = colors.color;
           e.currentTarget.style.transform = "scale(1.05)";
         }}
-        onMouseLeave={e => {
+        onMouseLeave={(e) => {
           e.currentTarget.style.boxShadow = buttonStyles.boxShadow;
           e.currentTarget.style.backgroundColor = colors.bg;
           e.currentTarget.style.color = colors.color;
           e.currentTarget.style.borderColor = colors.border;
           e.currentTarget.style.transform = "scale(1)";
         }}
-        onMouseDown={e => {
+        onMouseDown={(e) => {
           e.currentTarget.style.transform = buttonActiveScale;
         }}
-        onMouseUp={e => {
+        onMouseUp={(e) => {
           e.currentTarget.style.transform = "scale(1.05)";
         }}
         size="sm"
@@ -82,10 +82,7 @@ const PetListSection = ({
 
   return (
     <div className="mb-5">
-      <h4
-        className="mb-4 fw-semibold text-secondary"
-        style={{ fontSize: "1.5rem" }}
-      >
+      <h4 className="mb-4 fw-semibold text-secondary" style={{ fontSize: "1.5rem" }}>
         {title}
       </h4>
 
@@ -97,14 +94,11 @@ const PetListSection = ({
             <ListGroup.Item
               key={pet._id}
               className="d-flex align-items-center gap-4 bg-white rounded-3 shadow-sm p-3"
-              style={{
-                cursor: "default",
-                transition: "box-shadow 0.3s ease",
-              }}
-              onMouseEnter={e =>
+              style={{ cursor: "default", transition: "box-shadow 0.3s ease" }}
+              onMouseEnter={(e) =>
                 (e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.12)")
               }
-              onMouseLeave={e =>
+              onMouseLeave={(e) =>
                 (e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)")
               }
             >
@@ -148,11 +142,7 @@ const PetListSection = ({
               <div className="flex-grow-1">
                 <h5
                   className="mb-1"
-                  style={{
-                    fontWeight: 600,
-                    color: "#1c1c1e",
-                    fontSize: "1.125rem",
-                  }}
+                  style={{ fontWeight: 600, color: "#1c1c1e", fontSize: "1.125rem" }}
                 >
                   {pet.name}
                 </h5>
@@ -165,15 +155,15 @@ const PetListSection = ({
               <div className="d-flex flex-wrap gap-2">
                 {createButton("view", () => handleViewDetails(pet), FaEye, "View")}
                 {createButton("edit", () => handleEditClick(pet), FaEdit, "Edit")}
-                {createButton(
-                  "delete",
-                  () => handleDeleteClick(pet._id),
-                  FaTrash,
-                  "Delete"
-                )}
+                {createButton("delete", () => handleDeleteClick(pet._id), FaTrash, "Delete")}
+
+                {/* Order Tag button passing user and pet */}
                 {createButton(
                   "order",
-                  () => navigate("/select-tag/standard"),
+                  () =>
+                    navigate("/select-tag/standard", {
+                      state: { user, pet }, // <-- user and pet passed here
+                    }),
                   FaCartPlus,
                   "Order Tag"
                 )}
@@ -182,9 +172,7 @@ const PetListSection = ({
           ))}
         </ListGroup>
       ) : (
-        <p className="text-muted fst-italic">
-          You don't have any {title.toLowerCase()}.
-        </p>
+        <p className="text-muted fst-italic">You don't have any {title.toLowerCase()}.</p>
       )}
     </div>
   );

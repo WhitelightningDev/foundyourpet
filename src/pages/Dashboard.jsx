@@ -110,6 +110,10 @@ const Dashboard = () => {
   const refreshPets = () => fetchPets();
 
   const handleOpenModal = () => {
+    if (!user.membershipActive) {
+      toast.warn("You must have an active membership to add a pet.");
+      return;
+    }
     setIsEditMode(false);
     setShowModal(true);
   };
@@ -209,6 +213,18 @@ const Dashboard = () => {
     }
   };
 
+  const handleBuyMembership = () => {
+    navigate("/checkout", {
+      state: {
+        membership: true,
+        total: 50, // fixed membership price
+        package: { type: "Membership" },
+        membershipObjectId: null, // no ID until payment success
+        selectedPets: [], // no pets for membership purchase
+      },
+    });
+  };
+
   const handleShare = () => {
     const message = encodeURIComponent(
       "Check out Found Your Pet — a simple, smart way to help lost pets get home faster. https://foundyourpet.vercel.app/"
@@ -230,125 +246,149 @@ const Dashboard = () => {
   const cats = pets.filter((pet) => pet.species?.toLowerCase() === "cat");
 
   return (
-  <Container className="my-5">
-    <Card className="border-0 shadow-sm rounded-4 bg-light-subtle">
-      <Card.Body className="text-center px-5 py-5">
-        {userLoading ? (
-          <Spinner animation="border" size="lg" />
-        ) : (
-          <>
-            <h1 className="display-5 fw-semibold text-dark mb-3">
-              Welcome back, {user.name}
-            </h1>
+    <Container className="my-5">
+      <Card className="border-0 shadow-sm rounded-4 bg-light-subtle">
+        <Card.Body className="text-center px-5 py-5">
+          {userLoading ? (
+            <Spinner animation="border" size="lg" />
+          ) : (
+            <>
+              <h1 className="display-5 fw-semibold text-dark mb-3">
+                Welcome back, {user.name}
+              </h1>
 
-            {/* WhatsApp Share Button */}
-            <div className="mb-3">
-              <Button
-                variant="outline-success"
-                size="lg"
-                onClick={handleShare}
-                className="d-inline-flex align-items-center gap-2 rounded-pill px-4 py-2 shadow-sm"
-                style={{
-                  fontWeight: 600,
-                }}
-              >
-                <FaWhatsapp size={20} />
-                Share on WhatsApp
-              </Button>
-            </div>
+              {/* WhatsApp Share Button */}
+              <div className="mb-3">
+                <Button
+                  variant="outline-success"
+                  size="lg"
+                  onClick={handleShare}
+                  className="d-inline-flex align-items-center gap-2 rounded-pill px-4 py-2 shadow-sm"
+                  style={{
+                    fontWeight: 600,
+                  }}
+                >
+                  <FaWhatsapp size={20} />
+                  Share on WhatsApp
+                </Button>
+              </div>
 
-            {/* Membership Status */}
-            <div className="mt-4">
-              {user.membershipActive ? (
-                <p className="text-success fw-medium fs-5">
-                  ✅ Member since{" "}
-                  <strong>
-                    {new Date(user.membershipStartDate).toLocaleDateString()}
-                  </strong>
-                </p>
-              ) : (
-                <p className="text-danger fw-medium fs-5">
-                  ❌ No active membership found
-                </p>
-              )}
-            </div>
+              {/* Membership Status and Conditional UI */}
+              <div className="mt-4">
+                {user.membershipActive ? (
+                  <>
+                    <p className="text-success fw-medium fs-5">
+                      ✅ Member since{" "}
+                       <strong>{new Date(user.membershipStartDate).toLocaleDateString()}</strong>
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-danger fw-medium fs-5">
+                      ❌ No active membership found
+                    </p>
 
-            {/* Add New Pet Button */}
-            <div className="mt-5">
-              <Button
-                variant="dark"
-                size="lg"
-                onClick={handleOpenModal}
-                className="px-5 py-3 rounded-pill fw-medium shadow-sm"
-              >
-                <FaPlus className="me-2" />
-                Add New Pet
-              </Button>
-            </div>
-          </>
-        )}
-      </Card.Body>
-    </Card>
+                    {/* Show membership purchase card */}
+                    <Card className="mt-4 p-3 shadow-sm border rounded-3 bg-white text-center">
+                      <h5>Purchase Membership - R50 / month</h5>
+                      <p className="mb-3">
+                        Join now and get full access! Your membership will renew
+                        monthly on the day of purchase.
+                      </p>
+                      <Button
+                        variant="primary"
+                        onClick={handleBuyMembership}
+                        disabled={user.membershipActive}
+                      >
+                        {user.membershipActive
+                          ? "Membership Active"
+                          : "Buy Membership - R50"}
+                      </Button>
+                    </Card>
+                  </>
+                )}
+              </div>
 
-    <div className="mt-5">
-      <PetListSection
-        title="Your Dogs"
-        pets={dogs}
-        loading={loading}
-        handleViewDetails={handleViewDetails}
-        handleEditClick={handleEditClick}
-        handleDeleteClick={handleDeleteClick}
-      />
+              {/* Add New Pet Button */}
+              <div className="mt-5">
+                <Button
+                  variant="dark"
+                  size="lg"
+                  onClick={handleOpenModal}
+                  className="px-5 py-3 rounded-pill fw-medium shadow-sm"
+                  disabled={!user.membershipActive}
+                  title={
+                    user.membershipActive
+                      ? "Add a new pet"
+                      : "Activate membership to add pets"
+                  }
+                >
+                  <FaPlus className="me-2" />
+                  Add New Pet
+                </Button>
+              </div>
+            </>
+          )}
+        </Card.Body>
+      </Card>
 
-      <PetListSection
-        title="Your Cats"
-        pets={cats}
-        loading={loading}
-        handleViewDetails={handleViewDetails}
-        handleEditClick={handleEditClick}
-        handleDeleteClick={handleDeleteClick}
-      />
-    </div>
+      <div className="mt-5">
+        <PetListSection
+          title="Your Dogs"
+          pets={dogs}
+          loading={loading}
+          handleViewDetails={handleViewDetails}
+          handleEditClick={handleEditClick}
+          handleDeleteClick={handleDeleteClick}
+        />
 
-    {!isEditMode && (
-      <AddPetModal
-        showModal={showModal}
-        closeModal={handleCloseModal}
+        <PetListSection
+          title="Your Cats"
+          pets={cats}
+          loading={loading}
+          handleViewDetails={handleViewDetails}
+          handleEditClick={handleEditClick}
+          handleDeleteClick={handleDeleteClick}
+        />
+      </div>
+
+      {!isEditMode && (
+        <AddPetModal
+          showModal={showModal}
+          closeModal={handleCloseModal}
+          refreshPets={refreshPets}
+        />
+      )}
+
+      {isEditMode && (
+        <EditPetModal
+          show={showModal}
+          formData={formData}
+          handleChange={handleChange}
+          handleClose={handleCloseModal}
+          handleSave={handleSaveChanges}
+          refreshPets={refreshPets}
+        />
+      )}
+
+      {showDetailsModal && selectedPet && (
+        <PetDetailsModal
+          show={showDetailsModal}
+          handleClose={handleCloseDetailsModal}
+          pet={selectedPet}
+        />
+      )}
+
+      <DeleteConfirmationModal
+        show={showDeleteModal}
+        handleClose={() => setShowDeleteModal(false)}
+        handleConfirm={confirmDeletePet}
+        isDeleting={isDeleting}
+        deletionSuccess={false}
         refreshPets={refreshPets}
       />
-    )}
-
-    {isEditMode && (
-      <EditPetModal
-        show={showModal}
-        formData={formData}
-        handleChange={handleChange}
-        handleClose={handleCloseModal}
-        handleSave={handleSaveChanges}
-        refreshPets={refreshPets}
-      />
-    )}
-
-    {showDetailsModal && selectedPet && (
-      <PetDetailsModal
-        show={showDetailsModal}
-        handleClose={handleCloseDetailsModal}
-        pet={selectedPet}
-      />
-    )}
-
-    <DeleteConfirmationModal
-      show={showDeleteModal}
-      handleClose={() => setShowDeleteModal(false)}
-      handleConfirm={confirmDeletePet}
-      isDeleting={isDeleting}
-      deletionSuccess={false}
-      refreshPets={refreshPets}
-    />
-  </Container>
-);
-
-
+    </Container>
+  );
 };
 
 export default Dashboard;
