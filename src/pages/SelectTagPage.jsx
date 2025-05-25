@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   Container,
   Card,
@@ -18,10 +18,14 @@ import axios from "axios";
 function SelectTagPage() {
   const { tagType } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [, setAddons] = useState([]);
   const [loading, setLoading] = useState(true);
- const [user, setUser] = useState({
+
+  // Initialize user and pets from location.state if available
+  const initialUser = location.state?.user || {
     name: "",
     email: "",
     isAdmin: false,
@@ -35,10 +39,15 @@ function SelectTagPage() {
       postalCode: "",
       country: "",
     },
-  });
-  const [pets, setPets] = useState([]);
+  };
+  const initialPets = location.state?.pet ? [location.state.pet] : [];
+
+  const [user, setUser] = useState(initialUser);
+  const [pets, setPets] = useState(initialPets);
   const [showToast, setShowToast] = useState(false);
-  const [selectedPets, setSelectedPets] = useState([]);
+  const [selectedPets, setSelectedPets] = useState(
+    initialPets.length ? [initialPets[0]._id] : []
+  );
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -57,6 +66,10 @@ function SelectTagPage() {
           }),
         ]);
 
+        console.log("Package data:", pkgRes.data);
+        console.log("Addons data:", addonRes.data);
+        console.log("Pets data:", petRes.data);
+
         setSelectedPackage(pkgRes.data);
         setAddons(addonRes.data);
         setPets(petRes.data);
@@ -67,39 +80,39 @@ function SelectTagPage() {
       }
     }
 
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get(
-          "https://foundyourpet-backend.onrender.com/api/users/me",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-           const userData = response.data.user;
-        setUser({
-        name: userData.name?.trim() || "",
-        email: userData.email || "",
-        isAdmin: userData.isAdmin || false,
-        membershipActive: userData.membershipActive || false,
-        membershipStartDate: userData.membershipStartDate || "",
-        contact: userData.contact || "",
-        address: userData.address || {
-          street: "",
-          city: "",
-          province: "",
-          postalCode: "",
-          country: "",
-        },
-      });
-      } catch (error) {
-        console.error("Failed to fetch user info:", error);
+    async function fetchUser() {
+      if (!location.state?.user) {
+        try {
+          const response = await axios.get(
+            "https://foundyourpet-backend.onrender.com/api/users/me",
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          console.log("User data:", response.data.user);
+          const userData = response.data.user;
+          setUser({
+            name: userData.name?.trim() || "",
+            email: userData.email || "",
+            isAdmin: userData.isAdmin || false,
+            membershipActive: userData.membershipActive || false,
+            membershipStartDate: userData.membershipStartDate || "",
+            contact: userData.contact || "",
+            address: userData.address || {
+              street: "",
+              city: "",
+              province: "",
+              postalCode: "",
+              country: "",
+            },
+          });
+        } catch (error) {
+          console.error("Failed to fetch user info:", error);
+        }
       }
-    };
+    }
 
     fetchUser();
     fetchData();
-  }, [tagType]);
+  }, [tagType, location.state]);
 
   const handlePetSelection = (pet) => {
     setSelectedPets((prev) =>
@@ -151,7 +164,10 @@ function SelectTagPage() {
   return (
     <Container fluid="md" className="my-5 px-3">
       {/* Header */}
-      <h2 className="border-bottom pb-3 mb-4 text-center fw-semibold" style={{ fontSize: "1.9rem", color: "#0071e3" }}>
+      <h2
+        className="border-bottom pb-3 mb-4 text-center fw-semibold"
+        style={{ fontSize: "1.9rem", color: "#0071e3" }}
+      >
         Great Stuff, {user.name}
       </h2>
 
@@ -190,7 +206,10 @@ function SelectTagPage() {
           </svg>
         </div>
         <div>
-          <p className="mb-1 fw-semibold" style={{ fontSize: "1.1rem", color: "#333" }}>
+          <p
+            className="mb-1 fw-semibold"
+            style={{ fontSize: "1.1rem", color: "#333" }}
+          >
             Please Note
           </p>
           <p className="mb-0" style={{ fontSize: "0.9rem", color: "#666" }}>
@@ -210,13 +229,18 @@ function SelectTagPage() {
           textAlign: "center",
         }}
       >
-        <span className="d-block mb-3" style={{ fontSize: "1.6rem", fontWeight: "600", color: "#0071e3" }}>
+        <span
+          className="d-block mb-3"
+          style={{ fontSize: "1.6rem", fontWeight: "600", color: "#0071e3" }}
+        >
           R{selectedPackage.price.toFixed(2)} Initial{" "}
           <small className="text-primary" style={{ fontWeight: "500" }}>
             + R50 Monthly
           </small>
         </span>
-        <p className="h4 fw-bold mt-4 mb-2">{selectedPackage.name || "Standard Package"}</p>
+        <p className="h4 fw-bold mt-4 mb-2">
+          {selectedPackage.name || "Standard Package"}
+        </p>
         <p className="text-muted mb-3">{selectedPackage.description}</p>
         <ul
           className="list-unstyled text-start px-3"
@@ -236,10 +260,19 @@ function SelectTagPage() {
 
       {/* Pet Selection */}
       <div className="mb-4" style={{ maxWidth: "600px", margin: "auto" }}>
-        <h5 className="mb-3 fw-semibold" style={{ fontSize: "1.3rem", color: "#222" }}>
+        <h5
+          className="mb-3 fw-semibold"
+          style={{ fontSize: "1.3rem", color: "#222" }}
+        >
           Select Pets for Tag Order
         </h5>
-        <ListGroup style={{ borderRadius: "12px", overflow: "hidden", boxShadow: "0 4px 12px rgb(0 0 0 / 0.1)" }}>
+        <ListGroup
+          style={{
+            borderRadius: "12px",
+            overflow: "hidden",
+            boxShadow: "0 4px 12px rgb(0 0 0 / 0.1)",
+          }}
+        >
           {pets.map((pet) => (
             <ListGroup.Item
               key={pet._id}
@@ -287,19 +320,11 @@ function SelectTagPage() {
         </Col>
         <Col xs={12} md={6} className="text-md-end">
           <Button
+            variant="primary"
+            size="lg"
             onClick={handleContinue}
-            className="px-4 py-2"
-            style={{
-              borderRadius: "30px",
-              fontWeight: "600",
-              fontSize: "1.1rem",
-              backgroundColor: "#0071e3",
-              borderColor: "#0071e3",
-              boxShadow: "0 6px 15px rgb(0 113 227 / 0.3)",
-              transition: "background-color 0.3s ease",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#005bb5")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#0071e3")}
+            disabled={selectedPets.length === 0}
+            aria-disabled={selectedPets.length === 0}
           >
             Continue
           </Button>
@@ -307,19 +332,18 @@ function SelectTagPage() {
       </Row>
 
       {/* Toast */}
-      <ToastContainer position="bottom-end" className="p-3">
+      <ToastContainer position="bottom-center" className="mb-3">
         <Toast
+          bg="warning"
           onClose={() => setShowToast(false)}
           show={showToast}
           delay={3000}
           autohide
-          bg="warning"
-          style={{ borderRadius: "12px" }}
+          style={{ minWidth: "280px" }}
+          role="alert"
+          aria-live="assertive"
         >
-          <Toast.Header closeButton={true}>
-            <strong className="me-auto">Selection Required</strong>
-          </Toast.Header>
-          <Toast.Body>Please select at least one pet before continuing.</Toast.Body>
+          <Toast.Body>Please select at least one pet to continue</Toast.Body>
         </Toast>
       </ToastContainer>
     </Container>

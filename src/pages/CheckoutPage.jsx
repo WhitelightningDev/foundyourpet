@@ -26,9 +26,8 @@ function CheckoutPage() {
 
   const [errors, setErrors] = useState({});
 
-  const MEMBERSHIP_COST = 50;
-  const membershipCost = membership ? MEMBERSHIP_COST : 0;
-  const subtotal = total + membershipCost;
+  // Removed separate membership cost addition since total includes it
+  const subtotal = total;
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -184,8 +183,7 @@ function CheckoutPage() {
                     {pet.name}
                   </h6>
                   <small style={{ color: "#6b7280", fontStyle: "italic" }}>
-                    {pet.breed || "Unknown Breed"}, {pet.species},{" "}
-                 
+                    {pet.breed || "Unknown Breed"}, {pet.species}{" "}
                   </small>
                 </div>
                 <span style={{ color: "#374151", fontWeight: 600 }}>
@@ -194,26 +192,7 @@ function CheckoutPage() {
               </li>
             ))}
 
-            {membership && (
-              <li
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "1rem 0",
-                  backgroundColor: "#e0f2fe",
-                  borderBottom: "1px solid #e5e7eb",
-                  borderRadius: "0 0 12px 12px",
-                }}
-              >
-                <div style={{ color: "#0284c7" }}>
-                  <h6 style={{ margin: 0, fontWeight: 600 }}>Membership</h6>
-                  <small style={{ fontStyle: "italic" }}>Support package</small>
-                </div>
-                <span style={{ color: "#0284c7", fontWeight: 700 }}>
-                  +R{MEMBERSHIP_COST}
-                </span>
-              </li>
-            )}
+            {/* Removed duplicate membership cost display */}
 
             <li
               style={{
