@@ -29,42 +29,41 @@ function ProfilePage() {
   const [originalData, setOriginalData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?._id;
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) {
+    if (user) {
       const userProfile = {
-        name: storedUser.name || "",
-        surname: storedUser.surname || "",
-        contact: storedUser.contact || "",
-        email: storedUser.email || "",
+        name: user.name || "",
+        surname: user.surname || "",
+        contact: user.contact || "",
+        email: user.email || "",
         password: "",
         address: {
-          street: storedUser.address?.street || "",
-          city: storedUser.address?.city || "",
-          province: storedUser.address?.province || "",
-          postalCode: storedUser.address?.postalCode || "",
-          country: storedUser.address?.country || "",
+          street: user.address?.street || "",
+          city: user.address?.city || "",
+          province: user.address?.province || "",
+          postalCode: user.address?.postalCode || "",
+          country: user.address?.country || "",
         },
       };
       setUserData(userProfile);
       setOriginalData(userProfile);
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     if (name.startsWith("address.")) {
-      const addressField = name.split(".")[1];
+      const key = name.split(".")[1];
       setUserData((prev) => ({
         ...prev,
         address: {
           ...prev.address,
-          [addressField]: value,
+          [key]: value,
         },
       }));
     } else {
@@ -74,19 +73,14 @@ function ProfilePage() {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-
-    // Check if the country is provided before submitting
     if (!userData.address.country.trim()) {
       alert("Please include a country in your address.");
       return;
     }
 
-    // Prepare the payload, only including the password if it's not empty
-    const payload = {
-      ...userData,
-    };
-    if (userData.password.trim() === "") {
-      delete payload.password; // Don't send password if empty
+    const payload = { ...userData };
+    if (!userData.password.trim()) {
+      delete payload.password;
     }
 
     try {
@@ -94,16 +88,13 @@ function ProfilePage() {
       const response = await axios.put(
         `https://foundyourpet-backend.onrender.com/api/users/${userId}`,
         payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
+
       alert("Profile updated successfully");
       localStorage.setItem("user", JSON.stringify(response.data.user));
-      setIsEditing(false);
       setOriginalData(userData);
+      setIsEditing(false);
     } catch (error) {
       alert("Failed to update profile");
       console.error(error);
@@ -117,10 +108,7 @@ function ProfilePage() {
 
   if (loading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ height: "60vh" }}
-      >
+      <div className="d-flex justify-content-center align-items-center" style={{ height: "60vh" }}>
         <Spinner animation="border" variant="primary" />
       </div>
     );
@@ -128,20 +116,17 @@ function ProfilePage() {
 
   return (
     <Container className="my-5">
-      <Card className="shadow-sm">
+      <Card className="shadow-lg">
         <Card.Header className="d-flex justify-content-between align-items-center">
-          <h4 className="mb-0">User Profile</h4>
+          <h4 className="mb-0">Profile Details</h4>
           {!isEditing ? (
-            <Button
-              variant="outline-primary"
-              onClick={() => setIsEditing(true)}
-            >
-              Edit
+            <Button variant="outline-primary" onClick={() => setIsEditing(true)}>
+              Edit Profile
             </Button>
           ) : (
             <div className="d-flex gap-2">
-              <Button variant="success" onClick={handleUpdate}>
-                Save Changes
+              <Button variant="success" type="submit" onClick={handleUpdate}>
+                Save
               </Button>
               <Button variant="secondary" onClick={handleCancel}>
                 Cancel
@@ -152,10 +137,11 @@ function ProfilePage() {
 
         <Card.Body>
           <Form onSubmit={handleUpdate}>
-            <Row className="mb-4">
+            <h5 className="mb-3 text-muted">Basic Information</h5>
+            <Row className="mb-3">
               <Col md={6}>
                 <Form.Group controlId="formName">
-                  <Form.Label>Name</Form.Label>
+                  <Form.Label>First Name</Form.Label>
                   <Form.Control
                     type="text"
                     name="name"
@@ -167,7 +153,7 @@ function ProfilePage() {
               </Col>
               <Col md={6}>
                 <Form.Group controlId="formSurname">
-                  <Form.Label>Surname</Form.Label>
+                  <Form.Label>Last Name</Form.Label>
                   <Form.Control
                     type="text"
                     name="surname"
@@ -179,7 +165,7 @@ function ProfilePage() {
               </Col>
             </Row>
 
-            <Row className="mb-4">
+            <Row className="mb-3">
               <Col md={6}>
                 <Form.Group controlId="formContact">
                   <Form.Label>Contact</Form.Label>
@@ -188,8 +174,8 @@ function ProfilePage() {
                     name="contact"
                     value={userData.contact}
                     onChange={handleChange}
-                    placeholder="Enter contact"
                     disabled={!isEditing}
+                    placeholder="Enter phone number"
                     required
                   />
                 </Form.Group>
@@ -202,8 +188,8 @@ function ProfilePage() {
                     name="email"
                     value={userData.email}
                     onChange={handleChange}
-                    placeholder="Enter email"
                     disabled={!isEditing}
+                    placeholder="Enter email"
                     required
                   />
                 </Form.Group>
@@ -211,37 +197,33 @@ function ProfilePage() {
             </Row>
 
             <Form.Group controlId="formPassword" className="mb-4">
-              <Form.Label>Password</Form.Label>
+              <Form.Label>New Password</Form.Label>
               <Form.Control
                 type="password"
                 name="password"
-                placeholder="Enter new password"
+                placeholder="Leave blank to keep current password"
                 value={userData.password}
                 onChange={handleChange}
                 disabled={!isEditing}
               />
-              <Form.Text muted>
-                Leave blank if you don’t want to change your password.
+              <Form.Text className="text-muted">
+                Leave blank if you do not wish to change your password.
               </Form.Text>
             </Form.Group>
 
-            <h5 className="mb-3">Address Information</h5>
+            <h5 className="mb-3 text-muted">Address Details</h5>
 
-            <Row className="mb-3">
-              <Col md={12}>
-                <Form.Group controlId="formStreet">
-                  <Form.Label>Street</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="address.street"
-                    value={userData.address.street}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    required
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
+            <Form.Group controlId="formStreet" className="mb-3">
+              <Form.Label>Street</Form.Label>
+              <Form.Control
+                type="text"
+                name="address.street"
+                value={userData.address.street}
+                onChange={handleChange}
+                disabled={!isEditing}
+                required
+              />
+            </Form.Group>
 
             <Row className="mb-3">
               <Col md={6}>
@@ -272,7 +254,7 @@ function ProfilePage() {
               </Col>
             </Row>
 
-            <Row className="mb-4">
+            <Row>
               <Col md={6}>
                 <Form.Group controlId="formPostalCode">
                   <Form.Label>Postal Code</Form.Label>

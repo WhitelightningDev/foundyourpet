@@ -25,9 +25,9 @@ import TsAndCs from "./pages/T's&C's";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import PasswordResetPage from "./pages/PasswordReset";
 // Payment status pags
-import SuccessPage from "./pages/SuccessPage";
-import FailurePage from "./pages/FailurePage";
-import CancelPage from "./pages/CancelPage";
+import SuccessPage from "./payments-response-pages/SuccessPage";
+import FailurePage from "./payments-response-pages/FailurePage";
+import CancelPage from "./payments-response-pages/CancelPage";
 import PetRedirect from "./pages/PetRedirect";
 
 function App() {
