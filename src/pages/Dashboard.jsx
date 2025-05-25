@@ -62,35 +62,38 @@ const Dashboard = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchUser = useCallback(async () => {
-    try {
-      const response = await axios.get(
-        "https://foundyourpet-backend.onrender.com/api/users/me",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const userData = response.data.user;
+  try {
+    const response = await axios.get(
+      "https://foundyourpet-backend.onrender.com/api/users/me",
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const userData = response.data.user;
+    console.log("Fetched user data:", userData);  // <-- Log entire user object here
+console.log(user.membershipStartDate);
 
-      setUser({
-        name: userData.name?.trim() || "",
-        email: userData.email || "",
-        isAdmin: userData.isAdmin || false,
-        membershipActive: userData.membershipActive || false,
-        membershipStartDate: userData.membershipStartDate || "",
-        contact: userData.contact || "",
-        address: userData.address || {
-          street: "",
-          city: "",
-          province: "",
-          postalCode: "",
-          country: "",
-        },
-      });
-    } catch (error) {
-      console.error("Failed to fetch user info:", error);
-      toast.error("Failed to load user information.");
-    } finally {
-      setUserLoading(false);
-    }
-  }, [token]);
+    setUser({
+      name: userData.name?.trim() || "",
+      email: userData.email || "",
+      isAdmin: userData.isAdmin || false,
+      membershipActive: userData.membershipActive || false,
+      membershipStartDate: userData.membershipStartDate || "",  // <-- check this field
+      contact: userData.contact || "",
+      address: userData.address || {
+        street: "",
+        city: "",
+        province: "",
+        postalCode: "",
+        country: "",
+      },
+    });
+  } catch (error) {
+    console.error("Failed to fetch user info:", error);
+    toast.error("Failed to load user information.");
+  } finally {
+    setUserLoading(false);
+  }
+}, [token]);
+
 
   const fetchPets = useCallback(async () => {
     try {
@@ -274,40 +277,40 @@ const Dashboard = () => {
               </div>
 
               {/* Membership Status and Conditional UI */}
-              <div className="mt-4">
-                {user.membershipActive ? (
-                  <>
-                    <p className="text-success fw-medium fs-5">
-                      ✅ Member since{" "}
-                       <strong>{new Date(user.membershipStartDate).toLocaleDateString()}</strong>
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-danger fw-medium fs-5">
-                      ❌ No active membership found
-                    </p>
+             <div className="mt-4">
+  {user.membershipActive ? (
+    <>
+      <p className="text-success fw-medium fs-5">
+        ✅ Membership Active
+      </p>
+    </>
+  ) : (
+    <>
+      <p className="text-danger fw-medium fs-5">
+        ❌ No active membership found
+      </p>
 
-                    {/* Show membership purchase card */}
-                    <Card className="mt-4 p-3 shadow-sm border rounded-3 bg-white text-center">
-                      <h5>Purchase Membership - R50 / month</h5>
-                      <p className="mb-3">
-                        Join now and get full access! Your membership will renew
-                        monthly on the day of purchase.
-                      </p>
-                      <Button
-                        variant="primary"
-                        onClick={handleBuyMembership}
-                        disabled={user.membershipActive}
-                      >
-                        {user.membershipActive
-                          ? "Membership Active"
-                          : "Buy Membership - R50"}
-                      </Button>
-                    </Card>
-                  </>
-                )}
-              </div>
+      {/* Show membership purchase card */}
+      <Card className="mt-4 p-3 shadow-sm border rounded-3 bg-white text-center">
+        <h5>Purchase Membership - R50 / month</h5>
+        <p className="mb-3">
+          Join now and get full access! Your membership will renew
+          monthly on the day of purchase.
+        </p>
+        <Button
+          variant="primary"
+          onClick={handleBuyMembership}
+          disabled={user.membershipActive}
+        >
+          {user.membershipActive
+            ? "Membership Active"
+            : "Buy Membership - R50"}
+        </Button>
+      </Card>
+    </>
+  )}
+</div>
+
 
               {/* Add New Pet Button */}
               <div className="mt-5">
