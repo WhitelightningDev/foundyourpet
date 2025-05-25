@@ -20,24 +20,23 @@ import PetDetailsModal from "../components/PetDetailsModal";
 import EditPetModal from "../components/EditPetModal";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import { Placeholder } from "react-bootstrap";
-import DashboardLoadingSkeleton from "../loadingskeletons/dashboardloadingskeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-
+import PetListSection from "../components/PetListSection";
 function Dashboard() {
   const [user, setUser] = useState({
-  name: "",
-  email: "",
-  isAdmin: false,
-  membershipActive:"",
-  contact: "",
-  address: {
-    street: "",
-    city: "",
-    province: "",
-    postalCode: "",
-    country: "",
-  },
-});
+    name: "",
+    email: "",
+    isAdmin: false,
+    membershipActive: "",
+    contact: "",
+    address: {
+      street: "",
+      city: "",
+      province: "",
+      postalCode: "",
+      country: "",
+    },
+  });
 
   const [membershipActive, setMembershipActive] = useState(false);
   const [pets, setPets] = useState([]);
@@ -206,48 +205,47 @@ function Dashboard() {
   };
 
   useEffect(() => {
-  const fetchUser = async () => {
-    setUserLoading(true);
-    try {
-      const response = await axios.get(
-        "https://foundyourpet-backend.onrender.com/api/users/me",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+    const fetchUser = async () => {
+      setUserLoading(true);
+      try {
+        const response = await axios.get(
+          "https://foundyourpet-backend.onrender.com/api/users/me",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
-      console.log("Fetched user:", response.data.user); // Confirm user object
+        console.log("Fetched user:", response.data.user); // Confirm user object
 
-      const userData = response.data.user;
+        const userData = response.data.user;
 
-      setUser({
-        name: userData.name?.trim() || "",
-        email: userData.email || "",
-        isAdmin: userData.isAdmin || false,
-        membershipActive: userData.membershipActive || false,
-        contact: userData.contact || "",
-        address: userData.address || {
-          street: "",
-          city: "",
-          province: "",
-          postalCode: "",
-          country: "",
-        },
-      });
-    } catch (error) {
-      console.error("Failed to fetch user info:", error);
-      toast.error("Failed to load user information.");
-    } finally {
-      setUserLoading(false);
+        setUser({
+          name: userData.name?.trim() || "",
+          email: userData.email || "",
+          isAdmin: userData.isAdmin || false,
+          membershipActive: userData.membershipActive || false,
+          contact: userData.contact || "",
+          address: userData.address || {
+            street: "",
+            city: "",
+            province: "",
+            postalCode: "",
+            country: "",
+          },
+        });
+      } catch (error) {
+        console.error("Failed to fetch user info:", error);
+        toast.error("Failed to load user information.");
+      } finally {
+        setUserLoading(false);
+      }
+    };
+
+    if (token) {
+      fetchUser();
+      fetchPets();
     }
-  };
-
-  if (token) {
-    fetchUser();
-    fetchPets();
-  }
-}, [token]);
-
+  }, [token]);
 
   const handleOpenModal = () => {
     setIsEditMode(false); // Add mode
@@ -261,263 +259,99 @@ function Dashboard() {
   const dogs = pets.filter((pet) => pet.species?.toLowerCase() === "dog");
   const cats = pets.filter((pet) => pet.species?.toLowerCase() === "cat");
 
- return (
-  <Container className="my-5">
-    <div className="d-flex justify-content-center align-items-center gap-3 mb-4">
-      {userLoading ? (
-        <Spinner animation="border" size="sm" />
-      ) : (
-        <h3 className="text-dark fw-bold m-0">Welcome back {user.name}</h3>
+  return (
+    <Container className="my-5">
+      <div className="d-flex justify-content-center align-items-center gap-3 mb-4">
+        {userLoading ? (
+          <Spinner animation="border" size="sm" />
+        ) : (
+          <h3 className="text-dark fw-bold m-0">Welcome back {user.name}</h3>
+        )}
+
+        <Button variant="outline-success" size="sm" onClick={handleShare}>
+          Share on WhatsApp
+        </Button>
+      </div>
+
+      <div>User Has a membership {user.membershipActive}</div>
+
+      <div className="d-flex justify-content-center mb-4">
+        {!userLoading &&
+          (user.membershipActive ? (
+            <p className="text-success fw-semibold">
+              You have an active membership since{" "}
+              {new Date(user.membershipStartDate).toLocaleDateString()}.
+            </p>
+          ) : (
+            <p className="text-danger fw-semibold">
+              You do not have an active membership.
+            </p>
+          ))}
+      </div>
+
+      <div className="d-flex justify-content-center mb-4">
+        <Button variant="success" onClick={handleOpenModal}>
+          <FaPlus className="me-2" /> Add New Pet
+        </Button>
+      </div>
+      <PetListSection
+        title="Your Dogs"
+        pets={dogs}
+        loading={loading}
+        handleViewDetails={handleViewDetails}
+        handleEditClick={handleEditClick}
+        handleDeleteClick={handleDeleteClick}
+      />
+
+      <PetListSection
+        title="Your Cats"
+        pets={cats}
+        loading={loading}
+        handleViewDetails={handleViewDetails}
+        handleEditClick={handleEditClick}
+        handleDeleteClick={handleDeleteClick}
+      />
+
+      {/* Modals */}
+      {!isEditMode && (
+        <AddPetModal
+          showModal={showModal}
+          closeModal={handleCloseModal}
+          refreshPets={refreshPets} // ✅ add this
+        />
       )}
 
-      <Button variant="outline-success" size="sm" onClick={handleShare}>
-        Share on WhatsApp
-      </Button>
-    </div>
+      {/* Edit Pet Modal */}
+      {isEditMode && (
+        <EditPetModal
+          show={showModal}
+          formData={formData}
+          handleChange={handleChange}
+          handleClose={handleCloseModal}
+          handleSave={handleSaveChanges}
+          refreshPets={refreshPets} // Pass the refresh function
+        />
+      )}
 
-    <div>User Has a membership {user.membershipActive}</div>
+      {showDetailsModal && (
+        <PetDetailsModal
+          show={showDetailsModal}
+          handleClose={handleCloseDetailsModal}
+          pet={selectedPet}
+        />
+      )}
 
-    <div className="d-flex justify-content-center mb-4">
-      {!userLoading &&
-        (user.membershipActive ? (
-          <p className="text-success fw-semibold">
-            You have an active membership since{" "}
-            {new Date(user.membershipStartDate).toLocaleDateString()}.
-          </p>
-        ) : (
-          <p className="text-danger fw-semibold">You do not have an active membership.</p>
-        ))}
-    </div>
-
-    <div className="d-flex justify-content-center mb-4">
-      <Button variant="success" onClick={handleOpenModal}>
-        <FaPlus className="me-2" /> Add New Pet
-      </Button>
-    </div>
-
-    {/* Dogs Section */}
-    <h4 className="mb-3 text-primary">Your Dogs</h4>
-    {loading ? (
-      <DashboardLoadingSkeleton />
-    ) : dogs.length > 0 ? (
-      <ListGroup className="mb-5">
-        {dogs.map((pet) => (
-          <ListGroup.Item
-            key={pet._id}
-            className="mb-3 shadow-sm rounded p-3 bg-light"
-          >
-            <div className="d-flex justify-content-between align-items-center gap-3">
-              {/* Pet Image */}
-              {pet.photoUrl ? (
-                <img
-                  src={
-                    pet.photoUrl.startsWith("http")
-                      ? pet.photoUrl
-                      : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`
-                  }
-                  alt={`${pet.name}'s profile`}
-                  style={{
-                    width: "50px",
-                    height: "50px",
-                    objectFit: "cover",
-                    borderRadius: "50%",
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: "50px",
-                    height: "50px",
-                    borderRadius: "50%",
-                    backgroundColor: "#ccc",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "0.7rem",
-                    color: "#666",
-                  }}
-                >
-                  No Photo
-                </div>
-              )}
-
-              {/* Pet Info */}
-              <div className="flex-grow-1">
-                <h5 className="mb-1">{pet.name}</h5>
-                <p className="mb-0 text-muted">{pet.breed}</p>
-              </div>
-
-              {/* Buttons */}
-              <div className="pet-button-group d-flex flex-wrap gap-1">
-                <Button
-                  variant="info"
-                  size="sm"
-                  onClick={() => handleViewDetails(pet)}
-                >
-                  <FaEye className="me-1" /> View
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => handleEditClick(pet)}
-                >
-                  <FaEdit className="me-1" /> Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => handleDeleteClick(pet._id)}
-                >
-                  <FaTrash className="me-1" /> Delete
-                </Button>
-                <Button
-                  variant="success"
-                  size="sm"
-                  onClick={() => navigate("/select-tag/standard")}
-                >
-                  <FaCartPlus className="me-1" /> Order Tag
-                </Button>
-              </div>
-            </div>
-          </ListGroup.Item>
-        ))}
-      </ListGroup>
-    ) : (
-      <p className="text-muted">You don't have any dogs.</p>
-    )}
-
-    {/* Cats Section */}
-    <h4 className="mb-3 text-primary">Your Cats</h4>
-    {loading ? (
-      <DashboardLoadingSkeleton />
-    ) : cats.length > 0 ? (
-      <ListGroup className="mb-5">
-        {cats.map((pet) => (
-          <ListGroup.Item
-            key={pet._id}
-            className="mb-3 shadow-sm rounded p-3 bg-light"
-          >
-            <div className="d-flex justify-content-between align-items-center gap-3">
-              {/* Pet Image */}
-              {pet.photoUrl ? (
-                <img
-                  src={
-                    pet.photoUrl.startsWith("http")
-                      ? pet.photoUrl
-                      : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`
-                  }
-                  alt={`${pet.name}'s profile`}
-                  style={{
-                    width: "50px",
-                    height: "50px",
-                    objectFit: "cover",
-                    borderRadius: "50%",
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: "50px",
-                    height: "50px",
-                    borderRadius: "50%",
-                    backgroundColor: "#ccc",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "0.7rem",
-                    color: "#666",
-                  }}
-                >
-                  No Photo
-                </div>
-              )}
-
-              {/* Pet Info */}
-              <div className="flex-grow-1">
-                <h5 className="mb-1">{pet.name}</h5>
-                <p className="mb-0 text-muted">{pet.breed}</p>
-              </div>
-
-              {/* Buttons */}
-              <div className="pet-button-group d-flex flex-wrap gap-1">
-                <Button
-                  variant="info"
-                  size="sm"
-                  onClick={() => handleViewDetails(pet)}
-                >
-                  <FaEye className="me-1" /> View
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => handleEditClick(pet)}
-                >
-                  <FaEdit className="me-1" /> Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => handleDeleteClick(pet._id)}
-                >
-                  <FaTrash className="me-1" /> Delete
-                </Button>
-                <Button
-                  variant="success"
-                  size="sm"
-                  onClick={() => navigate("/select-tag/standard")}
-                >
-                  <FaCartPlus className="me-1" /> Order Tag
-                </Button>
-              </div>
-            </div>
-          </ListGroup.Item>
-        ))}
-      </ListGroup>
-    ) : (
-      <p className="text-muted">You don't have any cats.</p>
-    )}
-
-    {/* Modals */}
-    {!isEditMode && (
-      <AddPetModal
-        showModal={showModal}
-        closeModal={handleCloseModal}
-        refreshPets={refreshPets} // ✅ add this
-      />
-    )}
-
-    {/* Edit Pet Modal */}
-    {isEditMode && (
-      <EditPetModal
-        show={showModal}
-        formData={formData}
-        handleChange={handleChange}
-        handleClose={handleCloseModal}
-        handleSave={handleSaveChanges}
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        show={showDeleteModal}
+        handleClose={() => setShowDeleteModal(false)}
+        handleConfirm={confirmDeletePet}
+        isDeleting={isDeleting}
+        deletionSuccess={deletionSuccess}
         refreshPets={refreshPets} // Pass the refresh function
       />
-    )}
-
-    {showDetailsModal && (
-      <PetDetailsModal
-        show={showDetailsModal}
-        handleClose={handleCloseDetailsModal}
-        pet={selectedPet}
-      />
-    )}
-
-    {/* Delete Confirmation Modal */}
-    <DeleteConfirmationModal
-      show={showDeleteModal}
-      handleClose={() => setShowDeleteModal(false)}
-      handleConfirm={confirmDeletePet}
-      isDeleting={isDeleting}
-      deletionSuccess={deletionSuccess}
-      refreshPets={refreshPets} // Pass the refresh function
-    />
-  </Container>
-);
-
+    </Container>
+  );
 }
 
 export default Dashboard;
