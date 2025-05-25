@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import "../styles/Dashboard.css";
 import axios from "axios";
-import { Container, Button, Spinner } from "react-bootstrap";
+import { Container, Button, Spinner, Card } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -11,6 +11,7 @@ import PetDetailsModal from "../components/PetDetailsModal";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import PetListSection from "../components/PetListSection";
 import "react-loading-skeleton/dist/skeleton.css";
+import { FaWhatsapp } from "react-icons/fa";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -229,39 +230,67 @@ const Dashboard = () => {
   const cats = pets.filter((pet) => pet.species?.toLowerCase() === "cat");
 
   return (
-    <Container className="my-5">
-      <div className="d-flex justify-content-center align-items-center gap-3 mb-4">
+  <Container className="my-5">
+    <Card className="border-0 shadow-sm rounded-4 bg-light-subtle">
+      <Card.Body className="text-center px-5 py-5">
         {userLoading ? (
-          <Spinner animation="border" size="sm" />
+          <Spinner animation="border" size="lg" />
         ) : (
-          <h3 className="text-dark fw-bold m-0">Welcome back {user.name}</h3>
+          <>
+            <h1 className="display-5 fw-semibold text-dark mb-3">
+              Welcome back, {user.name}
+            </h1>
+
+            {/* WhatsApp Share Button */}
+            <div className="mb-3">
+              <Button
+                variant="outline-success"
+                size="lg"
+                onClick={handleShare}
+                className="d-inline-flex align-items-center gap-2 rounded-pill px-4 py-2 shadow-sm"
+                style={{
+                  fontWeight: 600,
+                }}
+              >
+                <FaWhatsapp size={20} />
+                Share on WhatsApp
+              </Button>
+            </div>
+
+            {/* Membership Status */}
+            <div className="mt-4">
+              {user.membershipActive ? (
+                <p className="text-success fw-medium fs-5">
+                  ✅ Member since{" "}
+                  <strong>
+                    {new Date(user.membershipStartDate).toLocaleDateString()}
+                  </strong>
+                </p>
+              ) : (
+                <p className="text-danger fw-medium fs-5">
+                  ❌ No active membership found
+                </p>
+              )}
+            </div>
+
+            {/* Add New Pet Button */}
+            <div className="mt-5">
+              <Button
+                variant="dark"
+                size="lg"
+                onClick={handleOpenModal}
+                className="px-5 py-3 rounded-pill fw-medium shadow-sm"
+              >
+                <FaPlus className="me-2" />
+                Add New Pet
+              </Button>
+            </div>
+          </>
         )}
+      </Card.Body>
+    </Card>
 
-        <Button variant="outline-success" size="sm" onClick={handleShare}>
-          Share on WhatsApp
-        </Button>
-      </div>
-
-      <div className="d-flex justify-content-center mb-4">
-        {!userLoading &&
-          (user.membershipActive ? (
-            <p className="text-success fw-semibold">
-              You have an active membership since{" "}
-              {new Date(user.membershipStartDate).toLocaleDateString()}.
-            </p>
-          ) : (
-            <p className="text-danger fw-semibold">
-              You do not have an active membership.
-            </p>
-          ))}
-      </div>
-
-      <div className="d-flex justify-content-center mb-4">
-        <Button variant="success" onClick={handleOpenModal}>
-          <FaPlus className="me-2" /> Add New Pet
-        </Button>
-      </div>
-
+    <div className="mt-5">
       <PetListSection
         title="Your Dogs"
         pets={dogs}
@@ -279,44 +308,47 @@ const Dashboard = () => {
         handleEditClick={handleEditClick}
         handleDeleteClick={handleDeleteClick}
       />
+    </div>
 
-      {!isEditMode && (
-        <AddPetModal
-          showModal={showModal}
-          closeModal={handleCloseModal}
-          refreshPets={refreshPets}
-        />
-      )}
-
-      {isEditMode && (
-        <EditPetModal
-          show={showModal}
-          formData={formData}
-          handleChange={handleChange}
-          handleClose={handleCloseModal}
-          handleSave={handleSaveChanges}
-          refreshPets={refreshPets}
-        />
-      )}
-
-      {showDetailsModal && selectedPet && (
-        <PetDetailsModal
-          show={showDetailsModal}
-          handleClose={handleCloseDetailsModal}
-          pet={selectedPet}
-        />
-      )}
-
-      <DeleteConfirmationModal
-        show={showDeleteModal}
-        handleClose={() => setShowDeleteModal(false)}
-        handleConfirm={confirmDeletePet}
-        isDeleting={isDeleting}
-        deletionSuccess={false}
+    {!isEditMode && (
+      <AddPetModal
+        showModal={showModal}
+        closeModal={handleCloseModal}
         refreshPets={refreshPets}
       />
-    </Container>
-  );
+    )}
+
+    {isEditMode && (
+      <EditPetModal
+        show={showModal}
+        formData={formData}
+        handleChange={handleChange}
+        handleClose={handleCloseModal}
+        handleSave={handleSaveChanges}
+        refreshPets={refreshPets}
+      />
+    )}
+
+    {showDetailsModal && selectedPet && (
+      <PetDetailsModal
+        show={showDetailsModal}
+        handleClose={handleCloseDetailsModal}
+        pet={selectedPet}
+      />
+    )}
+
+    <DeleteConfirmationModal
+      show={showDeleteModal}
+      handleClose={() => setShowDeleteModal(false)}
+      handleConfirm={confirmDeletePet}
+      isDeleting={isDeleting}
+      deletionSuccess={false}
+      refreshPets={refreshPets}
+    />
+  </Container>
+);
+
+
 };
 
 export default Dashboard;

@@ -103,3 +103,13 @@
 .dashboard-section .list-group-item:hover {
   background-color: #f8f9fa;
 }
+
+/* Don't have this anywhere near the share button unless intentional */
+.button:hover .whatsapp-button {
+  display: block; /* BAD if .whatsapp-button is meant to be shown only on click */
+}
+
+.whatsapp-button {
+  width: 100%;     /* BAD if it's unintended */
+  position: absolute; /* Only if scoped correctly */
+}
