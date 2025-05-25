@@ -1,34 +1,30 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-lone-blocks */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import "../styles/Dashboard.css";
 import axios from "axios";
-import {
-  Container,
-  Button,
-  Modal,
-  Spinner,
-  Form,
-  ListGroup,
-} from "react-bootstrap";
-import AddPetModal from "../components/AddPetModal";
-import { FaPlus, FaEdit, FaTrash, FaEye, FaCartPlus } from "react-icons/fa";
+import { Container, Button, Spinner } from "react-bootstrap";
+import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import PetDetailsModal from "../components/PetDetailsModal";
+
+import AddPetModal from "../components/AddPetModal";
 import EditPetModal from "../components/EditPetModal";
+import PetDetailsModal from "../components/PetDetailsModal";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
-import { Placeholder } from "react-bootstrap";
-import "react-loading-skeleton/dist/skeleton.css";
 import PetListSection from "../components/PetListSection";
-function Dashboard() {
+
+import "react-loading-skeleton/dist/skeleton.css";
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem("authToken");
+
   const [user, setUser] = useState({
     name: "",
     email: "",
     isAdmin: false,
-    membershipActive: "",
+    membershipActive: false,
     contact: "",
+    membershipStartDate: "",
     address: {
       street: "",
       city: "",
@@ -38,15 +34,14 @@ function Dashboard() {
     },
   });
 
-  const [membershipActive, setMembershipActive] = useState(false);
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userLoading, setUserLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
   const [currentPet, setCurrentPet] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
-  const [userLoading, setUserLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     species: "",
@@ -63,76 +58,64 @@ function Dashboard() {
   });
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [petToDelete, setPetToDelete] = useState(null);
-  const [deletionSuccess, setDeletionSuccess] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const handleShare = () => {
-    const message = encodeURIComponent(
-      "Check out Found Your Pet — a simple, smart way to help lost pets get home faster.   https://foundyourpet.vercel.app/"
-    );
-    const url = `https://wa.me/?text=${message}`;
-    window.open(url, "_blank");
-  };
 
-  const token = localStorage.getItem("authToken");
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        "https://foundyourpet-backend.onrender.com/api/users/me",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const userData = response.data.user;
 
-  // Inside Dashboard component
+      setUser({
+        name: userData.name?.trim() || "",
+        email: userData.email || "",
+        isAdmin: userData.isAdmin || false,
+        membershipActive: userData.membershipActive || false,
+        membershipStartDate: userData.membershipStartDate || "",
+        contact: userData.contact || "",
+        address: userData.address || {
+          street: "",
+          city: "",
+          province: "",
+          postalCode: "",
+          country: "",
+        },
+      });
+    } catch (error) {
+      console.error("Failed to fetch user info:", error);
+      toast.error("Failed to load user information.");
+    } finally {
+      setUserLoading(false);
+    }
+  }, [token]);
 
-  const refreshPets = () => {
-    fetchPets();
-  };
-
-  const fetchPets = async () => {
+  const fetchPets = useCallback(async () => {
     try {
       const response = await axios.get(
         "https://foundyourpet-backend.onrender.com/api/pets",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setPets(response.data);
     } catch (error) {
       console.error("Failed to fetch pets:", error);
+      toast.error("Could not load pets.");
     } finally {
       setLoading(false);
     }
+  }, [token]);
+
+  const refreshPets = () => fetchPets();
+
+  const handleOpenModal = () => {
+    setIsEditMode(false);
+    setShowModal(true);
   };
 
-  const handleDeleteClick = (petId) => {
-    setPetToDelete(petId);
-    setShowDeleteModal(true);
-  };
-
-  const confirmDeletePet = async () => {
-    if (!petToDelete) return;
-    setIsDeleting(true);
-
-    try {
-      await axios.delete(
-        `https://foundyourpet-backend.onrender.com/api/pets/${petToDelete}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        }
-      );
-
-      setPets((prevPets) => prevPets.filter((pet) => pet._id !== petToDelete));
-      toast.success("Pet deleted successfully");
-    } catch (error) {
-      console.error(
-        "Error deleting pet:",
-        error.response?.data || error.message
-      );
-      toast.error("Failed to delete pet");
-    } finally {
-      setShowDeleteModal(false);
-      setIsDeleting(false);
-      setPetToDelete(null);
-    }
-  };
+  const handleCloseModal = () => setShowModal(false);
 
   const handleViewDetails = async (pet) => {
     setDetailsLoading(true);
@@ -144,15 +127,20 @@ function Dashboard() {
       setSelectedPet(response.data);
       setShowDetailsModal(true);
     } catch (error) {
-      console.error("Failed to fetch latest pet details:", error);
+      console.error("Failed to fetch pet details:", error);
       toast.error("Could not load pet details.");
     } finally {
       setDetailsLoading(false);
     }
   };
 
+  const handleCloseDetailsModal = () => {
+    setShowDetailsModal(false);
+    setSelectedPet(null);
+  };
+
   const handleEditClick = (pet) => {
-    setIsEditMode(true); // Edit mode
+    setIsEditMode(true);
     setCurrentPet(pet);
     setFormData({
       name: pet.name || "",
@@ -160,9 +148,13 @@ function Dashboard() {
       breed: pet.breed || "",
       age: pet.age || "",
       gender: pet.gender || "",
+      dateOfBirth: pet.dateOfBirth || "",
       photoUrl: pet.photoUrl || "",
       color: pet.color || "",
       size: pet.size || "",
+      weight: pet.weight || "",
+      spayedNeutered: pet.spayedNeutered?.toString() || "",
+      microchipNumber: pet.microchipNumber || "",
     });
     setShowModal(true);
   };
@@ -171,20 +163,17 @@ function Dashboard() {
     try {
       const updatedData = {
         ...formData,
-        spayedNeutered: formData.spayedNeutered === "true", // Ensure conversion to boolean
+        spayedNeutered: formData.spayedNeutered === "true",
       };
-      console.log("Updated Pet Data: ", updatedData); // Debugging log
 
       await axios.put(
         `https://foundyourpet-backend.onrender.com/api/pets/${currentPet._id}`,
         updatedData,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Pet updated successfully!");
       setShowModal(false);
-      fetchPets(); // Refresh pets
+      fetchPets();
     } catch (error) {
       console.error("Failed to update pet:", error);
       toast.error("Failed to update pet.");
@@ -193,68 +182,50 @@ function Dashboard() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  const handleCloseDetailsModal = () => {
-    setShowDetailsModal(false);
-    setSelectedPet(null); // Clear selected pet
+  const handleDeleteClick = (petId) => {
+    setPetToDelete(petId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeletePet = async () => {
+    if (!petToDelete) return;
+    setIsDeleting(true);
+    try {
+      await axios.delete(
+        `https://foundyourpet-backend.onrender.com/api/pets/${petToDelete}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setPets((prev) => prev.filter((pet) => pet._id !== petToDelete));
+      toast.success("Pet deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting pet:", error);
+      toast.error("Failed to delete pet.");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+      setPetToDelete(null);
+    }
+  };
+
+  const handleShare = () => {
+    const message = encodeURIComponent(
+      "Check out Found Your Pet — a simple, smart way to help lost pets get home faster. https://foundyourpet.vercel.app/"
+    );
+    const url = `https://wa.me/?text=${message}`;
+    window.open(url, "_blank");
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      setUserLoading(true);
-      try {
-        const response = await axios.get(
-          "https://foundyourpet-backend.onrender.com/api/users/me",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        console.log("Fetched user:", response.data.user); // Confirm user object
-
-        const userData = response.data.user;
-
-        setUser({
-          name: userData.name?.trim() || "",
-          email: userData.email || "",
-          isAdmin: userData.isAdmin || false,
-          membershipActive: userData.membershipActive || false,
-          contact: userData.contact || "",
-          address: userData.address || {
-            street: "",
-            city: "",
-            province: "",
-            postalCode: "",
-            country: "",
-          },
-        });
-      } catch (error) {
-        console.error("Failed to fetch user info:", error);
-        toast.error("Failed to load user information.");
-      } finally {
-        setUserLoading(false);
-      }
-    };
-
     if (token) {
       fetchUser();
       fetchPets();
+    } else {
+      navigate("/login");
     }
-  }, [token]);
-
-  const handleOpenModal = () => {
-    setIsEditMode(false); // Add mode
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-  };
+  }, [token, fetchUser, fetchPets, navigate]);
 
   const dogs = pets.filter((pet) => pet.species?.toLowerCase() === "dog");
   const cats = pets.filter((pet) => pet.species?.toLowerCase() === "cat");
@@ -272,8 +243,6 @@ function Dashboard() {
           Share on WhatsApp
         </Button>
       </div>
-
-      <div>User Has a membership {user.membershipActive}</div>
 
       <div className="d-flex justify-content-center mb-4">
         {!userLoading &&
@@ -294,6 +263,7 @@ function Dashboard() {
           <FaPlus className="me-2" /> Add New Pet
         </Button>
       </div>
+
       <PetListSection
         title="Your Dogs"
         pets={dogs}
@@ -312,16 +282,14 @@ function Dashboard() {
         handleDeleteClick={handleDeleteClick}
       />
 
-      {/* Modals */}
       {!isEditMode && (
         <AddPetModal
           showModal={showModal}
           closeModal={handleCloseModal}
-          refreshPets={refreshPets} // ✅ add this
+          refreshPets={refreshPets}
         />
       )}
 
-      {/* Edit Pet Modal */}
       {isEditMode && (
         <EditPetModal
           show={showModal}
@@ -329,11 +297,11 @@ function Dashboard() {
           handleChange={handleChange}
           handleClose={handleCloseModal}
           handleSave={handleSaveChanges}
-          refreshPets={refreshPets} // Pass the refresh function
+          refreshPets={refreshPets}
         />
       )}
 
-      {showDetailsModal && (
+      {showDetailsModal && selectedPet && (
         <PetDetailsModal
           show={showDetailsModal}
           handleClose={handleCloseDetailsModal}
@@ -341,17 +309,16 @@ function Dashboard() {
         />
       )}
 
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         show={showDeleteModal}
         handleClose={() => setShowDeleteModal(false)}
         handleConfirm={confirmDeletePet}
         isDeleting={isDeleting}
-        deletionSuccess={deletionSuccess}
-        refreshPets={refreshPets} // Pass the refresh function
+        deletionSuccess={false}
+        refreshPets={refreshPets}
       />
     </Container>
   );
-}
+};
 
 export default Dashboard;
