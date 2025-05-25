@@ -5,13 +5,11 @@ import { Container, Button, Spinner } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
 import AddPetModal from "../components/AddPetModal";
 import EditPetModal from "../components/EditPetModal";
 import PetDetailsModal from "../components/PetDetailsModal";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import PetListSection from "../components/PetListSection";
-
 import "react-loading-skeleton/dist/skeleton.css";
 
 const Dashboard = () => {
