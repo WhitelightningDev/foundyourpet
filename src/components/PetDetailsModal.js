@@ -38,8 +38,9 @@ const PetDetailsModal = ({ show, handleClose, pet }) => {
   };
 
   const tagOrder = pet.tagOrder || null;
-  const deliveryStatus = pet.hasTag ? deliveryStatusLabel(tagOrder?.fulfillment?.status) : "—";
-  const trackingNumber = pet.hasTag ? tagOrder?.fulfillment?.pudo?.trackingNumber || "—" : "—";
+  const hasOrderedTag = pet.hasTag || !!tagOrder;
+  const deliveryStatus = hasOrderedTag ? deliveryStatusLabel(tagOrder?.fulfillment?.status) : "—";
+  const trackingNumber = hasOrderedTag ? tagOrder?.fulfillment?.pudo?.trackingNumber || "—" : "—";
   const purchasedAt = tagOrder?.purchasedAt ? new Date(tagOrder.purchasedAt) : null;
   const purchasedAtLabel = purchasedAt && !Number.isNaN(purchasedAt.getTime())
     ? purchasedAt.toLocaleString("en-ZA")
