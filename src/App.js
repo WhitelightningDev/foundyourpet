@@ -29,6 +29,7 @@ import SuccessPage from "./payments-response-pages/SuccessPage";
 import FailurePage from "./payments-response-pages/FailurePage";
 import CancelPage from "./payments-response-pages/CancelPage";
 import PetRedirect from "./pages/PetRedirect";
+import TagOrderTracking from "./pages/TagOrderTracking";
 
 function App() {
   return (
@@ -84,6 +85,14 @@ function App() {
                 element={
                   <PrivateRoute>
                     <Dashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/tag-orders/:paymentId"
+                element={
+                  <PrivateRoute>
+                    <TagOrderTracking />
                   </PrivateRoute>
                 }
               />
