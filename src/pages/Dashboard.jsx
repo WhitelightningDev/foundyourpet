@@ -192,6 +192,7 @@ const Dashboard = () => {
     setPetToDelete(petId);
     setShowDeleteModal(true);
   };
+  
 
   const confirmDeletePet = async () => {
     if (!petToDelete) return;
