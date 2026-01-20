@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { API_BASE_URL } from "../config/api";
+import { cn } from "@/lib/utils";
 
 const PetListSection = ({
   title,
@@ -17,6 +18,8 @@ const PetListSection = ({
   handleViewDetails,
   handleEditClick,
   handleDeleteClick,
+  showHeader = true,
+  className,
 }) => {
   const navigate = useNavigate();
 
@@ -51,11 +54,13 @@ const PetListSection = ({
     pet.photoUrl?.startsWith("http") ? pet.photoUrl : `${API_BASE_URL}${pet.photoUrl || ""}`;
 
   return (
-    <div className="mb-8">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold">{title}</h2>
-        <Badge variant="secondary">{pets.length}</Badge>
-      </div>
+    <div className={cn(showHeader ? "space-y-4" : "", className)}>
+      {showHeader ? (
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold">{title}</h2>
+          <Badge variant="secondary">{pets.length}</Badge>
+        </div>
+      ) : null}
 
       {loading ? (
         <PetListSkeleton count={3} />
@@ -127,7 +132,7 @@ const PetListSection = ({
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">
-          You don&apos;t have any {title.toLowerCase()} yet. Add a pet first, then subscribe before ordering a tag.
+          You don&apos;t have any pets yet. Add a pet first, then subscribe before ordering a tag.
         </p>
       )}
     </div>

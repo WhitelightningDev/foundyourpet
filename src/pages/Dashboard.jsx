@@ -14,14 +14,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Loader2, Mail, MapPin, PawPrint, Phone } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("authToken");
 
   const [user, setUser] = useState({
+    _id: "",
     name: "",
+    surname: "",
     email: "",
     isAdmin: false,
     membershipActive: false,
@@ -64,36 +67,36 @@ const Dashboard = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchUser = useCallback(async () => {
-  try {
-    const response = await axios.get(
-      `${API_BASE_URL}/api/users/me`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    const userData = response.data.user;
-    console.log("Fetched user data:", userData);  // <-- Log entire user object here
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const userData = response.data.user;
 
-    setUser({
-      name: userData.name?.trim() || "",
-      email: userData.email || "",
-      isAdmin: userData.isAdmin || false,
-      membershipActive: userData.membershipActive || false,
-      membershipStartDate: userData.membershipStartDate || "",  // <-- check this field
-      contact: userData.contact || "",
-      address: userData.address || {
-        street: "",
-        city: "",
-        province: "",
-        postalCode: "",
-        country: "",
-      },
-    });
-  } catch (error) {
-    console.error("Failed to fetch user info:", error);
-    toast.error("Failed to load user information.");
-  } finally {
-    setUserLoading(false);
-  }
-}, [token]);
+      setUser({
+        _id: userData._id || "",
+        name: userData.name?.trim() || "",
+        surname: userData.surname?.trim() || "",
+        email: userData.email || "",
+        isAdmin: userData.isAdmin || false,
+        membershipActive: userData.membershipActive || false,
+        membershipStartDate: userData.membershipStartDate ?? "",
+        contact: userData.contact || "",
+        address: userData.address || {
+          street: "",
+          city: "",
+          province: "",
+          postalCode: "",
+          country: "",
+        },
+      });
+    } catch (error) {
+      console.error("Failed to fetch user info:", error);
+      toast.error("Failed to load user information.");
+    } finally {
+      setUserLoading(false);
+    }
+  }, [token]);
 
 
   const fetchPets = useCallback(async () => {
@@ -212,7 +215,7 @@ const Dashboard = () => {
 
   const handleShare = () => {
     const message = encodeURIComponent(
-      "Check out Found Your Pet — a simple, smart way to help lost pets get home faster. https://foundyourpet.vercel.app/"
+      "Check out Found Your Pet — a simple, smart way to help lost pets get home faster. https://www.foundyourpet.co.za/"
     );
     const url = `https://wa.me/?text=${message}`;
     window.open(url, "_blank");
@@ -227,149 +230,297 @@ const Dashboard = () => {
     }
   }, [token, fetchUser, fetchPets, navigate]);
 
-  const dogs = pets.filter((pet) => pet.species?.toLowerCase() === "dog");
-  const cats = pets.filter((pet) => pet.species?.toLowerCase() === "cat");
-  const activeMembershipCount = pets.filter((pet) => pet.hasMembership).length;
-  const canOrderTags = pets.length > 0;
+  const normalizeUserId = (value) => {
+    if (!value) return "";
+    if (typeof value === "string") return value;
+    if (typeof value === "object") return value._id || "";
+    return "";
+  };
+
+  const visiblePets = pets.filter((pet) => {
+    const currentUserId = normalizeUserId(user?._id);
+    const petUserId = normalizeUserId(pet?.userId);
+    if (!currentUserId || !petUserId) return true;
+    return petUserId === currentUserId;
+  });
+
+  const dogs = visiblePets.filter((pet) => pet.species?.toLowerCase() === "dog");
+  const cats = visiblePets.filter((pet) => pet.species?.toLowerCase() === "cat");
+  const subscribedPets = visiblePets.filter((pet) => pet.hasMembership);
+  const canOrderTags = visiblePets.length > 0;
+
+  const initials = (() => {
+    const first = (user?.name || "").trim();
+    const last = (user?.surname || "").trim();
+    const a = first ? first[0] : "";
+    const b = last ? last[0] : "";
+    return (a + b).toUpperCase() || "U";
+  })();
+
+  const locationLine = (() => {
+    const city = user?.address?.city?.trim();
+    const province = user?.address?.province?.trim();
+    const country = user?.address?.country?.trim();
+    return [city, province, country].filter(Boolean).join(", ");
+  })();
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10">
-      <Card className="shadow-sm">
-        <CardHeader className="text-center">
-          {userLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <>
-              <CardTitle className="text-3xl">Welcome back, {user.name}</CardTitle>
-              <CardDescription>
-                Subscriptions are billed monthly per pet. Small: R50 • Medium: R70 • Large: R100.
-              </CardDescription>
-            </>
-          )}
-        </CardHeader>
+    <main className="min-h-screen bg-muted/40">
+      <div className="mx-auto w-full max-w-6xl px-4 py-8">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+            <p className="text-sm text-muted-foreground">
+              Manage your account and your pets in one place.
+            </p>
+          </div>
 
-        {!userLoading && (
-          <CardContent className="space-y-6">
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <Badge variant="secondary">
-                Active subscriptions: {activeMembershipCount} / {pets.length}
-              </Badge>
-              <Badge variant="outline">Choose a tier when you add a pet</Badge>
-            </div>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={handleOpenModal} title="Add a new pet">
+              <FaPlus />
+              Add pet
+            </Button>
+            <Button variant="outline" onClick={handleShare}>
+              <FaWhatsapp />
+              Share
+            </Button>
+          </div>
+        </div>
 
-            <Separator />
+        <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
+          <div className="space-y-6">
+            <Card className="shadow-sm">
+              <CardHeader className="space-y-4">
+                {userLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-xl font-semibold text-primary">
+                        {initials}
+                      </div>
+                      <div className="min-w-0">
+                        <CardTitle className="truncate text-xl">
+                          {user.name} {user.surname}
+                        </CardTitle>
+                        {locationLine ? (
+                          <CardDescription className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            <span className="truncate">{locationLine}</span>
+                          </CardDescription>
+                        ) : null}
+                      </div>
+                    </div>
 
-            <div className="flex flex-col items-center justify-center gap-3">
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <Button
-                  onClick={handleOpenModal}
-                  className="rounded-full px-6"
-                  title="Add a new pet"
-                >
-                  <FaPlus />
-                  Add New Pet
-                </Button>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant={user.membershipActive ? "default" : "secondary"}>
+                        {user.membershipActive ? "Membership active" : "No active membership"}
+                      </Badge>
+                      <Badge variant="outline">
+                        Subscribed pets: {subscribedPets.length} / {visiblePets.length}
+                      </Badge>
+                    </div>
+                  </>
+                )}
+              </CardHeader>
 
-                <Button
-                  variant="outline"
-                  onClick={handleShare}
-                  className="rounded-full px-6"
-                >
-                  <FaWhatsapp />
-                  Share on WhatsApp
-                </Button>
-              </div>
+              {!userLoading ? (
+                <CardContent className="space-y-4">
+                  <Separator />
 
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <Button variant="outline" onClick={() => navigate("/prices")}>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Mail className="h-4 w-4" />
+                      <span className="truncate text-foreground">{user.email}</span>
+                    </div>
+                    {user.contact ? (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Phone className="h-4 w-4" />
+                        <span className="truncate text-foreground">{user.contact}</span>
+                      </div>
+                    ) : null}
+                    {user.membershipStartDate ? (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span className="truncate text-foreground">
+                          Member since {String(user.membershipStartDate)}
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="rounded-lg border bg-background p-3">
+                    <p className="text-xs font-medium text-muted-foreground">Address</p>
+                    <p className="mt-1 text-sm">
+                      {[user.address?.street, user.address?.city, user.address?.province]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {[user.address?.postalCode, user.address?.country].filter(Boolean).join(", ")}
+                    </p>
+                  </div>
+                </CardContent>
+              ) : null}
+            </Card>
+
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg">Quick actions</CardTitle>
+                <CardDescription>Order tags and manage subscriptions.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button variant="outline" onClick={() => navigate("/prices")} className="w-full">
                   View pricing
                 </Button>
                 <Button
                   onClick={() => navigate("/select-tag/standard")}
                   disabled={!canOrderTags}
+                  className="w-full"
                 >
                   Order tags (R250 each)
                 </Button>
-              </div>
 
-              <div className="max-w-2xl rounded-lg border bg-muted/40 p-4 text-left text-sm text-muted-foreground">
-                <p className="font-medium text-foreground">
-                  Add a pet first before buying a tag.
-                </p>
-                <p className="mt-1">
-                  Tags can only be ordered for pets with an active subscription.
-                </p>
-                {!canOrderTags && (
-                  <p className="mt-2">
-                    You don&apos;t have any pets yet—add one to continue.
+                <div className="rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">
+                  <p className="flex items-center gap-2 font-medium text-foreground">
+                    <PawPrint className="h-4 w-4" />
+                    Add a pet before ordering tags
                   </p>
-                )}
-              </div>
+                  <p className="mt-1">
+                    Tags can only be ordered for pets with an active subscription.
+                  </p>
+                  {!canOrderTags ? (
+                    <p className="mt-2">You don&apos;t have any pets yet—add one to continue.</p>
+                  ) : null}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Card className="shadow-sm">
+                <CardHeader className="space-y-1">
+                  <CardDescription>Total pets</CardDescription>
+                  <CardTitle className="text-3xl">{visiblePets.length}</CardTitle>
+                </CardHeader>
+              </Card>
+              <Card className="shadow-sm">
+                <CardHeader className="space-y-1">
+                  <CardDescription>Subscribed</CardDescription>
+                  <CardTitle className="text-3xl">{subscribedPets.length}</CardTitle>
+                </CardHeader>
+              </Card>
+              <Card className="shadow-sm">
+                <CardHeader className="space-y-1">
+                  <CardDescription>Dogs</CardDescription>
+                  <CardTitle className="text-3xl">{dogs.length}</CardTitle>
+                </CardHeader>
+              </Card>
+              <Card className="shadow-sm">
+                <CardHeader className="space-y-1">
+                  <CardDescription>Cats</CardDescription>
+                  <CardTitle className="text-3xl">{cats.length}</CardTitle>
+                </CardHeader>
+              </Card>
             </div>
-          </CardContent>
+
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg">Your pets</CardTitle>
+                <CardDescription>View, edit, subscribe, and order tags.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="all">
+                  <TabsList className="w-full justify-start">
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="dogs">Dogs</TabsTrigger>
+                    <TabsTrigger value="cats">Cats</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="all">
+                    <PetListSection
+                      title="All pets"
+                      showHeader={false}
+                      pets={visiblePets}
+                      loading={loading}
+                      user={user}
+                      handleViewDetails={handleViewDetails}
+                      handleEditClick={handleEditClick}
+                      handleDeleteClick={handleDeleteClick}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="dogs">
+                    <PetListSection
+                      title="Dogs"
+                      showHeader={false}
+                      pets={dogs}
+                      loading={loading}
+                      user={user}
+                      handleViewDetails={handleViewDetails}
+                      handleEditClick={handleEditClick}
+                      handleDeleteClick={handleDeleteClick}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="cats">
+                    <PetListSection
+                      title="Cats"
+                      showHeader={false}
+                      pets={cats}
+                      loading={loading}
+                      user={user}
+                      handleViewDetails={handleViewDetails}
+                      handleEditClick={handleEditClick}
+                      handleDeleteClick={handleDeleteClick}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {!isEditMode && (
+          <AddPetModal
+            showModal={showModal}
+            closeModal={handleCloseModal}
+            refreshPets={refreshPets}
+          />
         )}
-      </Card>
 
-      <div className="mt-5">
-        <PetListSection
-          title="Your Dogs"
-          pets={dogs}
-          loading={loading}
-          user={user}
-          handleViewDetails={handleViewDetails}
-          handleEditClick={handleEditClick}
-          handleDeleteClick={handleDeleteClick}
-        />
+        {isEditMode && (
+          <EditPetModal
+            show={showModal}
+            formData={formData}
+            handleChange={handleChange}
+            handleClose={handleCloseModal}
+            handleSave={handleSaveChanges}
+            refreshPets={refreshPets}
+          />
+        )}
 
-        <PetListSection
-          title="Your Cats"
-          pets={cats}
-          loading={loading}
-          user={user}
-          handleViewDetails={handleViewDetails}
-          handleEditClick={handleEditClick}
-          handleDeleteClick={handleDeleteClick}
+        {showDetailsModal && selectedPet && (
+          <PetDetailsModal
+            show={showDetailsModal}
+            handleClose={handleCloseDetailsModal}
+            pet={selectedPet}
+          />
+        )}
+
+        <DeleteConfirmationModal
+          show={showDeleteModal}
+          handleClose={() => setShowDeleteModal(false)}
+          handleConfirm={confirmDeletePet}
+          isDeleting={isDeleting}
+          deletionSuccess={false}
+          refreshPets={refreshPets}
         />
       </div>
-
-      {!isEditMode && (
-        <AddPetModal
-          showModal={showModal}
-          closeModal={handleCloseModal}
-          refreshPets={refreshPets}
-        />
-      )}
-
-      {isEditMode && (
-        <EditPetModal
-          show={showModal}
-          formData={formData}
-          handleChange={handleChange}
-          handleClose={handleCloseModal}
-          handleSave={handleSaveChanges}
-          refreshPets={refreshPets}
-        />
-      )}
-
-      {showDetailsModal && selectedPet && (
-        <PetDetailsModal
-          show={showDetailsModal}
-          handleClose={handleCloseDetailsModal}
-          pet={selectedPet}
-        />
-      )}
-
-      <DeleteConfirmationModal
-        show={showDeleteModal}
-        handleClose={() => setShowDeleteModal(false)}
-        handleConfirm={confirmDeletePet}
-        isDeleting={isDeleting}
-        deletionSuccess={false}
-        refreshPets={refreshPets}
-      />
-    </div>
+    </main>
   );
 };
 
