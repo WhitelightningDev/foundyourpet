@@ -9,7 +9,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -503,18 +502,41 @@ function AdminDashboard() {
 
               <div className="mt-5">
                 {loading ? (
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {Array.from({ length: 6 }).map((_, idx) => (
-                      <Card key={idx}>
-                        <CardHeader className="space-y-2">
-                          <Skeleton className="h-5 w-32" />
+                  <div className="overflow-hidden rounded-xl border bg-card">
+                    <div className="hidden grid-cols-12 gap-3 border-b bg-muted/30 px-4 py-3 text-xs font-medium text-muted-foreground md:grid">
+                      <div className="col-span-4">User</div>
+                      <div className="col-span-4">Email</div>
+                      <div className="col-span-2">Contact</div>
+                      <div className="col-span-1">Role</div>
+                      <div className="col-span-1 text-right">Action</div>
+                    </div>
+                    {Array.from({ length: 8 }).map((_, idx) => (
+                      <div
+                        key={idx}
+                        className="grid grid-cols-12 items-center gap-3 border-b px-4 py-3 last:border-b-0"
+                      >
+                        <div className="col-span-12 md:col-span-4">
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="h-9 w-9 rounded-xl" />
+                            <div className="min-w-0 space-y-2">
+                              <Skeleton className="h-4 w-36" />
+                              <Skeleton className="h-3 w-44 md:hidden" />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-span-12 hidden md:col-span-4 md:block">
                           <Skeleton className="h-4 w-52" />
-                        </CardHeader>
-                        <CardFooter className="flex items-center justify-between">
+                        </div>
+                        <div className="col-span-6 md:col-span-2">
+                          <Skeleton className="h-4 w-20" />
+                        </div>
+                        <div className="col-span-6 flex justify-end md:col-span-1 md:justify-start">
                           <Skeleton className="h-6 w-16" />
+                        </div>
+                        <div className="col-span-12 flex justify-end md:col-span-1">
                           <Skeleton className="h-9 w-20" />
-                        </CardFooter>
-                      </Card>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 ) : (
