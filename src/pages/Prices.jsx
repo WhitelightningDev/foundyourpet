@@ -286,7 +286,7 @@ function Prices() {
 
         <div className="mt-10 flex flex-col items-center justify-center gap-3 text-center sm:flex-row">
           <Button asChild size="lg" className="w-full sm:w-auto">
-            <Link to="/Dashboard">Go to dashboard</Link>
+            <Link to="/dashboard">Go to dashboard</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
             <Link to="/contact">Ask a pricing question</Link>

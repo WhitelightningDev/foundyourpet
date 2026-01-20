@@ -246,7 +246,7 @@ function Home() {
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Button asChild size="lg" className="gap-2">
-                  <Link to="/Dashboard">
+                  <Link to="/dashboard">
                     Get Started <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>

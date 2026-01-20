@@ -36,7 +36,7 @@ function Features() {
         </p>
         <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button asChild size="lg" className="w-full sm:w-auto">
-            <Link to="/Dashboard">Add a pet</Link>
+            <Link to="/dashboard">Add a pet</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
             <Link to="/prices">View pricing</Link>
