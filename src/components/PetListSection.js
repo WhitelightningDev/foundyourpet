@@ -23,6 +23,21 @@ const PetListSection = ({
 }) => {
   const navigate = useNavigate();
 
+  const parseDate = (value) => {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+
+  const formatDate = (date) =>
+    date
+      ? date.toLocaleDateString("en-ZA", {
+          year: "numeric",
+          month: "short",
+          day: "2-digit",
+        })
+      : null;
+
   const getMonthlyPriceForSize = (size) => {
     const normalizedSize = (size || "").toString().trim().toLowerCase();
     if (normalizedSize === "small") return 50;
@@ -90,6 +105,37 @@ const PetListSection = ({
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{pet.breed}</p>
+                    {pet.hasMembership ? (
+                      (() => {
+                        const membershipStartDate = parseDate(
+                          pet.membershipStartDate ||
+                            pet.subscriptionStartDate ||
+                            pet.membershipStartedAt ||
+                            pet.membershipStart
+                        );
+                        const nextDebitDate = parseDate(
+                          pet.nextDebitDate ||
+                            pet.nextBillingDate ||
+                            pet.nextChargeDate ||
+                            pet.nextDebitAt
+                        );
+                        const monthlyDebitDay = (nextDebitDate || membershipStartDate)?.getDate?.() || null;
+                        const startedLabel = membershipStartDate ? `Started ${formatDate(membershipStartDate)}` : null;
+                        const debitLabel = nextDebitDate
+                          ? `Next debit ${formatDate(nextDebitDate)}`
+                          : monthlyDebitDay
+                            ? `Monthly debit day: ${monthlyDebitDay}`
+                            : null;
+
+                        if (!startedLabel && !debitLabel) return null;
+
+                        return (
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {[startedLabel, debitLabel].filter(Boolean).join(" • ")}
+                          </p>
+                        );
+                      })()
+                    ) : null}
                   </div>
                 </div>
 

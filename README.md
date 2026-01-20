@@ -63,6 +63,10 @@ Create a .env file:
 MONGO_URI=your_mongodb_uri
 JWT_SECRET=your_jwt_secret
 YOCO_SECRET_KEY=your_yoco_secret
+FRONTEND_URL=https://www.foundyourpet.co.za
+
+`FRONTEND_URL` is used by the backend payment flow to build the redirect URLs back to the frontend:
+`/payment-success`, `/payment-failure`, `/payment-cancel`.
 Frontend
 
 cd frontend
