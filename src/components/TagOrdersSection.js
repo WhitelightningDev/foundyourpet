@@ -9,16 +9,38 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const statusLabel = (status) => {
   const normalized = (status || "unfulfilled").toString().toLowerCase();
   if (normalized === "unfulfilled") return "Unfulfilled";
   if (normalized === "processing") return "Processing";
-  if (normalized === "submitted") return "Submitted";
+  if (normalized === "submitted") return "Submitted to PUDO";
   if (normalized === "shipped") return "Shipped";
   if (normalized === "delivered") return "Delivered";
   if (normalized === "cancelled") return "Cancelled";
   return normalized || "Unfulfilled";
+};
+
+const normalizeStatus = (status) =>
+  (status || "unfulfilled").toString().trim().toLowerCase();
+
+const extractTotalFromResponse = (response) => {
+  const candidates = [
+    response?.data?.data?.total,
+    response?.data?.data?.count,
+    response?.data?.data?.pagination?.total,
+    response?.data?.pagination?.total,
+    response?.data?.total,
+    response?.data?.count,
+  ];
+  for (const value of candidates) {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string" && value.trim() !== "" && Number.isFinite(Number(value))) {
+      return Number(value);
+    }
+  }
+  return null;
 };
 
 const badgeVariantForStatus = (status) => {
@@ -50,35 +72,53 @@ function TagOrdersSection({ token }) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
 
+  const [qInput, setQInput] = useState("");
   const [q, setQ] = useState("");
-  const [fulfillmentStatus, setFulfillmentStatus] = useState("open");
+  const [statusTab, setStatusTab] = useState("unfulfilled");
+  const [tabCounts, setTabCounts] = useState({});
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const resolvedFulfillmentStatus = useMemo(() => {
-    if (fulfillmentStatus === "open") return "";
-    return fulfillmentStatus;
-  }, [fulfillmentStatus]);
+  const statusTabs = useMemo(
+    () => [
+      { value: "all", label: "All" },
+      { value: "unfulfilled", label: "Unfulfilled" },
+      { value: "processing", label: "Processing" },
+      { value: "submitted", label: "Submitted" },
+      { value: "shipped", label: "Shipped" },
+      { value: "delivered", label: "Delivered" },
+      { value: "cancelled", label: "Cancelled" },
+    ],
+    []
+  );
 
   const fetchOrders = useCallback(
-    async ({ showSpinner } = {}) => {
+    async ({ showSpinner, tab, query } = {}) => {
       if (!token) return;
       if (showSpinner) setLoading(true);
       setRefreshing(!showSpinner);
       setError("");
       try {
+        const resolvedTab = (tab || "all").toString();
+        const resolvedQuery = (query || "").toString().trim();
         const res = await axios.get(`${API_BASE_URL}/api/payment/admin/tag-orders`, {
           headers: { Authorization: `Bearer ${token}` },
           params: {
-            q: q.trim() || undefined,
-            fulfillmentStatus: resolvedFulfillmentStatus || undefined,
+            q: resolvedQuery || undefined,
+            fulfillmentStatus: resolvedTab === "all" ? undefined : resolvedTab,
             limit: 50,
             skip: 0,
           },
         });
-        setOrders(res.data?.data?.orders || []);
+        const nextOrders = res.data?.data?.orders || [];
+        setOrders(nextOrders);
+        const total = extractTotalFromResponse(res);
+        setTabCounts((prev) => ({
+          ...prev,
+          [resolvedTab]: total ?? nextOrders.length,
+        }));
       } catch (err) {
         console.error("Failed to load tag orders:", err);
         setError(err?.response?.data?.message || "Failed to load tag orders");
@@ -87,12 +127,53 @@ function TagOrdersSection({ token }) {
         setRefreshing(false);
       }
     },
-    [token, q, resolvedFulfillmentStatus]
+    [token]
   );
 
   useEffect(() => {
-    fetchOrders({ showSpinner: true });
-  }, [fetchOrders]);
+    fetchOrders({ showSpinner: true, tab: statusTab, query: q });
+  }, [fetchOrders, q, statusTab]);
+
+  useEffect(() => {
+    if (!token) return undefined;
+    let mounted = true;
+
+    const loadCounts = async () => {
+      const resolvedQuery = (q || "").toString().trim();
+      const requests = statusTabs.map((t) =>
+        axios.get(`${API_BASE_URL}/api/payment/admin/tag-orders`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            q: resolvedQuery || undefined,
+            fulfillmentStatus: t.value === "all" ? undefined : t.value,
+            limit: 1,
+            skip: 0,
+          },
+        })
+      );
+
+      const results = await Promise.allSettled(requests);
+      if (!mounted) return;
+
+      const next = {};
+      results.forEach((result, idx) => {
+        const tab = statusTabs[idx]?.value;
+        if (!tab || result.status !== "fulfilled") return;
+        const total = extractTotalFromResponse(result.value);
+        if (total == null) return;
+        next[tab] = total;
+      });
+
+      if (Object.keys(next).length) {
+        setTabCounts((prev) => ({ ...prev, ...next }));
+      }
+    };
+
+    loadCounts();
+    return () => {
+      mounted = false;
+    };
+  }, [q, statusTabs, token]);
 
   const openFulfillment = (order) => {
     setSelectedOrder(order);
@@ -111,12 +192,16 @@ function TagOrdersSection({ token }) {
       );
 
       const updatedPayment = res.data?.data || null;
+      const nextStatus = normalizeStatus(updatedPayment?.fulfillment?.status || payload?.status);
       if (updatedPayment?._id) {
         setOrders((prev) =>
           prev.map((o) => (o.paymentId === updatedPayment._id ? { ...o, fulfillment: updatedPayment.fulfillment } : o))
         );
+      }
+      if (statusTab !== "all" && nextStatus && nextStatus !== statusTab) {
+        setStatusTab(nextStatus);
       } else {
-        await fetchOrders({ showSpinner: false });
+        await fetchOrders({ showSpinner: false, tab: statusTab, query: q });
       }
       setDialogOpen(false);
     } catch (err) {
@@ -141,38 +226,54 @@ function TagOrdersSection({ token }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <Tabs value={statusTab} onValueChange={setStatusTab}>
+          <div className="overflow-x-auto pb-1">
+            <TabsList className="w-max justify-start">
+              {statusTabs.map((t) => (
+                <TabsTrigger key={t.value} value={t.value}>
+                  <span className="flex items-center gap-2">
+                    <span>{t.label}</span>
+                    <span className="rounded-md bg-background/70 px-1.5 py-0.5 text-[11px] text-foreground shadow-sm ring-1 ring-border">
+                      {loading && t.value === statusTab
+                        ? "—"
+                        : tabCounts?.[t.value] ?? (t.value === statusTab && !loading ? orders.length : "—")}
+                    </span>
+                  </span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+        </Tabs>
+
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-1 flex-col gap-3 sm:flex-row">
             <div className="flex-1">
               <Input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
+                value={qInput}
+                onChange={(e) => setQInput(e.target.value)}
                 placeholder="Search orders (email, city, tag type)…"
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter") return;
+                  e.preventDefault();
+                  setQ(qInput);
+                }}
               />
-            </div>
-            <div className="sm:w-[220px]">
-              <select
-                value={fulfillmentStatus}
-                onChange={(e) => setFulfillmentStatus(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                aria-label="Fulfillment status"
-              >
-                <option value="open">Open (default)</option>
-                <option value="unfulfilled">Unfulfilled</option>
-                <option value="processing">Processing</option>
-                <option value="submitted">Submitted</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
             </div>
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => fetchOrders({ showSpinner: true })} disabled={loading}>
+            <Button
+              variant="outline"
+              onClick={() => setQ(qInput)}
+              disabled={loading}
+            >
               Search
             </Button>
-            <Button variant="secondary" onClick={() => fetchOrders({ showSpinner: false })} disabled={loading || refreshing}>
+            <Button
+              variant="secondary"
+              onClick={() => fetchOrders({ showSpinner: false, tab: statusTab, query: q })}
+              disabled={loading || refreshing}
+            >
               {refreshing ? "Refreshing..." : "Refresh"}
             </Button>
           </div>
@@ -195,75 +296,127 @@ function TagOrdersSection({ token }) {
             No tag orders found.
           </div>
         ) : (
-          <div className="overflow-hidden rounded-xl border bg-card">
-            <div className="hidden grid-cols-12 gap-3 border-b bg-muted/30 px-4 py-3 text-xs font-medium text-muted-foreground lg:grid">
-              <div className="col-span-2">Purchased</div>
-              <div className="col-span-2">Tag</div>
-              <div className="col-span-2">Amount</div>
-              <div className="col-span-2">Customer</div>
-              <div className="col-span-3">Address</div>
-              <div className="col-span-1 text-right">Action</div>
-            </div>
-
-            {orders.map((order) => {
-              const fulfillment = order.fulfillment || {};
-              const status = fulfillment.status || "unfulfilled";
-              const shipping = order.shipping || {};
-              const fullName = [shipping.name, shipping.surname].filter(Boolean).join(" ").trim();
-              const purchasedAt = order.purchasedAt ? new Date(order.purchasedAt).toLocaleString() : "—";
-
+          <div className="rounded-xl border bg-card">
+            {(() => {
+              const showPudoColumns = ["all", "processing", "submitted", "shipped", "delivered"].includes(statusTab);
+              const gridCols = showPudoColumns
+                ? "lg:grid-cols-[180px_170px_130px_220px_200px_200px_1fr_auto]"
+                : "lg:grid-cols-[180px_170px_130px_220px_1fr_auto]";
+              const rowGrid = `grid gap-3 ${gridCols}`;
               return (
-                <div
-                  key={order.paymentId}
-                  className="grid grid-cols-12 gap-3 border-b px-4 py-3 last:border-b-0 hover:bg-accent/30"
-                >
-                  <div className="col-span-12 lg:col-span-2">
-                    <div className="text-sm font-medium">{purchasedAt}</div>
-                    <div className="truncate font-mono text-[11px] text-muted-foreground">
-                      {order.paymentId}
+                <div className="overflow-x-auto">
+                  <div className={showPudoColumns ? "min-w-[1400px]" : "min-w-[1100px]"}>
+                    <div
+                      className={`hidden lg:grid ${gridCols} gap-3 border-b bg-muted/30 px-4 py-3 text-xs font-medium text-muted-foreground`}
+                    >
+                      <div>Purchased</div>
+                      <div>Tag</div>
+                      <div>Amount</div>
+                      <div>Customer</div>
+                      {showPudoColumns ? (
+                        <>
+                          <div>PUDO shipment ID</div>
+                          <div>PUDO tracking #</div>
+                        </>
+                      ) : null}
+                      <div>Address</div>
+                      <div className="text-right">Action</div>
                     </div>
-                  </div>
 
-                  <div className="col-span-12 lg:col-span-2">
-                    <div className="text-sm font-medium">{order.tagType || "—"}</div>
-                    <div className="text-xs text-muted-foreground">{order.packageType || "—"}</div>
-                    <div className="mt-1">
-                      <Badge variant={badgeVariantForStatus(status)}>{statusLabel(status)}</Badge>
-                    </div>
-                  </div>
+                    {orders.map((order) => {
+                      const fulfillment = order.fulfillment || {};
+                      const pudo = fulfillment?.pudo || {};
+                      const status = fulfillment.status || "unfulfilled";
+                      const shipping = order.shipping || {};
+                      const fullName = [shipping.name, shipping.surname].filter(Boolean).join(" ").trim();
+                      const purchasedAt = order.purchasedAt ? new Date(order.purchasedAt).toLocaleString() : "—";
 
-                  <div className="col-span-6 lg:col-span-2">
-                    <div className="text-sm font-medium">
-                      {order.currency || "ZAR"} {order.amountPaid}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Qty: {Number.isFinite(order.quantity) ? order.quantity : order.pets?.length || 0}
-                    </div>
-                  </div>
+                      return (
+                        <div
+                          key={order.paymentId}
+                          className={`${rowGrid} border-b px-4 py-3 last:border-b-0 hover:bg-accent/30`}
+                        >
+                          <div>
+                            <div className="text-xs font-medium text-muted-foreground lg:hidden">Purchased</div>
+                            <div className="text-sm font-medium">{purchasedAt}</div>
+                            <div className="truncate font-mono text-[11px] text-muted-foreground">
+                              {order.paymentId}
+                            </div>
+                          </div>
 
-                  <div className="col-span-6 lg:col-span-2">
-                    <div className="truncate text-sm font-medium">{fullName || "—"}</div>
-                    <div className="truncate text-xs text-muted-foreground">{shipping.email || "—"}</div>
-                    <div className="truncate text-xs text-muted-foreground">{shipping.contact || "—"}</div>
-                  </div>
+                          <div>
+                            <div className="text-xs font-medium text-muted-foreground lg:hidden">Tag</div>
+                            <div className="text-sm font-medium">{order.tagType || "—"}</div>
+                            <div className="text-xs text-muted-foreground">{order.packageType || "—"}</div>
+                            <div className="mt-1">
+                              <Badge variant={badgeVariantForStatus(status)}>{statusLabel(status)}</Badge>
+                            </div>
+                          </div>
 
-                  <div className="col-span-12 lg:col-span-3">
-                    <div className="text-sm">{formatAddress(shipping.address)}</div>
-                    {Array.isArray(order.pets) && order.pets.length ? (
-                      <div className="mt-1 truncate text-xs text-muted-foreground">
-                        Pets: {order.pets.map((p) => p?.name).filter(Boolean).join(", ") || "—"}
-                      </div>
-                    ) : null}
-                  </div>
+                          <div>
+                            <div className="text-xs font-medium text-muted-foreground lg:hidden">Amount</div>
+                            <div className="text-sm font-medium">
+                              {order.currency || "ZAR"} {order.amountPaid}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Qty: {Number.isFinite(order.quantity) ? order.quantity : order.pets?.length || 0}
+                            </div>
+                          </div>
 
-                  <div className="col-span-12 flex justify-end lg:col-span-1">
-                    <Button size="sm" variant="outline" onClick={() => openFulfillment(order)}>
-                      Edit
-                    </Button>
+                          <div>
+                            <div className="text-xs font-medium text-muted-foreground lg:hidden">Customer</div>
+                            <div className="truncate text-sm font-medium">{fullName || "—"}</div>
+                            <div className="truncate text-xs text-muted-foreground">{shipping.email || "—"}</div>
+                            <div className="truncate text-xs text-muted-foreground">{shipping.contact || "—"}</div>
+                          </div>
+
+                          {showPudoColumns ? (
+                            <>
+                              <div>
+                                <div className="text-xs font-medium text-muted-foreground lg:hidden">PUDO shipment ID</div>
+                                <div className="truncate font-mono text-sm">{pudo?.shipmentId || "—"}</div>
+                              </div>
+                              <div>
+                                <div className="text-xs font-medium text-muted-foreground lg:hidden">PUDO tracking #</div>
+                                <div className="truncate font-mono text-sm">{pudo?.trackingNumber || "—"}</div>
+                                {pudo?.labelUrl ? (
+                                  <div className="mt-1">
+                                    <a
+                                      href={pudo.labelUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-xs font-medium text-primary underline-offset-4 hover:underline"
+                                    >
+                                      Open label
+                                    </a>
+                                  </div>
+                                ) : null}
+                              </div>
+                            </>
+                          ) : null}
+
+                          <div>
+                            <div className="text-xs font-medium text-muted-foreground lg:hidden">Address</div>
+                            <div className="text-sm">{formatAddress(shipping.address)}</div>
+                            {Array.isArray(order.pets) && order.pets.length ? (
+                              <div className="mt-1 truncate text-xs text-muted-foreground">
+                                Pets: {order.pets.map((p) => p?.name).filter(Boolean).join(", ") || "—"}
+                              </div>
+                            ) : null}
+                          </div>
+
+                          <div className="flex justify-end lg:justify-end">
+                            <Button size="sm" variant="outline" onClick={() => openFulfillment(order)}>
+                              Edit
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
-            })}
+            })()}
           </div>
         )}
       </CardContent>
@@ -280,4 +433,3 @@ function TagOrdersSection({ token }) {
 }
 
 export default TagOrdersSection;
-

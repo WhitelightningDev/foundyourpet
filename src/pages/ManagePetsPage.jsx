@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import {
   Container,
   Row,
@@ -12,6 +13,7 @@ import {
   Form,
 } from "react-bootstrap";
 import { FaPaw, FaDog, FaCat } from "react-icons/fa";
+import { API_BASE_URL } from "../config/api";
 
 function ManagePets() {
   const [pets, setPets] = useState([]);
@@ -29,7 +31,7 @@ function ManagePets() {
 
   const fetchPets = async () => {
     try {
-      const response = await axios.get("https://foundyourpet-backend.onrender.com/api/pets", {
+      const response = await axios.get(`${API_BASE_URL}/api/pets`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPets(response.data);
@@ -43,6 +45,18 @@ function ManagePets() {
   useEffect(() => {
     fetchPets();
   }, []);
+
+  useEffect(() => {
+    if (!token) return undefined;
+    const openStatuses = new Set(["unfulfilled", "processing", "submitted", "shipped"]);
+    const hasOpen = pets.some((pet) =>
+      openStatuses.has(String(pet?.tagOrder?.fulfillment?.status || "").toLowerCase())
+    );
+    if (!hasOpen) return undefined;
+
+    const interval = setInterval(() => fetchPets(), 20000);
+    return () => clearInterval(interval);
+  }, [token, pets]);
 
   const getSpeciesIcon = (species) => {
     switch (species.toLowerCase()) {
@@ -73,7 +87,7 @@ function ManagePets() {
   const handleSaveChanges = async () => {
     try {
       await axios.put(
-        `https://foundyourpet-backend.onrender.com/api/pets/${currentPet._id}`,
+        `${API_BASE_URL}/api/pets/${currentPet._id}`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -86,9 +100,31 @@ function ManagePets() {
     }
   };
 
+  const normalizeDeliveryStatus = (status) =>
+    (status || "unfulfilled").toString().trim().toLowerCase();
+
+  const deliveryStatusLabel = (status) => {
+    const s = normalizeDeliveryStatus(status);
+    if (s === "unfulfilled") return "Unfulfilled";
+    if (s === "processing") return "Processing";
+    if (s === "submitted") return "Submitted to PUDO";
+    if (s === "shipped") return "Shipped";
+    if (s === "delivered") return "Delivered";
+    if (s === "cancelled") return "Cancelled";
+    return s;
+  };
+
+  const getImageSrc = (pet) =>
+    pet.photoUrl?.startsWith("http") ? pet.photoUrl : `${API_BASE_URL}${pet.photoUrl || ""}`;
+
   return (
     <Container className="my-5">
-      <h2 className="mb-4 text-center text-dark">Manage Your Pets</h2>
+      <div className="mb-4 d-flex flex-column gap-2 flex-sm-row align-items-sm-center justify-content-sm-between">
+        <h2 className="m-0 text-dark">Manage Your Pets</h2>
+        <Button variant="outline-secondary" onClick={() => fetchPets()}>
+          Refresh
+        </Button>
+      </div>
       {loading ? (
         <div className="text-center">
           <Spinner animation="border" variant="primary" />
@@ -104,7 +140,7 @@ function ManagePets() {
                 {pet.photoUrl && (
                   <Card.Img
                     variant="top"
-                    src={pet.photoUrl}
+                    src={getImageSrc(pet)}
                     alt={`${pet.name}'s photo`}
                     style={{ objectFit: "cover", height: "200px" }}
                   />
@@ -186,6 +222,22 @@ function ManagePets() {
                           <strong>Tag Type:</strong> {pet.tagType}
                         </p>
                       )}
+                      {pet.tagOrder ? (
+                        <>
+                          <p className="mb-1">
+                            <strong>Delivery Status:</strong>{" "}
+                            {deliveryStatusLabel(pet.tagOrder?.fulfillment?.status)}
+                          </p>
+                          <p className="mb-1">
+                            <strong>PUDO Tracking #:</strong>{" "}
+                            {pet.tagOrder?.fulfillment?.pudo?.trackingNumber || "—"}
+                          </p>
+                          <p className="mb-1">
+                            <strong>PUDO Shipment ID:</strong>{" "}
+                            {pet.tagOrder?.fulfillment?.pudo?.shipmentId || "—"}
+                          </p>
+                        </>
+                      ) : null}
                       {pet.tagSerial && (
                         <p className="mb-1">
                           <strong>Tag Serial:</strong> {pet.tagSerial}
@@ -227,16 +279,27 @@ function ManagePets() {
                           <strong>Insurance:</strong> {pet.insuranceInfo}
                         </p>
                       )}
-                    </div>
                   </div>
+                </div>
 
+                {pet.tagOrder?.paymentId ? (
                   <Button
-                    variant="info"
-                    className="w-100"
-                    onClick={() => handleEditClick(pet)}
+                    as={Link}
+                    to={`/tag-orders/${pet.tagOrder.paymentId}`}
+                    variant="outline-primary"
+                    className="w-100 mb-2"
                   >
-                    Edit Pet
+                    Track delivery
                   </Button>
+                ) : null}
+
+                <Button
+                  variant="info"
+                  className="w-100"
+                  onClick={() => handleEditClick(pet)}
+                >
+                  Edit Pet
+                </Button>
                 </Card.Body>
               </Card>
             </Col>

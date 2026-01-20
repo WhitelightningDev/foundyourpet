@@ -1,5 +1,5 @@
 import React from "react";
-import { FaEye, FaEdit, FaTrash, FaCartPlus } from "react-icons/fa";
+import { FaEye, FaEdit, FaTrash, FaCartPlus, FaTruck } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PetListSkeleton from "../loadingskeletons/PetListSkeleton";
 import { toast } from "react-toastify";
@@ -37,6 +37,52 @@ const PetListSection = ({
           day: "2-digit",
         })
       : null;
+
+  const normalizeDeliveryStatus = (status) => {
+    const normalized = (status || "").toString().trim().toLowerCase();
+    return normalized || "unfulfilled";
+  };
+
+  const deliveryStatusLabel = (status) => {
+    const normalized = normalizeDeliveryStatus(status);
+    if (normalized === "unfulfilled") return "Unfulfilled";
+    if (normalized === "processing") return "Processing";
+    if (normalized === "submitted") return "Submitted";
+    if (normalized === "shipped") return "Shipped";
+    if (normalized === "delivered") return "Delivered";
+    if (normalized === "cancelled") return "Cancelled";
+    return normalized;
+  };
+
+  const tagTimelineSteps = [
+    { key: "unfulfilled", label: "Unfulfilled" },
+    { key: "processing", label: "Processing" },
+    { key: "submitted", label: "Submitted" },
+    { key: "shipped", label: "Shipped" },
+    { key: "delivered", label: "Delivered" },
+  ];
+
+  const tagTimelineBadges = (status) => {
+    const normalized = normalizeDeliveryStatus(status);
+    if (normalized === "cancelled") {
+      return <Badge variant="destructive">Cancelled</Badge>;
+    }
+    const currentIndex = Math.max(0, tagTimelineSteps.findIndex((s) => s.key === normalized));
+    return (
+      <>
+        {tagTimelineSteps.map((step, idx) => {
+          const isDone = idx < currentIndex;
+          const isCurrent = idx === currentIndex;
+          const variant = isDone ? "default" : isCurrent ? "secondary" : "outline";
+          return (
+            <Badge key={step.key} variant={variant}>
+              {step.label}
+            </Badge>
+          );
+        })}
+      </>
+    );
+  };
 
   const getMonthlyPriceForSize = (size) => {
     const normalizedSize = (size || "").toString().trim().toLowerCase();
@@ -136,6 +182,28 @@ const PetListSection = ({
                         );
                       })()
                     ) : null}
+
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {(pet.hasTag || !!pet.tagOrder)
+                        ? (() => {
+                            const order = pet.tagOrder || null;
+                            const tagType = pet.tagType || order?.tagType || "—";
+                            const status = order?.fulfillment?.status || "unfulfilled";
+                            const tracking = order?.fulfillment?.pudo?.trackingNumber || null;
+                            const parts = [
+                              `Tag: ${tagType}`,
+                              `Delivery: ${deliveryStatusLabel(status)}`,
+                              tracking ? `Tracking: ${tracking}` : null,
+                            ].filter(Boolean);
+                            return parts.join(" • ");
+                          })()
+                        : "Tag: Not ordered"}
+                    </p>
+                    {(pet.hasTag || !!pet.tagOrder) ? (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {tagTimelineBadges(pet.tagOrder?.fulfillment?.status || "unfulfilled")}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 
@@ -154,17 +222,29 @@ const PetListSection = ({
                   </Button>
 
                   {pet.hasMembership ? (
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        navigate("/select-tag/standard", {
-                          state: { user, pet },
-                        })
-                      }
-                    >
-                      <FaCartPlus />
-                      Order tag
-                    </Button>
+                    <>
+                      {pet.tagOrder?.paymentId ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/tag-orders/${pet.tagOrder.paymentId}`)}
+                        >
+                          <FaTruck />
+                          Track delivery
+                        </Button>
+                      ) : null}
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          navigate("/select-tag/standard", {
+                            state: { user, pet },
+                          })
+                        }
+                      >
+                        <FaCartPlus />
+                        Order tag
+                      </Button>
+                    </>
                   ) : (
                     <Button variant="secondary" size="sm" onClick={() => handleStartSubscription(pet)}>
                       <FaCreditCard />
