@@ -46,7 +46,7 @@ function PasswordResetPage() {
     } catch (error) {
       setIsLoading(false);
       if (error.response) {
-        const { status, data } = error.response;
+        const { status } = error.response;
         switch (status) {
           case 404:
             showToastMessage("User not found. Please check the email.");
