@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Row, Col } from "react-bootstrap";
 import UserDetailsModal from "../components/UserDetailsModal";
-import UserCard from "../components/UserCard";
 import QRCodeModal from "../components/QRCodeModal";
 import UserListSection from "../components/UserListSection";
 function AdminDashboard() {
