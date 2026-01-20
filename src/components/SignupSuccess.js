@@ -51,39 +51,27 @@ const SignupSuccess = () => {
     }
 
     setSending(true);
-    const endpoints = [
-      { method: "post", url: `${API_BASE_URL}/api/users/resend-verification`, data: { email: nextEmail } },
-      { method: "post", url: `${API_BASE_URL}/api/users/resend-verification-email`, data: { email: nextEmail } },
-      { method: "post", url: `${API_BASE_URL}/api/users/send-verification`, data: { email: nextEmail } },
-      { method: "post", url: `${API_BASE_URL}/api/users/send-verification-email`, data: { email: nextEmail } },
-      { method: "post", url: `${API_BASE_URL}/api/users/verify-email/resend`, data: { email: nextEmail } },
-    ];
 
     try {
-      let lastError = null;
-      for (const req of endpoints) {
-        try {
-          const res = await axios({
-            method: req.method,
-            url: req.url,
-            data: req.data,
-          });
-          const ok = res?.status >= 200 && res?.status < 300;
-          if (ok) {
-            toast.success("Verification email sent. Check your inbox.");
-            return;
-          }
-        } catch (err) {
-          lastError = err;
-        }
+      const res = await axios.post(`${API_BASE_URL}/api/users/resend-verification`, { email: nextEmail });
+      const message = res?.data?.message || "If an account exists, we sent a verification email.";
+      if (res?.data?.cooldown) toast.message(message);
+      else toast.success(message);
+      return;
+    } catch (err) {
+      const status = err?.response?.status;
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.msg ||
+        err?.message ||
+        "Could not send verification email.";
+
+      // Backwards compatibility: older backends used 429 for cooldown.
+      if (status === 429) {
+        toast.message(message);
+        return;
       }
 
-      const status = lastError?.response?.status;
-      const message =
-        lastError?.response?.data?.message ||
-        lastError?.response?.data?.msg ||
-        lastError?.message ||
-        "Could not send verification email.";
       toast.error(status ? `${message} (HTTP ${status})` : message);
     } finally {
       setSending(false);
