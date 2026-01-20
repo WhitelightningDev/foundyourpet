@@ -1,26 +1,14 @@
 import React from "react";
-import { Button, ListGroup } from "react-bootstrap";
 import { FaEye, FaEdit, FaTrash, FaCartPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PetListSkeleton from "../loadingskeletons/PetListSkeleton";
 import { toast } from "react-toastify";
 import { FaCreditCard } from "react-icons/fa";
-
-const buttonStyles = {
-  borderRadius: "9999px", // pill shape
-  fontWeight: 600,
-  fontSize: "0.9rem",
-  padding: "6px 16px",
-  boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
-  transition: "all 0.25s ease",
-  display: "flex",
-  alignItems: "center",
-  gap: "6px",
-  userSelect: "none",
-};
-
-const buttonHoverShadow = "0 4px 12px rgba(0,0,0,0.18)";
-const buttonActiveScale = "scale(0.97)";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { API_BASE_URL } from "../config/api";
+import { cn } from "@/lib/utils";
 
 const PetListSection = ({
   title,
@@ -30,6 +18,8 @@ const PetListSection = ({
   handleViewDetails,
   handleEditClick,
   handleDeleteClick,
+  showHeader = true,
+  className,
 }) => {
   const navigate = useNavigate();
 
@@ -60,168 +50,90 @@ const PetListSection = ({
     });
   };
 
-  const createButton = (variant, onClick, Icon, label, styleOverrides = {}, disabled = false) => {
-    const colorSets = {
-      view: { bg: "#f0f5ff", color: "#0071e3", border: "#c2d1f0" },
-      edit: { bg: "#e6f5ea", color: "#28a745", border: "#a9d4af" },
-      delete: { bg: "#fdecea", color: "#d93025", border: "#f9c7c5" },
-      order: { bg: "#e6f0f6", color: "#0a84ff", border: "#bdd4f6" },
-      subscribe: { bg: "#fff4e6", color: "#f97316", border: "#fed7aa" },
-    };
-
-    const colors = colorSets[variant] || colorSets.view;
-
-    return (
-      <Button
-        onClick={onClick}
-        disabled={disabled}
-        style={{
-          ...buttonStyles,
-          backgroundColor: colors.bg,
-          color: colors.color,
-          border: `1.5px solid ${colors.border}`,
-          opacity: disabled ? 0.6 : 1,
-          cursor: disabled ? "not-allowed" : "pointer",
-          ...styleOverrides,
-        }}
-        onMouseEnter={(e) => {
-          if (disabled) return;
-          e.currentTarget.style.boxShadow = buttonHoverShadow;
-          e.currentTarget.style.backgroundColor = colors.color;
-          e.currentTarget.style.color = "#fff";
-          e.currentTarget.style.borderColor = colors.color;
-          e.currentTarget.style.transform = "scale(1.05)";
-        }}
-        onMouseLeave={(e) => {
-          if (disabled) return;
-          e.currentTarget.style.boxShadow = buttonStyles.boxShadow;
-          e.currentTarget.style.backgroundColor = colors.bg;
-          e.currentTarget.style.color = colors.color;
-          e.currentTarget.style.borderColor = colors.border;
-          e.currentTarget.style.transform = "scale(1)";
-        }}
-        onMouseDown={(e) => {
-          if (disabled) return;
-          e.currentTarget.style.transform = buttonActiveScale;
-        }}
-        onMouseUp={(e) => {
-          if (disabled) return;
-          e.currentTarget.style.transform = "scale(1.05)";
-        }}
-        size="sm"
-        className="d-flex"
-      >
-        <Icon />
-        {label}
-      </Button>
-    );
-  };
+  const getImageSrc = (pet) =>
+    pet.photoUrl?.startsWith("http") ? pet.photoUrl : `${API_BASE_URL}${pet.photoUrl || ""}`;
 
   return (
-    <div className="mb-5">
-      <h4 className="mb-4 fw-semibold text-secondary" style={{ fontSize: "1.5rem" }}>
-        {title}
-      </h4>
+    <div className={cn(showHeader ? "space-y-4" : "", className)}>
+      {showHeader ? (
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold">{title}</h2>
+          <Badge variant="secondary">{pets.length}</Badge>
+        </div>
+      ) : null}
 
       {loading ? (
         <PetListSkeleton count={3} />
       ) : pets.length > 0 ? (
-        <ListGroup as="div" className="gap-3">
+        <div className="space-y-3">
           {pets.map((pet) => (
-            <ListGroup.Item
-              key={pet._id}
-              className="d-flex align-items-center gap-4 bg-white rounded-3 shadow-sm p-3"
-              style={{ cursor: "default", transition: "box-shadow 0.3s ease" }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.12)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)")
-              }
-            >
-              {/* Pet Image */}
-              {pet.photoUrl ? (
-                <img
-                  src={
-                    pet.photoUrl.startsWith("http")
-                      ? pet.photoUrl
-                      : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`
-                  }
-                  alt={`${pet.name}'s profile`}
-                  style={{
-                    width: "64px",
-                    height: "64px",
-                    objectFit: "cover",
-                    borderRadius: "50%",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: "64px",
-                    height: "64px",
-                    borderRadius: "50%",
-                    backgroundColor: "#e0e0e0",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "0.85rem",
-                    color: "#a0a0a0",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                  }}
-                >
-                  No Photo
+            <Card key={pet._id} className="shadow-sm transition-shadow hover:shadow-md">
+              <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-4">
+                  {pet.photoUrl ? (
+                    <img
+                      src={getImageSrc(pet)}
+                      alt={`${pet.name}'s profile`}
+                      className="h-16 w-16 rounded-full object-cover ring-2 ring-border"
+                    />
+                  ) : (
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-xs text-muted-foreground ring-2 ring-border">
+                      No Photo
+                    </div>
+                  )}
+
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="truncate text-base font-semibold">{pet.name}</h3>
+                      <Badge variant={pet.hasMembership ? "default" : "secondary"}>
+                        {pet.hasMembership ? "Subscription active" : "Not subscribed"}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{pet.breed}</p>
+                  </div>
                 </div>
-              )}
 
-              {/* Pet Info */}
-              <div className="flex-grow-1">
-                <h5
-                  className="mb-1"
-                  style={{ fontWeight: 600, color: "#1c1c1e", fontSize: "1.125rem" }}
-                >
-                  {pet.name}
-                </h5>
-                <p className="mb-0" style={{ color: "#6e6e73", fontSize: "0.9rem" }}>
-                  {pet.breed}
-                </p>
-                <p className="mb-0" style={{ color: "#6e6e73", fontSize: "0.85rem" }}>
-                  Subscription:{" "}
-                  <strong style={{ color: pet.hasMembership ? "#198754" : "#6c757d" }}>
-                    {pet.hasMembership ? "Active" : "Not active"}
-                  </strong>
-                </p>
-              </div>
+                <div className="flex flex-1 flex-wrap justify-start gap-2 sm:justify-end">
+                  <Button variant="outline" size="sm" onClick={() => handleViewDetails(pet)}>
+                    <FaEye />
+                    View
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleEditClick(pet)}>
+                    <FaEdit />
+                    Edit
+                  </Button>
+                  <Button variant="destructive" size="sm" onClick={() => handleDeleteClick(pet._id)}>
+                    <FaTrash />
+                    Delete
+                  </Button>
 
-              {/* Buttons */}
-              <div className="d-flex flex-wrap gap-2">
-                {createButton("view", () => handleViewDetails(pet), FaEye, "View")}
-                {createButton("edit", () => handleEditClick(pet), FaEdit, "Edit")}
-                {createButton("delete", () => handleDeleteClick(pet._id), FaTrash, "Delete")}
-
-                {pet.hasMembership
-                  ? createButton(
-                      "order",
-                      () =>
+                  {pet.hasMembership ? (
+                    <Button
+                      size="sm"
+                      onClick={() =>
                         navigate("/select-tag/standard", {
                           state: { user, pet },
-                        }),
-                      FaCartPlus,
-                      "Order Tag"
-                    )
-                  : createButton(
-                      "subscribe",
-                      () => handleStartSubscription(pet),
-                      FaCreditCard,
-                      "Subscribe"
-                    )}
-              </div>
-            </ListGroup.Item>
+                        })
+                      }
+                    >
+                      <FaCartPlus />
+                      Order tag
+                    </Button>
+                  ) : (
+                    <Button variant="secondary" size="sm" onClick={() => handleStartSubscription(pet)}>
+                      <FaCreditCard />
+                      Subscribe
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           ))}
-        </ListGroup>
+        </div>
       ) : (
-        <p className="text-muted fst-italic">You don't have any {title.toLowerCase()}.</p>
+        <p className="text-sm text-muted-foreground">
+          You don&apos;t have any pets yet. Add a pet first, then subscribe before ordering a tag.
+        </p>
       )}
     </div>
   );

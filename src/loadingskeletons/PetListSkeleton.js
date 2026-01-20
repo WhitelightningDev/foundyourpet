@@ -1,49 +1,33 @@
 import React from "react";
-import { ListGroup, Placeholder } from "react-bootstrap";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const PetListSkeleton = ({ count = 3 }) => {
   return (
-    <ListGroup>
+    <div className="space-y-3">
       {Array.from({ length: count }).map((_, index) => (
-        <ListGroup.Item
+        <Card
           key={index}
-          className="mb-3 shadow-sm rounded p-3 bg-light"
+          className="shadow-sm"
         >
-          <div className="d-flex justify-content-between align-items-center gap-3">
-            {/* Circular Skeleton Image */}
-            <div
-              style={{
-                width: "50px",
-                height: "50px",
-                borderRadius: "50%",
-                backgroundColor: "#dee2e6",
-              }}
-            />
+          <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
+            <Skeleton className="h-16 w-16 rounded-full" />
 
-            {/* Info Skeleton */}
-            <div className="flex-grow-1">
-              <Placeholder as="h5" animation="wave" className="mb-1">
-                <Placeholder xs={6} />
-              </Placeholder>
-              <Placeholder as="p" animation="wave" className="mb-0">
-                <Placeholder xs={4} />
-              </Placeholder>
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="h-3 w-28" />
             </div>
 
-            {/* Buttons Skeleton */}
-            <div className="d-flex gap-1 flex-wrap">
-              {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className="btn btn-secondary btn-sm disabled placeholder col-3"
-                  style={{ width: "70px", height: "32px" }}
-                />
-              ))}
+            <div className="flex flex-wrap gap-2 sm:justify-end">
+              <Skeleton className="h-9 w-20" />
+              <Skeleton className="h-9 w-20" />
+              <Skeleton className="h-9 w-20" />
+              <Skeleton className="h-9 w-24" />
             </div>
-          </div>
-        </ListGroup.Item>
+          </CardContent>
+        </Card>
       ))}
-    </ListGroup>
+    </div>
   );
 };
 

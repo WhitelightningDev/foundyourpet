@@ -1,38 +1,41 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Toast, ToastContainer } from "react-bootstrap";
 // Import your AuthContext if using one
 import { AuthContext } from "../context/AuthContext";
 import { API_BASE_URL } from "../config/api";
 
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [toastMessage, setToastMessage] = useState("");
-  const [showToast, setShowToast] = useState(false);
+  const [message, setMessage] = useState(null); // { type: "success" | "error", text: string }
   const navigate = useNavigate();
   const { login } = useContext(AuthContext); // ADD this line
   const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = () => {
     if (!email || !password) {
-      showToastMessage("All fields are required!");
+      showMessage("All fields are required!");
       return false;
     }
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
-      showToastMessage("Please enter a valid email address!");
+      showMessage("Please enter a valid email address!");
       return false;
     }
     return true;
   };
 
-  const showToastMessage = (message) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3500);
+  const showMessage = (text, type = "error") => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 3500);
   };
 
   const handleSubmit = async (e) => {
@@ -40,6 +43,7 @@ function LoginPage() {
     if (!validateForm()) return;
   
     setIsLoading(true); 
+    setMessage(null);
   
     try {
       const response = await axios.post(
@@ -51,7 +55,7 @@ function LoginPage() {
         const { token, user } = response.data;
         login(token, user);
   
-        showToastMessage("Login successful! Redirecting...");
+        showMessage("Login successful! Redirecting...", "success");
   
         const redirectPath = user?.isAdmin ? "/admin-dashboard" : "/dashboard";
   
@@ -81,122 +85,119 @@ function LoginPage() {
   
       switch (status) {
         case 400:
-          showToastMessage("Oops: " + message);
+          showMessage("Oops: " + message);
           break;
         case 401:
-          showToastMessage("Incorrect email or password.");
+          showMessage("Incorrect email or password.");
           break;
         case 404:
-          showToastMessage("User not found. Please sign up.");
+          showMessage("User not found. Please sign up.");
           break;
         case 409:
-          showToastMessage(message);
+          showMessage(message);
           break;
         case 500:
-          showToastMessage("Server error. Please try again later.");
+          showMessage("Server error. Please try again later.");
           break;
         default:
-          showToastMessage("An unexpected error occurred. Try again.");
+          showMessage("An unexpected error occurred. Try again.");
       }
     } else {
-      showToastMessage("Network error. Please check your connection.");
+      showMessage("Network error. Please check your connection.");
     }
   };
   
 
   return (
-    <div>
-      <ToastContainer
-        position="top-end"
-        className="p-4"
-        style={{ zIndex: 1050, color: "white" }}
-      >
-        <Toast
-          show={showToast}
-          bg={toastMessage.includes("successful") ? "success" : "danger"}
-          onClose={() => setShowToast(false)}
-        >
-          <Toast.Body>{toastMessage}</Toast.Body>
-        </Toast>
-      </ToastContainer>
-
-      <div className="position-static d-block bg-body-secondary d-flex justify-content-center align-items-center">
-        <div className="modal-dialog mt-3 mb-3" style={{ maxWidth: "500px" }}>
-          <div className="modal-content rounded-4 shadow">
-            <div className="modal-header p-4 pb-3 border-bottom-0">
+    <main className="flex min-h-screen items-center justify-center bg-muted/40 px-4 py-10">
+      <div className="w-full max-w-md">
+        <Card className="shadow-sm">
+          <CardHeader className="space-y-2">
+            <div className="flex items-center gap-3">
               <img
-                className="rounded"
+                className="h-10 w-10 rounded"
                 src="/android-chrome-192x192.png"
-                width="50px"
                 alt="Logo"
               />
-              <h1 className="fw-bold m-3 mb-0 fs-3">Login</h1>
+              <div className="min-w-0">
+                <CardTitle>Sign in</CardTitle>
+                <CardDescription>Welcome back — enter your details to continue.</CardDescription>
+              </div>
             </div>
-            <div className="modal-body p-4 pt-0">
-              <form onSubmit={handleSubmit}>
-                <div className="form-floating mb-1">
-                  <input
-                    type="email"
-                    className="form-control rounded-3"
-                    placeholder="name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                  <label>Email address</label>
-                </div>
-                <div className="form-floating mb-1">
-                  <input
-                    type="password"
-                    className="form-control rounded-3"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <label>Password</label>
-                </div>
-                <button
-                  className="w-100 mb-1 btn btn-lg rounded-3 btn-primary"
-                  type="submit"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <span
-                        className="spinner-border spinner-border-sm me-2"
-                        role="status"
-                        aria-hidden="true"
-                      />
-                      Logging you in...
-                    </>
-                  ) : (
-                    "Login"
-                  )}
-                </button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {message ? (
+              <div
+                className={[
+                  "rounded-md border px-3 py-2 text-sm",
+                  message.type === "success"
+                    ? "border-primary/30 bg-primary/10 text-primary"
+                    : "border-destructive/30 bg-destructive/10 text-destructive",
+                ].join(" ")}
+                role="status"
+              >
+                {message.text}
+              </div>
+            ) : null}
 
-                <small className="text-body-secondary">
-                  By clicking Login, you agree to the terms of use.
-                </small>
-                <hr className="my-3" />
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  inputMode="email"
+                  required
+                />
+              </div>
 
-                <div className="d-flex justify-content-between">
-                  <Link
-                    to="/password-reset"
-                    className="btn btn-outline-secondary"
-                  >
-                    Forgot Password
-                  </Link>
-                  <Link to="/signup" className="btn btn-outline-secondary">
-                    Signup
-                  </Link>
-                </div>
-              </form>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  required
+                />
+              </div>
+
+              <Button className="w-full" type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    Signing you in...
+                  </>
+                ) : (
+                  "Sign in"
+                )}
+              </Button>
+
+              <p className="text-xs text-muted-foreground">
+                By signing in, you agree to the terms of use.
+              </p>
+            </form>
+
+            <Separator />
+
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+              <Button variant="outline" asChild>
+                <Link to="/password-reset">Forgot password</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to="/signup">Create account</Link>
+              </Button>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </main>
   );
 }
 
