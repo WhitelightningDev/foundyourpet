@@ -60,7 +60,7 @@ function NavigationBar() {
 
   const navButtonClassName = (href) =>
     cn(
-      "h-9 rounded-full px-4",
+      "h-9 rounded-full px-4 no-underline",
       isActive(href)
         ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
         : "text-muted-foreground hover:text-foreground"
@@ -72,7 +72,7 @@ function NavigationBar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4">
         <Link
           to="/"
-          className="flex items-center gap-2 rounded-md px-2 py-1 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="flex items-center gap-2 rounded-md px-2 py-1 no-underline transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
           <img
             src={logo}
@@ -104,6 +104,29 @@ function NavigationBar() {
                 </Link>
               </Button>
             ))}
+
+            {!isLoggedIn ? (
+              <>
+                <span className="ml-8 mr-3 select-none text-muted-foreground">|</span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 rounded-full bg-secondary/80 px-4 text-secondary-foreground no-underline shadow-sm hover:bg-secondary"
+                  >
+                    <Link to="/Login">Log in</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    size="sm"
+                    className="h-9 rounded-full px-4 no-underline shadow-sm"
+                  >
+                    <Link to="/Signup">Sign up</Link>
+                  </Button>
+                </div>
+              </>
+            ) : null}
           </div>
         </nav>
 
@@ -111,7 +134,7 @@ function NavigationBar() {
           {isLoggedIn ? (
             <>
               <div className="mx-1 hidden h-6 w-px bg-border md:block" />
-              <Button asChild variant="secondary" size="sm" className="gap-2">
+              <Button asChild variant="secondary" size="sm" className="gap-2 no-underline">
                 <Link to={dashboardHref}>
                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard
@@ -145,7 +168,11 @@ function NavigationBar() {
                     {isAdmin ? <Badge variant="secondary">Admin</Badge> : null}
                   </div>
                   <Separator className="my-1" />
-                  <Button asChild variant="ghost" className="w-full justify-start gap-2">
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="w-full justify-start gap-2 no-underline"
+                  >
                     <Link to="/profile">
                       <UserCircle className="h-5 w-5" />
                       Profile
@@ -162,16 +189,7 @@ function NavigationBar() {
                 </PopoverContent>
               </Popover>
             </>
-          ) : (
-            <>
-              <Button asChild variant="ghost" size="sm">
-                <Link to="/Login">Log in</Link>
-              </Button>
-              <Button asChild size="sm">
-                <Link to="/Signup">Sign up</Link>
-              </Button>
-            </>
-          )}
+          ) : null}
         </div>
 
         <div className="md:hidden">
@@ -202,7 +220,7 @@ function NavigationBar() {
                       asChild
                       variant="ghost"
                       className={cn(
-                        "h-10 w-full justify-start",
+                        "h-10 w-full justify-start no-underline",
                         isActive(item.href) && "bg-accent text-accent-foreground"
                       )}
                     >
@@ -219,7 +237,11 @@ function NavigationBar() {
               {isLoggedIn ? (
                 <div className="flex flex-col gap-2">
                   <SheetClose asChild>
-                    <Button asChild variant="secondary" className="justify-start gap-2">
+                    <Button
+                      asChild
+                      variant="secondary"
+                      className="justify-start gap-2 no-underline"
+                    >
                       <Link to={dashboardHref}>
                         <LayoutDashboard className="h-4 w-4" />
                         Dashboard
@@ -228,7 +250,11 @@ function NavigationBar() {
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button asChild variant="ghost" className="justify-start gap-2">
+                    <Button
+                      asChild
+                      variant="ghost"
+                      className="justify-start gap-2 no-underline"
+                    >
                       <Link to="/profile">
                         <UserCircle className="h-5 w-5" />
                         Profile
@@ -247,12 +273,16 @@ function NavigationBar() {
               ) : (
                 <div className="flex flex-col gap-2">
                   <SheetClose asChild>
-                    <Button asChild variant="ghost" className="justify-start">
+                    <Button
+                      asChild
+                      variant="secondary"
+                      className="justify-start gap-2 no-underline"
+                    >
                       <Link to="/Login">Log in</Link>
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button asChild className="justify-start">
+                    <Button asChild className="justify-start gap-2 no-underline">
                       <Link to="/Signup">Sign up</Link>
                     </Button>
                   </SheetClose>
