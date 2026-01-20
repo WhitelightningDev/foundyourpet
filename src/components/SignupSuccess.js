@@ -1,37 +1,89 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, CheckCircle2, Home, Mail } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const SignupSuccess = () => {
   return (
-    <div className="container-fluid bg-light min-vh-100 d-flex align-items-center justify-content-center">
-      <div className="text-center">
-        <img
-          src="/android-chrome-192x192.png"
-          alt="Found Your Pet Logo"
-          className="mb-2 rounded-3 shadow-lg"
-          width="100"
-          height="100"
-        />
-        <div><img
-          src="/check.png"
-          alt="Success Check"
-          className="mb-4 mt-3"
-          width="72"
-          height="72"
-        /></div>
-        <h1 className="display-5 fw-bold text-dark mb-2">Signup Successful</h1>
-        <p className="lead text-secondary mb-4">
-          Thank you for signing up! Please check your email to verify your account and complete the registration process.
-        </p>
-        <div className="d-grid gap-2 d-sm-flex justify-content-sm-center">
-          <a href="/login" className="btn btn-success btn-lg px-4 me-sm-3">
-            Go to Login
-          </a>
-          <a href="/" className="btn btn-outline-secondary btn-lg px-4">
-            Return Home
-          </a>
-        </div>
+    <main className="relative min-h-[calc(100vh-4rem)] bg-background px-4 py-12 text-foreground sm:py-16">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(27,182,168,0.18),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-[#FFD66B]/45 via-[#FFB55C]/25 to-[#FF8E4A]/25" />
+
+      <div className="mx-auto flex w-full max-w-lg flex-col items-center justify-center">
+        <Card className="w-full overflow-hidden shadow-lg shadow-primary/10">
+          <CardHeader className="space-y-4 text-center">
+            <div className="mx-auto flex items-center justify-center gap-3">
+              <img
+                src="/android-chrome-192x192.png"
+                alt="Found Your Pet"
+                className="h-12 w-12 rounded-xl border bg-card shadow-sm"
+                loading="lazy"
+              />
+              <div className="text-left">
+                <div className="text-sm font-medium leading-none">Found Your Pet</div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  Account setup
+                </div>
+              </div>
+            </div>
+
+            <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl border bg-card shadow-sm ring-1 ring-primary/10">
+              <CheckCircle2 className="h-7 w-7 text-primary" />
+            </div>
+
+            <div className="space-y-2">
+              <CardTitle className="text-2xl sm:text-3xl">Signup successful</CardTitle>
+              <CardDescription className="text-base">
+                Check your email to verify your account and complete registration.
+              </CardDescription>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-3">
+            <div className="rounded-xl border bg-card p-4">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-lg border bg-background/60 ring-1 ring-primary/10">
+                  <Mail className="h-4 w-4 text-primary" />
+                </div>
+                <div className="space-y-1">
+                  <div className="text-sm font-medium">Verify your email</div>
+                  <p className="text-sm text-muted-foreground">
+                    If you don’t see it, check your spam or promotions folder.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+
+          <CardFooter className="flex flex-col gap-3 sm:flex-row">
+            <Button
+              asChild
+              size="lg"
+              className="w-full gap-2 shadow-md shadow-primary/15 ring-1 ring-primary/10 hover:shadow-primary/20"
+            >
+              <Link to="/login">
+                Go to login <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="w-full gap-2">
+              <Link to="/">
+                <Home className="h-4 w-4" />
+                Return home
+              </Link>
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
-    </div>
+    </main>
   );
 };
 
