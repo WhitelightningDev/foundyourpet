@@ -7,7 +7,7 @@ const SuccessPage = () => {
   const [details, setDetails] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [ setMembershipUpdated] = useState(false);
+  const [, setMembershipUpdated] = useState(false);
 
   const paymentId = params.get("paymentId");
 
@@ -47,7 +47,7 @@ const SuccessPage = () => {
     };
 
     if (paymentId) fetchDetails();
-  }, [paymentId]);
+  }, [paymentId, setMembershipUpdated]);
 
   if (loading) return <div className="container"><p>Loading...</p></div>;
   if (error) return <div className="container"><h1>Error</h1><p>{error}</p></div>;

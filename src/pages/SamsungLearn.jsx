@@ -28,10 +28,7 @@ function SamsungLearn() {
         <div className="row row-cols-1 row-cols-md-2 g-4">
           <div className="col">
             <div className="list-group">
-              <a
-                className="list-group-item list-group-item-action d-flex gap-3 py-3"
-                aria-current="true"
-              >
+              <div className="list-group-item d-flex gap-3 py-3">
                 <i className="fs-3 bi bi-1-circle"></i>
                 <div className="d-flex gap-2 w-100 justify-content-between">
                   <div>
@@ -46,11 +43,8 @@ function SamsungLearn() {
                     </p>
                   </div>
                 </div>
-              </a>
-              <a
-                className="list-group-item list-group-item-action d-flex gap-3 py-3"
-                aria-current="true"
-              >
+              </div>
+              <div className="list-group-item d-flex gap-3 py-3">
                 <i className="fs-3 bi bi-2-circle"></i>
                 <div className="d-flex gap-2 w-100 justify-content-between">
                   <div>
@@ -65,11 +59,8 @@ function SamsungLearn() {
                     />
                   </div>
                 </div>
-              </a>
-              <a
-                className="list-group-item list-group-item-action d-flex gap-3 py-3"
-                aria-current="true"
-              >
+              </div>
+              <div className="list-group-item d-flex gap-3 py-3">
                 <i className="fs-3 bi bi-3-circle"></i>
                 <div className="d-flex gap-2 w-100 justify-content-between">
                   <div>
@@ -78,11 +69,8 @@ function SamsungLearn() {
                     </h6>
                   </div>
                 </div>
-              </a>
-              <a
-                className="list-group-item list-group-item-action d-flex gap-3 py-3"
-                aria-current="true"
-              >
+              </div>
+              <div className="list-group-item d-flex gap-3 py-3">
                 <i className="fs-3 bi bi-4-circle"></i>
                 <div className="d-flex gap-2 w-100 justify-content-between">
                   <div>
@@ -92,7 +80,7 @@ function SamsungLearn() {
                     </h6>
                   </div>
                 </div>
-              </a>
+              </div>
             </div>
           </div>
         </div>

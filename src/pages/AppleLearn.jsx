@@ -29,7 +29,7 @@ function AppleLearn() {
         <div className="col-lg-8">
           <div className="list-group">
             {/* Step 1 */}
-            <a href="#" className="list-group-item list-group-item-action d-flex gap-3 py-3">
+            <div className="list-group-item d-flex gap-3 py-3">
               <i className="fs-3 bi bi-1-circle"></i>
               <div className="d-flex flex-column w-100">
                 <h6 className="mb-0">Locate the Find My app</h6>
@@ -50,10 +50,10 @@ function AppleLearn() {
                 width="32"
                 height="32"
               />
-            </a>
+            </div>
 
             {/* Step 2 */}
-            <a href="#" className="list-group-item list-group-item-action d-flex gap-3 py-3">
+            <div className="list-group-item d-flex gap-3 py-3">
               <i className="fs-3 bi bi-2-circle"></i>
               <div className="d-flex flex-column w-100">
                 <h6 className="mb-0">Pair your AirTag with your iPhone</h6>
@@ -67,10 +67,10 @@ function AppleLearn() {
                   style={{ maxWidth: "300px", height: "auto" }}
                 />
               </div>
-            </a>
+            </div>
 
             {/* Step 3 */}
-            <a href="#" className="list-group-item list-group-item-action d-flex gap-3 py-3">
+            <div className="list-group-item d-flex gap-3 py-3">
               <i className="fs-3 bi bi-3-circle"></i>
               <div className="d-flex flex-column w-100">
                 <h6 className="mb-0">Follow the onscreen steps to name your tagged item</h6>
@@ -78,10 +78,10 @@ function AppleLearn() {
                   (e.g., "My car keys" if you're attaching your AirTag to your keys) and register it to your Apple ID.
                 </p>
               </div>
-            </a>
+            </div>
 
             {/* Step 4 */}
-            <a href="#" className="list-group-item list-group-item-action d-flex gap-3 py-3">
+            <div className="list-group-item d-flex gap-3 py-3">
               <i className="fs-3 bi bi-4-circle"></i>
               <div className="d-flex flex-column w-100">
                 <h6 className="mb-0">Once the AirTag is paired</h6>
@@ -95,7 +95,7 @@ function AppleLearn() {
                   style={{ maxWidth: "320px", height: "auto" }}
                 />
               </div>
-            </a>
+            </div>
           </div>
         </div>
       </div>

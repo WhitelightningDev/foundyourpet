@@ -40,7 +40,6 @@ const Dashboard = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedPet, setSelectedPet] = useState(null);
   const [currentPet, setCurrentPet] = useState(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     species: "",
@@ -69,7 +68,6 @@ const Dashboard = () => {
     );
     const userData = response.data.user;
     console.log("Fetched user data:", userData);  // <-- Log entire user object here
-console.log(user.membershipStartDate);
 
     setUser({
       name: userData.name?.trim() || "",
@@ -124,7 +122,6 @@ console.log(user.membershipStartDate);
   const handleCloseModal = () => setShowModal(false);
 
   const handleViewDetails = async (pet) => {
-    setDetailsLoading(true);
     try {
       const response = await axios.get(
         `https://foundyourpet-backend.onrender.com/api/pets/${pet._id}`,
@@ -135,8 +132,6 @@ console.log(user.membershipStartDate);
     } catch (error) {
       console.error("Failed to fetch pet details:", error);
       toast.error("Could not load pet details.");
-    } finally {
-      setDetailsLoading(false);
     }
   };
 
