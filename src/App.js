@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Prices from "./pages/Prices";
 import Features from "./pages/Features";
@@ -45,12 +45,21 @@ function App() {
               <Route path="/NormalLearn" element={<NormalTagLearn />} />
               <Route path="/SamsungLearn" element={<SamsungLearn />} />
               <Route path="/AppleLearn" element={<AppleLearn />} />
-              <Route path="/Login" element={<Login />} />
-              <Route path="/Signup" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/Login" element={<Navigate to="/login" replace />} />
+              <Route path="/Signup" element={<Navigate to="/signup" replace />} />
               <Route path="/select-tag/:tagType" element={<SelectTagPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/manage-pets" element={<ManagePetsPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <ProfilePage />
+                  </PrivateRoute>
+                }
+              />
               <Route path="/pet-profile/:petId" element={<PublicPetProfile />} />
               <Route path="/p/:petId" element={<PetRedirect />} />
               <Route path="/signup-success" element={<SignupSuccess />} />
@@ -64,20 +73,21 @@ function App() {
               <Route
                 path="/admin-dashboard"
                 element={
-                  <PrivateRoute>
+                  <PrivateRoute requireAdmin>
                     <AdminDashboard />
                   </PrivateRoute>
                 }
               />
 
               <Route
-                path="/Dashboard"
+                path="/dashboard"
                 element={
                   <PrivateRoute>
                     <Dashboard />
                   </PrivateRoute>
                 }
               />
+              <Route path="/Dashboard" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </main>
           <Footer />

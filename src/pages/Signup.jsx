@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { Toast, ToastContainer } from "react-bootstrap";
+import { API_BASE_URL } from "../config/api";
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -87,11 +88,11 @@ function Signup() {
       setIsLoading(true);
       try {
         const response = await axios.post(
-          "https://foundyourpet-backend.onrender.com/api/users/signup",
+          `${API_BASE_URL}/api/users/signup`,
           formData
         );
 
-        setToastMessage(response.data.message || "Signup successful!");
+        setToastMessage(response.data?.message || response.data?.msg || "Signup successful!");
         setToastVariant("success");
         setShowToast(true);
 
@@ -101,7 +102,17 @@ function Signup() {
         }, 2000);
       } catch (error) {
         if (error.response) {
-          setToastMessage(error.response.data.message || "Signup failed. Please try again.");
+          const { data } = error.response;
+          const validationErrors = Array.isArray(data?.errors) ? data.errors : [];
+          const firstValidationError =
+            validationErrors.length > 0 ? validationErrors[0]?.msg : null;
+
+          setToastMessage(
+            data?.message ||
+              data?.msg ||
+              firstValidationError ||
+              "Signup failed. Please try again."
+          );
         } else {
           setToastMessage("An error occurred. Please try again.");
         }

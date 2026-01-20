@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import {
   Form,
@@ -9,8 +9,14 @@ import {
   Card,
   Spinner,
 } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
+import { API_BASE_URL } from "../config/api";
 
 function ProfilePage() {
+  const navigate = useNavigate();
+  const { user, token, loading: authLoading, updateUser } = useContext(AuthContext);
+
   const [userData, setUserData] = useState({
     name: "",
     surname: "",
@@ -30,30 +36,32 @@ function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const user = JSON.parse(localStorage.getItem("user"));
-  const userId = user?._id;
-
   useEffect(() => {
-    if (user) {
-      const userProfile = {
-        name: user.name || "",
-        surname: user.surname || "",
-        contact: user.contact || "",
-        email: user.email || "",
-        password: "",
-        address: {
-          street: user.address?.street || "",
-          city: user.address?.city || "",
-          province: user.address?.province || "",
-          postalCode: user.address?.postalCode || "",
-          country: user.address?.country || "",
-        },
-      };
-      setUserData(userProfile);
-      setOriginalData(userProfile);
+    if (authLoading) return;
+    if (!user) {
       setLoading(false);
+      navigate("/login", { replace: true });
+      return;
     }
-  }, [user]);
+
+    const userProfile = {
+      name: user.name || "",
+      surname: user.surname || "",
+      contact: user.contact || "",
+      email: user.email || "",
+      password: "",
+      address: {
+        street: user.address?.street || "",
+        city: user.address?.city || "",
+        province: user.address?.province || "",
+        postalCode: user.address?.postalCode || "",
+        country: user.address?.country || "",
+      },
+    };
+    setUserData(userProfile);
+    setOriginalData(userProfile);
+    setLoading(false);
+  }, [authLoading, user, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -84,15 +92,14 @@ function ProfilePage() {
     }
 
     try {
-      const token = localStorage.getItem("authToken");
       const response = await axios.put(
-        `https://foundyourpet-backend.onrender.com/api/users/${userId}`,
+        `${API_BASE_URL}/api/users/${user?._id}`,
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       alert("Profile updated successfully");
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      updateUser(response.data.user);
       setOriginalData(userData);
       setIsEditing(false);
     } catch (error) {
