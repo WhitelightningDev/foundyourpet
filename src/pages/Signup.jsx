@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../config/api";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 function Signup() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     surname: "",
@@ -97,9 +98,14 @@ function Signup() {
         );
 
         toast.success(response.data?.message || response.data?.msg || "Signup successful!");
+        try {
+          sessionStorage.setItem("pendingVerificationEmail", formData.email || "");
+        } catch {
+          // no-op
+        }
 
         setTimeout(() => {
-          window.location.href = "/signup-success";
+          navigate("/signup-success", { state: { email: formData.email || "" } });
         }, 2000);
       } catch (error) {
         if (error.response) {

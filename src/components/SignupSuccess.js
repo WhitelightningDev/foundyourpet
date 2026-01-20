@@ -1,5 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, CheckCircle2, Home, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -11,8 +12,91 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { API_BASE_URL } from "../config/api";
 
 const SignupSuccess = () => {
+  const location = useLocation();
+  const initialEmail = useMemo(() => {
+    const fromState = location?.state?.email;
+    if (typeof fromState === "string" && fromState.trim()) return fromState.trim();
+    try {
+      const fromStorage = sessionStorage.getItem("pendingVerificationEmail");
+      return (fromStorage || "").trim();
+    } catch {
+      return "";
+    }
+  }, [location?.state?.email]);
+
+  const [email, setEmail] = useState(initialEmail);
+  const [sending, setSending] = useState(false);
+
+  const resendVerification = async ({ auto, emailOverride } = {}) => {
+    const nextEmail = ((emailOverride ?? email) || "").trim();
+    if (!nextEmail) {
+      toast.error("Enter the email you signed up with.");
+      return;
+    }
+
+    if (auto) {
+      try {
+        const lastAttempt = Number(sessionStorage.getItem("verificationEmailLastAttempt") || "0");
+        const now = Date.now();
+        if (lastAttempt && now - lastAttempt < 60_000) return;
+        sessionStorage.setItem("verificationEmailLastAttempt", String(now));
+      } catch {
+        // no-op
+      }
+    }
+
+    setSending(true);
+    const endpoints = [
+      { method: "post", url: `${API_BASE_URL}/api/users/resend-verification`, data: { email: nextEmail } },
+      { method: "post", url: `${API_BASE_URL}/api/users/resend-verification-email`, data: { email: nextEmail } },
+      { method: "post", url: `${API_BASE_URL}/api/users/send-verification`, data: { email: nextEmail } },
+      { method: "post", url: `${API_BASE_URL}/api/users/send-verification-email`, data: { email: nextEmail } },
+      { method: "post", url: `${API_BASE_URL}/api/users/verify-email/resend`, data: { email: nextEmail } },
+    ];
+
+    try {
+      let lastError = null;
+      for (const req of endpoints) {
+        try {
+          const res = await axios({
+            method: req.method,
+            url: req.url,
+            data: req.data,
+          });
+          const ok = res?.status >= 200 && res?.status < 300;
+          if (ok) {
+            toast.success("Verification email sent. Check your inbox.");
+            return;
+          }
+        } catch (err) {
+          lastError = err;
+        }
+      }
+
+      const status = lastError?.response?.status;
+      const message =
+        lastError?.response?.data?.message ||
+        lastError?.response?.data?.msg ||
+        lastError?.message ||
+        "Could not send verification email.";
+      toast.error(status ? `${message} (HTTP ${status})` : message);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!initialEmail) return;
+    setEmail(initialEmail);
+    resendVerification({ auto: true, emailOverride: initialEmail });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialEmail]);
+
   return (
     <main className="relative min-h-[calc(100vh-4rem)] bg-background px-4 py-12 text-foreground sm:py-16">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(27,182,168,0.18),transparent_55%)]" />
@@ -60,6 +144,32 @@ const SignupSuccess = () => {
                     If you don’t see it, check your spam or promotions folder.
                   </p>
                 </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border bg-muted/20 p-4">
+              <div className="text-sm font-medium">Resend verification</div>
+              <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                <Input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  type="email"
+                  autoComplete="email"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => resendVerification()}
+                  disabled={sending}
+                >
+                  <Mail className="h-4 w-4" />
+                  {sending ? "Sending…" : "Resend"}
+                </Button>
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                This triggers a verification email from the backend.
               </div>
             </div>
           </CardContent>
