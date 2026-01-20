@@ -2,7 +2,7 @@ import React from "react";
 import { FaEye, FaEdit, FaTrash, FaCartPlus, FaTruck } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PetListSkeleton from "../loadingskeletons/PetListSkeleton";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { FaCreditCard } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -95,7 +95,7 @@ const PetListSection = ({
   const handleStartSubscription = (pet) => {
     const monthlyPrice = getMonthlyPriceForSize(pet?.size);
     if (!monthlyPrice) {
-      toast.warn("Please edit your pet and set Size to Small / Medium / Large before subscribing.");
+      toast.warning("Please edit your pet and set Size to Small / Medium / Large before subscribing.");
       handleEditClick(pet);
       return;
     }

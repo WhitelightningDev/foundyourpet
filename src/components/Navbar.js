@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, LogOut, Menu, UserCircle } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import logo from "../assets/android-chrome-192x192.png";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +34,7 @@ function NavigationBar() {
   const handleLogout = () => {
     logout();
     setMobileOpen(false);
+    toast.message("Logged out.");
     navigate("/");
   };
 

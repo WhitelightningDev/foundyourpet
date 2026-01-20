@@ -4,6 +4,7 @@ import axios from "axios";
 // Import your AuthContext if using one
 import { AuthContext } from "../context/AuthContext";
 import { API_BASE_URL } from "../config/api";
+import { toast } from "sonner";
 
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,27 +16,21 @@ import { Separator } from "@/components/ui/separator";
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState(null); // { type: "success" | "error", text: string }
   const navigate = useNavigate();
   const { login } = useContext(AuthContext); // ADD this line
   const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = () => {
     if (!email || !password) {
-      showMessage("All fields are required!");
+      toast.error("All fields are required.");
       return false;
     }
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
-      showMessage("Please enter a valid email address!");
+      toast.error("Please enter a valid email address.");
       return false;
     }
     return true;
-  };
-
-  const showMessage = (text, type = "error") => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 3500);
   };
 
   const handleSubmit = async (e) => {
@@ -43,7 +38,6 @@ function LoginPage() {
     if (!validateForm()) return;
   
     setIsLoading(true); 
-    setMessage(null);
   
     try {
       const response = await axios.post(
@@ -54,19 +48,14 @@ function LoginPage() {
       if (response.status === 200) {
         const { token, user } = response.data;
         login(token, user);
-  
-        showMessage("Login successful! Redirecting...", "success");
-  
         const redirectPath = user?.isAdmin ? "/admin-dashboard" : "/dashboard";
-  
-        setTimeout(() => {
-          navigate(redirectPath);
-          setIsLoading(false);
-        }, 2000);
+        toast.success("Signed in successfully.");
+        navigate(redirectPath);
       }
     } catch (error) {
-      setIsLoading(false); 
       handleLoginError(error);
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -85,25 +74,25 @@ function LoginPage() {
   
       switch (status) {
         case 400:
-          showMessage("Oops: " + message);
+          toast.error(message);
           break;
         case 401:
-          showMessage("Incorrect email or password.");
+          toast.error("Incorrect email or password.");
           break;
         case 404:
-          showMessage("User not found. Please sign up.");
+          toast.error("User not found. Please sign up.");
           break;
         case 409:
-          showMessage(message);
+          toast.error(message);
           break;
         case 500:
-          showMessage("Server error. Please try again later.");
+          toast.error("Server error. Please try again later.");
           break;
         default:
-          showMessage("An unexpected error occurred. Try again.");
+          toast.error("An unexpected error occurred. Try again.");
       }
     } else {
-      showMessage("Network error. Please check your connection.");
+      toast.error("Network error. Please check your connection.");
     }
   };
   
@@ -126,20 +115,6 @@ function LoginPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {message ? (
-              <div
-                className={[
-                  "rounded-md border px-3 py-2 text-sm",
-                  message.type === "success"
-                    ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-destructive/30 bg-destructive/10 text-destructive",
-                ].join(" ")}
-                role="status"
-              >
-                {message.text}
-              </div>
-            ) : null}
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>

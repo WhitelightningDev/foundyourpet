@@ -1,7 +1,8 @@
 import QRCode from 'qrcode.react';
+import { PUBLIC_SITE_URL } from "../config/api";
 
 const QRGenerator = ({ petId }) => {
-  const qrUrl = `http://localhost:3000/pet/${petId}`;
+  const qrUrl = `${PUBLIC_SITE_URL}/p/${petId}`;
 
   const downloadQRCode = () => {
     const canvas = document.getElementById("qr-gen");

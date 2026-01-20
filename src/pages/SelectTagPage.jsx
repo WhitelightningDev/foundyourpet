@@ -14,6 +14,7 @@ import {
 } from "react-bootstrap";
 import { FaCheck } from "react-icons/fa";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 
 function SelectTagPage() {
   const navigate = useNavigate();
@@ -53,7 +54,7 @@ function SelectTagPage() {
 
     async function fetchData() {
       try {
-        const petRes = await axios.get("https://foundyourpet-backend.onrender.com/api/pets", {
+        const petRes = await axios.get(`${API_BASE_URL}/api/pets`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setPets(petRes.data);
@@ -68,7 +69,7 @@ function SelectTagPage() {
       if (!location.state?.user) {
         try {
           const response = await axios.get(
-            "https://foundyourpet-backend.onrender.com/api/users/me",
+            `${API_BASE_URL}/api/users/me`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           console.log("User data:", response.data.user);

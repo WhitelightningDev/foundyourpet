@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Toast, ToastContainer } from "react-bootstrap";
+import { API_BASE_URL } from "../config/api";
 
 function PasswordResetPage() {
   const [email, setEmail] = useState("");
@@ -30,7 +31,7 @@ function PasswordResetPage() {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://foundyourpet-backend.onrender.com/api/users/password-reset",
+        `${API_BASE_URL}/api/users/password-reset`,
         { email },
         {
           headers: {
