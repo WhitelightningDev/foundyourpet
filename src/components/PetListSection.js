@@ -3,6 +3,8 @@ import { Button, ListGroup } from "react-bootstrap";
 import { FaEye, FaEdit, FaTrash, FaCartPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PetListSkeleton from "../loadingskeletons/PetListSkeleton";
+import { toast } from "react-toastify";
+import { FaCreditCard } from "react-icons/fa";
 
 const buttonStyles = {
   borderRadius: "9999px", // pill shape
@@ -31,12 +33,40 @@ const PetListSection = ({
 }) => {
   const navigate = useNavigate();
 
-  const createButton = (variant, onClick, Icon, label, styleOverrides = {}) => {
+  const getMonthlyPriceForSize = (size) => {
+    const normalizedSize = (size || "").toString().trim().toLowerCase();
+    if (normalizedSize === "small") return 50;
+    if (normalizedSize === "medium") return 70;
+    if (normalizedSize === "large") return 100;
+    return null;
+  };
+
+  const handleStartSubscription = (pet) => {
+    const monthlyPrice = getMonthlyPriceForSize(pet?.size);
+    if (!monthlyPrice) {
+      toast.warn("Please edit your pet and set Size to Small / Medium / Large before subscribing.");
+      handleEditClick(pet);
+      return;
+    }
+
+    navigate("/checkout", {
+      state: {
+        membership: true,
+        total: monthlyPrice,
+        package: { type: `${pet.size} Pet Subscription` },
+        membershipObjectId: null,
+        selectedPets: [pet],
+      },
+    });
+  };
+
+  const createButton = (variant, onClick, Icon, label, styleOverrides = {}, disabled = false) => {
     const colorSets = {
       view: { bg: "#f0f5ff", color: "#0071e3", border: "#c2d1f0" },
       edit: { bg: "#e6f5ea", color: "#28a745", border: "#a9d4af" },
       delete: { bg: "#fdecea", color: "#d93025", border: "#f9c7c5" },
       order: { bg: "#e6f0f6", color: "#0a84ff", border: "#bdd4f6" },
+      subscribe: { bg: "#fff4e6", color: "#f97316", border: "#fed7aa" },
     };
 
     const colors = colorSets[variant] || colorSets.view;
@@ -44,14 +74,18 @@ const PetListSection = ({
     return (
       <Button
         onClick={onClick}
+        disabled={disabled}
         style={{
           ...buttonStyles,
           backgroundColor: colors.bg,
           color: colors.color,
           border: `1.5px solid ${colors.border}`,
+          opacity: disabled ? 0.6 : 1,
+          cursor: disabled ? "not-allowed" : "pointer",
           ...styleOverrides,
         }}
         onMouseEnter={(e) => {
+          if (disabled) return;
           e.currentTarget.style.boxShadow = buttonHoverShadow;
           e.currentTarget.style.backgroundColor = colors.color;
           e.currentTarget.style.color = "#fff";
@@ -59,6 +93,7 @@ const PetListSection = ({
           e.currentTarget.style.transform = "scale(1.05)";
         }}
         onMouseLeave={(e) => {
+          if (disabled) return;
           e.currentTarget.style.boxShadow = buttonStyles.boxShadow;
           e.currentTarget.style.backgroundColor = colors.bg;
           e.currentTarget.style.color = colors.color;
@@ -66,9 +101,11 @@ const PetListSection = ({
           e.currentTarget.style.transform = "scale(1)";
         }}
         onMouseDown={(e) => {
+          if (disabled) return;
           e.currentTarget.style.transform = buttonActiveScale;
         }}
         onMouseUp={(e) => {
+          if (disabled) return;
           e.currentTarget.style.transform = "scale(1.05)";
         }}
         size="sm"
@@ -149,6 +186,12 @@ const PetListSection = ({
                 <p className="mb-0" style={{ color: "#6e6e73", fontSize: "0.9rem" }}>
                   {pet.breed}
                 </p>
+                <p className="mb-0" style={{ color: "#6e6e73", fontSize: "0.85rem" }}>
+                  Subscription:{" "}
+                  <strong style={{ color: pet.hasMembership ? "#198754" : "#6c757d" }}>
+                    {pet.hasMembership ? "Active" : "Not active"}
+                  </strong>
+                </p>
               </div>
 
               {/* Buttons */}
@@ -157,16 +200,22 @@ const PetListSection = ({
                 {createButton("edit", () => handleEditClick(pet), FaEdit, "Edit")}
                 {createButton("delete", () => handleDeleteClick(pet._id), FaTrash, "Delete")}
 
-                {/* Order Tag button passing user and pet */}
-                {createButton(
-                  "order",
-                  () =>
-                    navigate("/select-tag/standard", {
-                      state: { user, pet }, // <-- user and pet passed here
-                    }),
-                  FaCartPlus,
-                  "Order Tag"
-                )}
+                {pet.hasMembership
+                  ? createButton(
+                      "order",
+                      () =>
+                        navigate("/select-tag/standard", {
+                          state: { user, pet },
+                        }),
+                      FaCartPlus,
+                      "Order Tag"
+                    )
+                  : createButton(
+                      "subscribe",
+                      () => handleStartSubscription(pet),
+                      FaCreditCard,
+                      "Subscribe"
+                    )}
               </div>
             </ListGroup.Item>
           ))}

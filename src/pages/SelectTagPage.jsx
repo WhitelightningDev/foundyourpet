@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Container,
   Card,
@@ -16,13 +16,11 @@ import { FaCheck } from "react-icons/fa";
 import axios from "axios";
 
 function SelectTagPage() {
-  const { tagType } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [selectedPackage, setSelectedPackage] = useState(null);
-  const [, setAddons] = useState([]);
   const [loading, setLoading] = useState(true);
+  const tagPrice = 250;
 
   // Initialize user and pets from location.state if available
   const initialUser = location.state?.user || {
@@ -45,6 +43,7 @@ function SelectTagPage() {
   const [user, setUser] = useState(initialUser);
   const [pets, setPets] = useState(initialPets);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
   const [selectedPets, setSelectedPets] = useState(
     initialPets.length ? [initialPets[0]._id] : []
   );
@@ -54,24 +53,9 @@ function SelectTagPage() {
 
     async function fetchData() {
       try {
-        const [pkgRes, addonRes, petRes] = await Promise.all([
-          axios.get(
-            `https://foundyourpet-backend.onrender.com/api/packages/type/${tagType}`
-          ),
-          axios.get(
-            `https://foundyourpet-backend.onrender.com/api/addons/filter?type=${tagType}`
-          ),
-          axios.get("https://foundyourpet-backend.onrender.com/api/pets", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-
-        console.log("Package data:", pkgRes.data);
-        console.log("Addons data:", addonRes.data);
-        console.log("Pets data:", petRes.data);
-
-        setSelectedPackage(pkgRes.data);
-        setAddons(addonRes.data);
+        const petRes = await axios.get("https://foundyourpet-backend.onrender.com/api/pets", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setPets(petRes.data);
       } catch (error) {
         console.error("Error loading data:", error);
@@ -112,9 +96,14 @@ function SelectTagPage() {
 
     fetchUser();
     fetchData();
-  }, [tagType, location.state]);
+  }, [location.state]);
 
   const handlePetSelection = (pet) => {
+    if (!pet?.hasMembership) {
+      setToastMessage("This pet needs an active subscription before you can order a tag.");
+      setShowToast(true);
+      return;
+    }
     setSelectedPets((prev) =>
       prev.includes(pet._id)
         ? prev.filter((id) => id !== pet._id)
@@ -124,13 +113,10 @@ function SelectTagPage() {
 
   const handleContinue = () => {
     if (selectedPets.length === 0) {
+      setToastMessage("Please select at least one pet to continue.");
       setShowToast(true);
       return;
     }
-
-    const base = selectedPackage?.price || 0;
-    const petTotal = selectedPets.length * base;
-    const finalPrice = petTotal;
 
     const selectedPetDetails = pets
       .filter((pet) => selectedPets.includes(pet._id))
@@ -139,21 +125,21 @@ function SelectTagPage() {
         userId: user._id,
       }));
 
-    const membershipId = selectedPackage?.membershipId;
+    const finalPrice = selectedPets.length * tagPrice;
 
     navigate("/checkout", {
       state: {
-        package: selectedPackage.name,
+        package: { type: "Normal Tag" },
         total: finalPrice,
-        membership: true,
-        membershipObjectId: membershipId,
+        membership: false,
+        membershipObjectId: null,
         selectedPets: selectedPetDetails,
         userId: user._id,
       },
     });
   };
 
-  if (loading || !selectedPackage) {
+  if (loading) {
     return (
       <Container className="my-5 text-center">
         <Spinner animation="border" variant="primary" />
@@ -233,25 +219,28 @@ function SelectTagPage() {
           className="d-block mb-3"
           style={{ fontSize: "1.6rem", fontWeight: "600", color: "#0071e3" }}
         >
-          R{selectedPackage.price.toFixed(2)} Initial{" "}
+          R{tagPrice.toFixed(2)}{" "}
           <small className="text-primary" style={{ fontWeight: "500" }}>
-            + R50 Monthly
+            one-off per tag
           </small>
         </span>
         <p className="h4 fw-bold mt-4 mb-2">
-          {selectedPackage.name || "Standard Package"}
+          Normal Tag
         </p>
-        <p className="text-muted mb-3">{selectedPackage.description}</p>
+        <p className="text-muted mb-3">
+          Order physical tags for pets with an active subscription.
+        </p>
         <ul
           className="list-unstyled text-start px-3"
           style={{ fontSize: "0.95rem", color: "#555", lineHeight: 1.5 }}
         >
-          {selectedPackage.features?.map((feature, idx) => (
-            <li key={idx} className="d-flex align-items-center mb-2">
-              <FaCheck
-                size={14}
-                style={{ color: "#0071e3", marginRight: "0.5rem" }}
-              />
+          {[
+            "Custom engraving",
+            "QR code linked to your pet profile",
+            "Doorstep or PUDO delivery",
+          ].map((feature) => (
+            <li key={feature} className="d-flex align-items-center mb-2">
+              <FaCheck size={14} style={{ color: "#0071e3", marginRight: "0.5rem" }} />
               {feature}
             </li>
           ))}
@@ -279,6 +268,7 @@ function SelectTagPage() {
               action
               onClick={() => handlePetSelection(pet)}
               active={selectedPets.includes(pet._id)}
+              disabled={!pet.hasMembership}
               className="d-flex justify-content-between align-items-center"
               style={{
                 cursor: "pointer",
@@ -287,10 +277,14 @@ function SelectTagPage() {
                 transition: "background-color 0.2s ease",
                 border: "none",
                 borderBottom: "1px solid #eee",
+                opacity: pet.hasMembership ? 1 : 0.55,
               }}
             >
               <span>
                 {pet.name} <small className="text-muted">({pet.species})</small>
+                {!pet.hasMembership ? (
+                  <small className="text-muted"> • subscription required</small>
+                ) : null}
               </span>
               <Form.Check
                 type="checkbox"
@@ -298,6 +292,7 @@ function SelectTagPage() {
                 onChange={() => handlePetSelection(pet)}
                 onClick={(e) => e.stopPropagation()}
                 style={{ transform: "scale(1.2)" }}
+                disabled={!pet.hasMembership}
                 aria-label={`Select pet ${pet.name}`}
               />
             </ListGroup.Item>
@@ -314,7 +309,7 @@ function SelectTagPage() {
           <h5 style={{ fontWeight: "600", fontSize: "1.3rem" }}>
             Total:{" "}
             <span className="text-primary">
-              R{(selectedPackage.price * selectedPets.length).toFixed(2)}
+              R{(tagPrice * selectedPets.length).toFixed(2)}
             </span>
           </h5>
         </Col>
@@ -343,7 +338,7 @@ function SelectTagPage() {
           role="alert"
           aria-live="assertive"
         >
-          <Toast.Body>Please select at least one pet to continue</Toast.Body>
+          <Toast.Body>{toastMessage || "Please select at least one pet to continue."}</Toast.Body>
         </Toast>
       </ToastContainer>
     </Container>
