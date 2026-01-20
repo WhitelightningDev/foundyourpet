@@ -137,15 +137,33 @@ function CheckoutPage() {
         ...(safePetDraft ? { petDraft: safePetDraft } : {}),
       }, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
 
-      if (response.data?.checkout_url) {
-        window.location.href = response.data.checkout_url;
+      const checkoutUrl = response.data?.checkout_url;
+      if (checkoutUrl) {
+        window.location.assign(checkoutUrl);
       } else {
-        alert("Checkout URL not received. Please try again.");
+        console.error("Checkout URL not received:", response.data);
+        alert("Checkout URL not received from server. Please try again.");
       }
     } catch (err) {
-      const serverMessage = err?.response?.data?.message;
+      const data = err?.response?.data;
+      const serverMessage = data?.message;
+      const providerDetails =
+        data?.provider === "yoco"
+          ? `Yoco error${data?.status ? ` (${data.status})` : ""}: ${typeof data?.details === "string" ? data.details : "See server logs"}`
+          : null;
+      const extra =
+        data?.details
+          ? typeof data.details === "string"
+            ? data.details
+            : JSON.stringify(data.details)
+          : null;
+      const requestId = data?.requestId ? `Request ID: ${data.requestId}` : null;
       console.error("Checkout error:", err.response?.data || err.message);
-      alert(serverMessage || "There was an error initiating checkout. Please try again.");
+      alert(
+        [providerDetails || serverMessage || "There was an error initiating checkout. Please try again.", requestId, extra]
+          .filter(Boolean)
+          .join("\n")
+      );
     } finally {
       setIsSubmitting(false);
     }
