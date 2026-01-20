@@ -34,51 +34,54 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <NavigationBar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/prices" element={<Prices />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/NormalLearn" element={<NormalTagLearn />} />
-          <Route path="/SamsungLearn" element={<SamsungLearn />} />
-          <Route path="/AppleLearn" element={<AppleLearn />} />
-          <Route path="/Login" element={<Login />} />
-          <Route path="/Signup" element={<Signup />} />
-          <Route path="/select-tag/:tagType" element={<SelectTagPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/manage-pets" element={<ManagePetsPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/pet-profile/:petId" element={<PublicPetProfile />} />
-          <Route path="/p/:petId" element={<PetRedirect />} />
-          <Route path="/signup-success" element={<SignupSuccess />} />
-          <Route path="/terms-and-conditions" element={<TsAndCs />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/password-reset" element={<PasswordResetPage />} />
-          <Route path="/payment-success" element={<SuccessPage />} />
-          <Route path="/payment-failure" element={<FailurePage />} />
-          <Route path="/payment-cancel" element={<CancelPage />} />
-          
+        <div className="flex min-h-screen flex-col bg-background text-foreground">
+          <NavigationBar />
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/prices" element={<Prices />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/features" element={<Features />} />
+              <Route path="/NormalLearn" element={<NormalTagLearn />} />
+              <Route path="/SamsungLearn" element={<SamsungLearn />} />
+              <Route path="/AppleLearn" element={<AppleLearn />} />
+              <Route path="/Login" element={<Login />} />
+              <Route path="/Signup" element={<Signup />} />
+              <Route path="/select-tag/:tagType" element={<SelectTagPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/manage-pets" element={<ManagePetsPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/pet-profile/:petId" element={<PublicPetProfile />} />
+              <Route path="/p/:petId" element={<PetRedirect />} />
+              <Route path="/signup-success" element={<SignupSuccess />} />
+              <Route path="/terms-and-conditions" element={<TsAndCs />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/password-reset" element={<PasswordResetPage />} />
+              <Route path="/payment-success" element={<SuccessPage />} />
+              <Route path="/payment-failure" element={<FailurePage />} />
+              <Route path="/payment-cancel" element={<CancelPage />} />
 
-          <Route
-            path="/admin-dashboard"
-            element={
-              <PrivateRoute>
-                <AdminDashboard />
-              </PrivateRoute>
-            }
-          />
+              <Route
+                path="/admin-dashboard"
+                element={
+                  <PrivateRoute>
+                    <AdminDashboard />
+                  </PrivateRoute>
+                }
+              />
 
-          <Route
-            path="/Dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-        </Routes>
-        <Footer />
+              <Route
+                path="/Dashboard"
+                element={
+                  <PrivateRoute>
+                    <Dashboard />
+                  </PrivateRoute>
+                }
+              />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
       </AuthProvider>
     </Router>
   );
