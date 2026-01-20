@@ -1,132 +1,207 @@
 import React from "react";
-import { Modal, Button, Card, Row, Col, Badge } from "react-bootstrap";
-import { QRCodeCanvas } from "qrcode.react";
-import { FaQrcode } from "react-icons/fa";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Mail, MapPin, PawPrint, Phone, QrCode, ShieldCheck } from "lucide-react";
 
 function UserDetailsModal({ show, onHide, user, pets, handleShowQRModal }) {
   if (!user) return null;
 
   return (
-    <Modal show={show} onHide={onHide} size="xl" centered className="apple-style-modal">
-      <Modal.Header closeButton className="border-0">
-        <Modal.Title className="fw-semibold text-dark fs-4">User Profile Overview</Modal.Title>
-      </Modal.Header>
+    <Dialog
+      open={show}
+      onOpenChange={(open) => {
+        if (!open) onHide();
+      }}
+    >
+      <DialogContent className="max-h-[90vh] max-w-6xl overflow-hidden p-0">
+        <div className="border-b bg-muted/30 p-6">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              User profile
+            </DialogTitle>
+            <DialogDescription>
+              Review account information and registered pets.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-      <Modal.Body>
-  <Row className="h-100">
-    {/* Left: User Info */}
-    <Col md={4} className="d-flex">
-      <Card className="shadow-lg border-0 rounded-4 w-100 h-100">
-        <Card.Body className="text-center d-flex flex-column justify-content-center">
-          <h4 className="fw-semibold text-dark">{user.name} {user.surname}</h4>
-          <p className="text-muted mb-2"><strong>Email:</strong> {user.email}</p>
-          <p className="text-muted mb-2"><strong>Contact:</strong> {user.contact}</p>
-          <p className="text-muted"><strong>Address:</strong> {user.address?.street}, {user.address?.city}</p>
-        </Card.Body>
-      </Card>
-    </Col>
+        <div className="grid gap-6 p-6 lg:grid-cols-3">
+          <Card className="lg:col-span-1">
+            <CardHeader className="space-y-2">
+              <CardTitle className="text-lg">
+                {user?.name} {user?.surname}
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <Badge variant={user?.isAdmin ? "default" : "secondary"}>
+                  {user?.isAdmin ? "Admin" : "User"}
+                </Badge>
+                <Badge variant="outline" className="border-primary/30 text-primary">
+                  {user?._id}
+                </Badge>
+              </div>
+            </CardHeader>
 
-    {/* Right: Pet Info */}
-    <Col md={8} className="d-flex flex-column">
-      <h5 className="text-dark fw-semibold mb-3 text-center">Registered Pets</h5>
+            <CardContent className="space-y-3 text-sm">
+              <div className="flex items-start gap-3 rounded-lg border bg-card px-3 py-3">
+                <Mail className="mt-0.5 h-4 w-4 text-primary" />
+                <div className="min-w-0">
+                  <div className="text-muted-foreground">Email</div>
+                  <div className="truncate font-medium">{user?.email}</div>
+                </div>
+              </div>
 
-      <div className="overflow-auto" style={{ maxHeight: '65vh' }}>
-        {pets.length === 0 ? (
-          <div className="text-center text-muted fs-6">No pets found.</div>
-        ) : (
-          pets.map((pet) => (
-            <Card key={pet._id} className="mb-3 shadow-lg border-0 rounded-4">
-              <Card.Body>
-                <Row className="align-items-center">
-                  <Col md={3} className="text-center">
-                    {pet.photoUrl ? (
-                      <img
-                        src={
-                          pet.photoUrl.startsWith("http")
-                            ? pet.photoUrl
-                            : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`
-                        }
-                        alt={`${pet.name}'s profile`}
-                        style={{
-                          width: "80px",
-                          height: "80px",
-                          borderRadius: "50%",
-                          objectFit: "cover",
-                          border: "1px solid #ccc",
-                        }}
-                      />
-                    ) : (
-                      <div
-                        className="d-flex align-items-center justify-content-center bg-light text-muted"
-                        style={{
-                          width: 80,
-                          height: 80,
-                          borderRadius: "50%",
-                          fontSize: "0.9rem",
-                        }}
-                      >
-                        No Image
-                      </div>
-                    )}
-                  </Col>
+              <div className="flex items-start gap-3 rounded-lg border bg-card px-3 py-3">
+                <Phone className="mt-0.5 h-4 w-4 text-primary" />
+                <div className="min-w-0">
+                  <div className="text-muted-foreground">Contact</div>
+                  <div className="truncate font-medium">{user?.contact || "—"}</div>
+                </div>
+              </div>
 
-                  <Col md={9}>
-                    <Row>
-                      <Col md={6}>
-                        <h6 className="fw-semibold text-dark">{pet.name}</h6>
-                        <p className="text-muted mb-1">{pet.species} • {pet.breed}</p>
-                        <p className="text-muted mb-1"><strong>Age:</strong> {pet.age} yrs</p>
-                        <p className="text-muted mb-1"><strong>Gender:</strong> {pet.gender}</p>
-                      </Col>
-                      <Col md={6}>
-                        <p className="text-muted mb-1"><strong>Spayed/Neutered:</strong> {pet.spayedNeutered ? "Yes" : "No"}</p>
-                        <p className="text-muted mb-1"><strong>Tag Type:</strong> {pet.tagType || "N/A"}</p>
-                        <p className="text-muted mb-1"><strong>Membership:</strong> 
-                          {" "}
-                          <Badge bg={pet.hasMembership ? "success" : "secondary"} pill>
-                            {pet.hasMembership ? "Active" : "Inactive"}
+              <div className="flex items-start gap-3 rounded-lg border bg-card px-3 py-3">
+                <MapPin className="mt-0.5 h-4 w-4 text-primary" />
+                <div className="min-w-0">
+                  <div className="text-muted-foreground">Address</div>
+                  <div className="font-medium">
+                    {user?.address?.street || user?.address?.city
+                      ? `${user?.address?.street ?? ""}${user?.address?.street && user?.address?.city ? ", " : ""}${user?.address?.city ?? ""}`
+                      : "—"}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="lg:col-span-2">
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <PawPrint className="h-4 w-4 text-primary" />
+                  <h3 className="text-lg font-semibold tracking-tight">
+                    Registered pets
+                  </h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Click a pet to download QR assets.
+                </p>
+              </div>
+              <Badge variant="secondary">{pets.length}</Badge>
+            </div>
+
+            <div className="mt-4 max-h-[60vh] overflow-auto pr-1">
+              {pets.length === 0 ? (
+                <div className="rounded-lg border bg-muted/20 p-6 text-sm text-muted-foreground">
+                  No pets found.
+                </div>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {pets.map((pet) => (
+                    <Card key={pet._id} className="overflow-hidden">
+                      <CardHeader className="space-y-3">
+                        <div className="flex items-start gap-3">
+                          <div className="h-14 w-14 overflow-hidden rounded-2xl border bg-muted/20">
+                            {pet.photoUrl ? (
+                              <img
+                                src={
+                                  pet.photoUrl.startsWith("http")
+                                    ? pet.photoUrl
+                                    : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`
+                                }
+                                alt={`${pet.name}'s profile`}
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                                No image
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <CardTitle className="truncate text-base">{pet.name}</CardTitle>
+                            <div className="mt-1 text-sm text-muted-foreground">
+                              {pet.species}
+                              {pet.breed ? ` • ${pet.breed}` : ""}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant={pet.hasMembership ? "default" : "secondary"}>
+                            {pet.hasMembership ? "Membership active" : "No membership"}
                           </Badge>
-                        </p>
-                        {pet.hasMembership && (
-                          <>
-                            <p className="text-muted mb-1"><strong>Type:</strong> {pet.membership}</p>
-                            <p className="text-muted mb-1"><strong>Start:</strong> {new Date(pet.membershipStartDate).toLocaleDateString()}</p>
-                          </>
-                        )}
-                      </Col>
-                    </Row>
+                          <Badge variant="outline">
+                            Tag: {pet.tagType || "N/A"}
+                          </Badge>
+                        </div>
+                      </CardHeader>
 
-                    <div className="text-end mt-3">
-                      <Button variant="outline-dark" size="sm" onClick={() => handleShowQRModal(pet)}>
-                        <FaQrcode className="me-1" /> View PDF
-                      </Button>
-                      <QRCodeCanvas
-                        id={`qr-${pet._id}`}
-                        value={`https://foundyourpet.vercel.app/p/${pet._id}`}
-                        size={128}
-                        level="L"
-                        includeMargin
-                        className="d-none"
-                      />
-                    </div>
-                  </Col>
-                </Row>
-              </Card.Body>
-            </Card>
-          ))
-        )}
-      </div>
-    </Col>
-  </Row>
-</Modal.Body>
+                      <CardContent className="space-y-2 text-sm">
+                        <div className="flex items-center justify-between gap-3 rounded-lg border bg-card px-3 py-2">
+                          <span className="text-muted-foreground">Age</span>
+                          <span className="font-medium">{pet.age ?? "—"} yrs</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3 rounded-lg border bg-card px-3 py-2">
+                          <span className="text-muted-foreground">Gender</span>
+                          <span className="font-medium">{pet.gender || "—"}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3 rounded-lg border bg-card px-3 py-2">
+                          <span className="text-muted-foreground">Spayed/Neutered</span>
+                          <span className="font-medium">
+                            {pet.spayedNeutered ? "Yes" : "No"}
+                          </span>
+                        </div>
 
+                        {pet.hasMembership ? (
+                          <div className="rounded-lg border bg-muted/20 p-3">
+                            <div className="text-sm font-medium">{pet.membership || "Membership"}</div>
+                            {pet.membershipStartDate ? (
+                              <div className="mt-1 text-xs text-muted-foreground">
+                                Started {new Date(pet.membershipStartDate).toLocaleDateString()}
+                              </div>
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </CardContent>
 
-      <Modal.Footer className="border-0">
-        <Button variant="outline-secondary" onClick={onHide}>
-          Close
-        </Button>
-      </Modal.Footer>
-    </Modal>
+                      <CardFooter className="flex items-center justify-end border-t bg-muted/20 px-6 py-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-2"
+                          onClick={() => handleShowQRModal(pet)}
+                        >
+                          <QrCode className="h-4 w-4" />
+                          QR downloads
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t bg-muted/30 px-6 py-4">
+          <DialogFooter>
+            <Button variant="outline" onClick={onHide}>
+              Close
+            </Button>
+          </DialogFooter>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

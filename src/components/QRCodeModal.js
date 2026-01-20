@@ -1,7 +1,16 @@
 import React from "react";
-import { Modal, Button } from "react-bootstrap";
 import { QRCodeCanvas } from "qrcode.react";
-import { FaFilePdf, FaQrcode, FaDownload } from "react-icons/fa";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Download, FileText, QrCode, Ruler, Copy } from "lucide-react";
 
 function QRCodeModal({
   show,
@@ -13,42 +22,94 @@ function QRCodeModal({
 }) {
   if (!pet) return null;
 
+  const qrValue = `https://foundyourpet.vercel.app/p/${pet._id}`;
+
   return (
-    <Modal show={show} onHide={onHide} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>QR Code Preview</Modal.Title>
-      </Modal.Header>
-      <Modal.Body className="text-center">
-        <QRCodeCanvas
-          value={`https://foundyourpet.vercel.app/pet-profile/${pet._id}`}
-          size={200}
-          level="H"
-          includeMargin
-        />
-        <div className="mt-4 d-flex flex-column gap-2">
-          <Button variant="outline-success" onClick={() => handleDownloadQRCode(pet._id)}>
-            <FaQrcode className="me-2" />
-            Download QR Code (PNG)
+    <Dialog
+      open={show}
+      onOpenChange={(open) => {
+        if (!open) onHide();
+      }}
+    >
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <QrCode className="h-5 w-5 text-primary" />
+            QR code preview
+          </DialogTitle>
+          <DialogDescription>
+            Use these downloads for printing and engraving.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex flex-col items-center gap-4">
+          <div className="rounded-2xl border bg-card p-4 shadow-sm ring-1 ring-primary/10">
+            <QRCodeCanvas
+              id={`qr-${pet._id}`}
+              value={qrValue}
+              size={220}
+              level="H"
+              includeMargin
+            />
+          </div>
+
+          <div className="w-full rounded-xl border bg-muted/20 p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-xs text-muted-foreground">Destination</div>
+                <div className="truncate text-sm font-medium">{qrValue}</div>
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="gap-2"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(qrValue);
+                  } catch {
+                    // no-op
+                  }
+                }}
+              >
+                <Copy className="h-4 w-4" />
+                Copy
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex w-full flex-wrap items-center gap-2">
+            <Badge variant="secondary">Pet ID: {pet._id}</Badge>
+            {pet.tagType ? <Badge variant="outline">Tag: {pet.tagType}</Badge> : null}
+          </div>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-3">
+          <Button variant="outline" className="gap-2" onClick={() => handleDownloadQRCode(pet._id)}>
+            <Download className="h-4 w-4" />
+            PNG
           </Button>
-          <Button variant="outline-danger" onClick={() => handleDownloadQRCodeAsPDF(pet._id)}>
-            <FaFilePdf className="me-2" />
-            Download QR as PDF
+          <Button variant="outline" className="gap-2" onClick={() => handleDownloadQRCodeAsPDF(pet._id)}>
+            <FileText className="h-4 w-4" />
+            PDF
           </Button>
           <Button
-            variant="outline-dark"
-            onClick={() =>
-              handleDownloadQRCodeAsDXF(
-                pet._id,
-                `https://foundyourpet.vercel.app/pet-profile/${pet._id}`
-              )
-            }
+            variant="outline"
+            className="gap-2"
+            onClick={() => handleDownloadQRCodeAsDXF(pet._id, qrValue)}
           >
-            <FaDownload className="me-2" />
-            Download QR as DXF
+            <Ruler className="h-4 w-4" />
+            DXF
           </Button>
         </div>
-      </Modal.Body>
-    </Modal>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onHide}>
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
