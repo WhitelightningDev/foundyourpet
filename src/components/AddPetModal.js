@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
+  const navigate = useNavigate();
+
   const [petData, setPetData] = useState({
     name: "",
     species: "",
     breed: "",
     age: "",
     gender: "",
+    size: "",
     spayedNeutered: false,
     photoFile: null,
   });
@@ -44,6 +48,7 @@ const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
     if (!petData.age || Number(petData.age) < 0)
       validationErrors.age = "Valid age is required.";
     if (!petData.gender) validationErrors.gender = "Gender is required.";
+    if (!petData.size) validationErrors.size = "Size is required.";
 
     return validationErrors;
   };
@@ -69,12 +74,23 @@ const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
       const userId = decodedToken.userId;
 
+      const sizeKey = petData.size.toLowerCase();
+      const monthlyPrice =
+        sizeKey === "small" ? 50 : sizeKey === "medium" ? 70 : sizeKey === "large" ? 100 : null;
+
+      if (!monthlyPrice) {
+        setToast({ show: true, message: "Please select a valid pet size.", type: "error" });
+        setIsLoading(false);
+        return;
+      }
+
       const formData = new FormData();
       formData.append("name", petData.name.trim());
       formData.append("species", petData.species);
       formData.append("breed", petData.breed.trim());
       formData.append("age", petData.age);
       formData.append("gender", petData.gender);
+      formData.append("size", petData.size);
       formData.append("spayedNeutered", petData.spayedNeutered);
       formData.append("userId", userId);
 
@@ -101,9 +117,29 @@ const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
 
       const result = await response.json();
       console.log("Pet added successfully:", result);
-      setToast({ show: true, message: "Pet added successfully!", type: "success" });
+      setToast({ show: true, message: "Pet added. Redirecting to subscription checkout…", type: "success" });
       refreshPets();
       closeModal();
+
+      const createdPet = result?.pet ?? result?.data ?? result?.newPet ?? result;
+      if (!createdPet?._id) {
+        setToast({
+          show: true,
+          message: "Pet was added, but we could not start checkout. Please try again from your dashboard.",
+          type: "error",
+        });
+        return;
+      }
+
+      navigate("/checkout", {
+        state: {
+          membership: true,
+          total: monthlyPrice,
+          package: { type: `${petData.size} Pet Subscription` },
+          membershipObjectId: null,
+          selectedPets: [createdPet],
+        },
+      });
     } catch (error) {
       console.error("Error adding pet:", error);
       setToast({ show: true, message: "An error occurred. Please try again.", type: "error" });
@@ -206,6 +242,7 @@ const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
                   {renderInput("Breed", "breed")}
                   {renderInput("Age", "age", "number")}
                   {renderSelect("Gender", "gender", ["Male", "Female"])}
+                  {renderSelect("Size", "size", ["Small", "Medium", "Large"])}
 
                   <div className="col-md-6 mb-3">
                     <label htmlFor="photo" className="form-label">

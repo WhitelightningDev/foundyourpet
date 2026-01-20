@@ -111,10 +111,6 @@ const Dashboard = () => {
   const refreshPets = () => fetchPets();
 
   const handleOpenModal = () => {
-    if (!user.membershipActive) {
-      toast.warn("You must have an active membership to add a pet.");
-      return;
-    }
     setIsEditMode(false);
     setShowModal(true);
   };
@@ -211,18 +207,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleBuyMembership = () => {
-    navigate("/checkout", {
-      state: {
-        membership: true,
-        total: 50, // fixed membership price
-        package: { type: "Membership" },
-        membershipObjectId: null, // no ID until payment success
-        selectedPets: [], // no pets for membership purchase
-      },
-    });
-  };
-
   const handleShare = () => {
     const message = encodeURIComponent(
       "Check out Found Your Pet — a simple, smart way to help lost pets get home faster. https://foundyourpet.vercel.app/"
@@ -242,6 +226,7 @@ const Dashboard = () => {
 
   const dogs = pets.filter((pet) => pet.species?.toLowerCase() === "dog");
   const cats = pets.filter((pet) => pet.species?.toLowerCase() === "cat");
+  const activeMembershipCount = pets.filter((pet) => pet.hasMembership).length;
 
   return (
     <Container className="my-5">
@@ -271,41 +256,16 @@ const Dashboard = () => {
                 </Button>
               </div>
 
-              {/* Membership Status and Conditional UI */}
-             <div className="mt-4">
-  {user.membershipActive ? (
-    <>
-      <p className="text-success fw-medium fs-5">
-        ✅ Membership Active
-      </p>
-    </>
-  ) : (
-    <>
-      <p className="text-danger fw-medium fs-5">
-        ❌ No active membership found
-      </p>
-
-      {/* Show membership purchase card */}
-      <Card className="mt-4 p-3 shadow-sm border rounded-3 bg-white text-center">
-        <h5>Purchase Membership - R50 / month</h5>
-        <p className="mb-3">
-          Join now and get full access! Your membership will renew
-          monthly on the day of purchase.
-        </p>
-        <Button
-          variant="primary"
-          onClick={handleBuyMembership}
-          disabled={user.membershipActive}
-        >
-          {user.membershipActive
-            ? "Membership Active"
-            : "Buy Membership - R50"}
-        </Button>
-      </Card>
-    </>
-  )}
-</div>
-
+              <div className="mt-4">
+                <p className="fw-medium fs-5 text-dark mb-2">Subscriptions are billed monthly per pet</p>
+                <p className="text-muted mb-0">
+                  Small: <strong>R50/mo</strong> • Medium: <strong>R70/mo</strong> • Large:{" "}
+                  <strong>R100/mo</strong> — choose the tier when you add a pet.
+                </p>
+                <p className="text-muted mt-2 mb-0">
+                  Active subscriptions: <strong>{activeMembershipCount}</strong> / <strong>{pets.length}</strong>
+                </p>
+              </div>
 
               {/* Add New Pet Button */}
               <div className="mt-5">
@@ -314,16 +274,19 @@ const Dashboard = () => {
                   size="lg"
                   onClick={handleOpenModal}
                   className="px-5 py-3 rounded-pill fw-medium shadow-sm"
-                  disabled={!user.membershipActive}
-                  title={
-                    user.membershipActive
-                      ? "Add a new pet"
-                      : "Activate membership to add pets"
-                  }
+                  title="Add a new pet"
                 >
                   <FaPlus className="me-2" />
                   Add New Pet
                 </Button>
+                <div className="mt-3 d-flex flex-wrap justify-content-center gap-2">
+                  <Button variant="outline-primary" onClick={() => navigate("/prices")}>
+                    View pricing
+                  </Button>
+                  <Button variant="primary" onClick={() => navigate("/select-tag/standard")}>
+                    Order tags (R250 each)
+                  </Button>
+                </div>
               </div>
             </>
           )}
@@ -335,6 +298,7 @@ const Dashboard = () => {
           title="Your Dogs"
           pets={dogs}
           loading={loading}
+          user={user}
           handleViewDetails={handleViewDetails}
           handleEditClick={handleEditClick}
           handleDeleteClick={handleDeleteClick}
@@ -344,6 +308,7 @@ const Dashboard = () => {
           title="Your Cats"
           pets={cats}
           loading={loading}
+          user={user}
           handleViewDetails={handleViewDetails}
           handleEditClick={handleEditClick}
           handleDeleteClick={handleDeleteClick}
