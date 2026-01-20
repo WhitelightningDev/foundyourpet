@@ -3,6 +3,7 @@ import axios from "axios";
 import UserDetailsModal from "../components/UserDetailsModal";
 import QRCodeModal from "../components/QRCodeModal";
 import UserListSection from "../components/UserListSection";
+import TagOrdersSection from "../components/TagOrdersSection";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +27,7 @@ import {
   User,
   Users,
 } from "lucide-react";
+import { API_BASE_URL } from "../config/api";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -47,7 +49,7 @@ function AdminDashboard() {
     setError("");
     try {
       const res = await axios.get(
-        "https://foundyourpet-backend.onrender.com/api/users",
+        `${API_BASE_URL}/api/users`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -68,7 +70,7 @@ function AdminDashboard() {
   const handleViewDetails = async (userId) => {
     try {
       const res = await axios.get(
-        `https://foundyourpet-backend.onrender.com/api/users/users/${userId}/with-pets`,
+        `${API_BASE_URL}/api/users/${userId}/with-pets`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -566,6 +568,8 @@ function AdminDashboard() {
             </Tabs>
           </CardContent>
         </Card>
+
+        <TagOrdersSection token={token} />
       </div>
 
       <UserDetailsModal
