@@ -7,7 +7,7 @@ const SuccessPage = () => {
   const [details, setDetails] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [membershipUpdated, setMembershipUpdated] = useState(false);
+  const [ setMembershipUpdated] = useState(false);
 
   const paymentId = params.get("paymentId");
 
