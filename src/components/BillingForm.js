@@ -1,28 +1,23 @@
 import React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-function BillingForm({ formData, errors, handleChange, handleCheckout }) {
+function BillingForm({ formData, errors, handleChange, handleCheckout, isSubmitting = false }) {
+  const fieldWrapperClass = "space-y-1.5";
+  const fieldLabelClass = "text-sm";
+  const fieldErrorClass = "text-xs font-medium text-destructive";
+  const selectBaseClass =
+    "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background " +
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 " +
+    "disabled:cursor-not-allowed disabled:opacity-50";
+
   return (
     <>
-      <h4
-        style={{
-          fontWeight: 700,
-          fontSize: "1.75rem",
-          marginBottom: "2rem",
-          color: "#111827",
-          borderBottom: "2px solid #2563eb",
-          paddingBottom: "0.5rem",
-        }}
-      >
-        Billing Address
-      </h4>
       <form
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "1.5rem",
-          maxWidth: "480px",
-          margin: "0 auto",
-        }}
+        className="grid gap-4"
         noValidate
         onSubmit={handleCheckout}
       >
@@ -58,34 +53,18 @@ function BillingForm({ formData, errors, handleChange, handleCheckout }) {
           },
           { id: "zip", label: "Postal Code", required: true, type: "text" },
         ].map(({ id, label, required, type, options }) => (
-          <div key={id} style={{ display: "flex", flexDirection: "column" }}>
-            <label
-              htmlFor={id}
-              style={{
-                fontWeight: 600,
-                marginBottom: "0.4rem",
-                color: errors[id] ? "#dc2626" : "#374151",
-              }}
-            >
-              {label}
-              {required && <span style={{ color: "#ef4444" }}> *</span>}
-            </label>
+          <div key={id} className={fieldWrapperClass}>
+            <Label htmlFor={id} className={cn(fieldLabelClass, errors[id] && "text-destructive")}>
+              {label}{required && <span className="text-destructive"> *</span>}
+            </Label>
             {type === "select" ? (
               <select
                 id={id}
                 value={formData[id]}
                 onChange={handleChange}
                 required={required}
-                style={{
-                  padding: "0.75rem 1rem",
-                  fontSize: "1rem",
-                  borderRadius: 8,
-                  border: errors[id] ? "2px solid #dc2626" : "1.5px solid #d1d5db",
-                  outlineColor: "#2563eb",
-                  backgroundColor: "#fff",
-                  cursor: "pointer",
-                  transition: "border-color 0.3s ease",
-                }}
+                className={cn(selectBaseClass, errors[id] && "border-destructive")}
+                aria-invalid={!!errors[id]}
               >
                 <option value="">Choose...</option>
                 {options.map((opt) => (
@@ -95,56 +74,38 @@ function BillingForm({ formData, errors, handleChange, handleCheckout }) {
                 ))}
               </select>
             ) : (
-              <input
+              <Input
                 type={type}
                 id={id}
                 value={formData[id]}
                 onChange={handleChange}
                 required={required}
-                style={{
-                  padding: "0.75rem 1rem",
-                  fontSize: "1rem",
-                  borderRadius: 8,
-                  border: errors[id] ? "2px solid #dc2626" : "1.5px solid #d1d5db",
-                  outlineColor: "#2563eb",
-                  transition: "border-color 0.3s ease",
-                }}
+                aria-invalid={!!errors[id]}
+                className={cn(errors[id] && "border-destructive")}
               />
             )}
             {errors[id] && (
-              <small
-                style={{
-                  color: "#dc2626",
-                  marginTop: "0.25rem",
-                  fontWeight: 600,
-                }}
-              >
+              <p className={fieldErrorClass}>
                 {errors[id]}
-              </small>
+              </p>
             )}
           </div>
         ))}
 
-        <button
+        <Button
           type="submit"
-          style={{
-            marginTop: "2rem",
-            padding: "1rem",
-            backgroundColor: "#2563eb",
-            color: "white",
-            border: "none",
-            borderRadius: 10,
-            fontWeight: 700,
-            fontSize: "1.1rem",
-            cursor: "pointer",
-            boxShadow: "0 4px 14px rgba(37, 99, 235, 0.6)",
-            transition: "background-color 0.3s ease",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1e40af")}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#2563eb")}
+          className="mt-2 w-full"
+          disabled={isSubmitting}
         >
-          Complete Checkout
-        </button>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Redirecting…
+            </>
+          ) : (
+            "Complete checkout"
+          )}
+        </Button>
       </form>
     </>
   );

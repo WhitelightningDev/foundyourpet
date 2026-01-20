@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { Toast, ToastContainer } from "react-bootstrap";
 import { API_BASE_URL } from "../config/api";
+
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -21,9 +27,7 @@ function Signup() {
     },
   });
 
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastVariant, setToastVariant] = useState(""); // 'success' or 'danger'
+  const [message, setMessage] = useState(null); // { type: "success" | "error", text: string }
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -50,6 +54,11 @@ function Signup() {
 
   const handleShowPasswordChange = () => {
     setShowPassword(!showPassword);
+  };
+
+  const showMessage = (text, type = "error") => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 5000);
   };
 
   const validateInputs = () => {
@@ -86,15 +95,17 @@ function Signup() {
     e.preventDefault();
     if (validateInputs()) {
       setIsLoading(true);
+      setMessage(null);
       try {
         const response = await axios.post(
           `${API_BASE_URL}/api/users/signup`,
           formData
         );
 
-        setToastMessage(response.data?.message || response.data?.msg || "Signup successful!");
-        setToastVariant("success");
-        setShowToast(true);
+        showMessage(
+          response.data?.message || response.data?.msg || "Signup successful!",
+          "success"
+        );
 
         setTimeout(() => {
           window.location.href = "/signup-success";
@@ -107,290 +118,317 @@ function Signup() {
           const firstValidationError =
             validationErrors.length > 0 ? validationErrors[0]?.msg : null;
 
-          setToastMessage(
+          showMessage(
             data?.message ||
               data?.msg ||
               firstValidationError ||
               "Signup failed. Please try again."
           );
         } else {
-          setToastMessage("An error occurred. Please try again.");
+          showMessage("An error occurred. Please try again.");
         }
-        setToastVariant("danger");
-        setShowToast(true);
         setIsLoading(false);
       }
     }
   };
 
+  const provinceSelectClassName = [
+    "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+    !formData.address.province ? "text-muted-foreground" : "",
+  ].join(" ");
+
   return (
-    <div className="d-flex justify-content-center align-items-center bg-body-secondary">
-      <div
-        className="modal-dialog border-3 rounded-5 shadow-lg mb-3 mt-3"
-        style={{ minHeight: "100vh", overflowY: "auto", paddingTop: "20px" }}
-      >
-        <div className="modal-content">
-          <div className="modal-header p-3 border-bottom-0 text-center">
-            <img className="rounded m-3" src="/android-chrome-192x192.png" width="70px" alt="Logo" />
-            <h1 className="fw-bold ms-2 fs-2">Sign Up</h1>
-          </div>
+    <main className="min-h-screen bg-muted/40 px-4 py-10">
+      <div className="mx-auto w-full max-w-3xl">
+        <Card className="shadow-sm">
+          <CardHeader className="space-y-2">
+            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+              <img className="h-12 w-12 rounded" src="/android-chrome-192x192.png" alt="Logo" />
+              <div className="min-w-0">
+                <CardTitle>Create your account</CardTitle>
+                <CardDescription>
+                  Fill in your details below — you&apos;ll be ready in under a minute.
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
 
-          <div className="modal-body p-3">
-            <form onSubmit={handleSubmit}>
-              <div className="row">
-                {/* User Details Column */}
-                <div className="col-12 col-md-6">
-                  <h6 className="mb-2">User Details</h6>
+          <CardContent className="space-y-6">
+            {message ? (
+              <div
+                className={[
+                  "rounded-md border px-3 py-2 text-sm",
+                  message.type === "success"
+                    ? "border-primary/30 bg-primary/10 text-primary"
+                    : "border-destructive/30 bg-destructive/10 text-destructive",
+                ].join(" ")}
+                role="status"
+              >
+                {message.text}
+              </div>
+            ) : null}
 
-                  <div className="row g-2 mb-2">
-                    <div className="col">
-                      <div className="form-floating">
-                        <input
-                          type="text"
-                          className="form-control rounded-3"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleChange}
-                          placeholder="First Name"
-                          required
-                        />
-                        {errors.name && <div className="text-danger small mt-1">{errors.name}</div>}
-                        <label>First Name</label>
-                      </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                <section className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground">User details</h3>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">First name</Label>
+                      <Input
+                        id="name"
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        placeholder="Jane"
+                        autoComplete="given-name"
+                        required
+                      />
+                      {errors.name ? <p className="text-xs text-destructive">{errors.name}</p> : null}
                     </div>
-                    <div className="col">
-                      <div className="form-floating">
-                        <input
-                          type="text"
-                          className="form-control rounded-3"
-                          name="surname"
-                          value={formData.surname}
-                          onChange={handleChange}
-                          placeholder="Last Name"
-                          required
-                        />
-                        {errors.surname && <div className="text-danger small mt-1">{errors.surname}</div>}
-                        <label>Last Name</label>
-                      </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="surname">Last name</Label>
+                      <Input
+                        id="surname"
+                        type="text"
+                        name="surname"
+                        value={formData.surname}
+                        onChange={handleChange}
+                        placeholder="Doe"
+                        autoComplete="family-name"
+                        required
+                      />
+                      {errors.surname ? (
+                        <p className="text-xs text-destructive">{errors.surname}</p>
+                      ) : null}
                     </div>
                   </div>
 
-                  <div className="form-floating mb-2">
-                    <input
-                      type="text"
-                      className="form-control rounded-3"
+                  <div className="space-y-2">
+                    <Label htmlFor="contact">Cell number</Label>
+                    <Input
+                      id="contact"
+                      type="tel"
                       name="contact"
                       value={formData.contact}
                       onChange={handleChange}
                       placeholder="+27"
+                      autoComplete="tel"
+                      inputMode="tel"
                       required
                     />
-                    {errors.contact && <div className="text-danger small mt-1">{errors.contact}</div>}
-                    <label>Cell Number</label>
+                    {errors.contact ? (
+                      <p className="text-xs text-destructive">{errors.contact}</p>
+                    ) : null}
                   </div>
 
-                  <div className="form-floating mb-2">
-                    <input
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
                       type="email"
-                      className="form-control rounded-3"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="name@example.com"
+                      autoComplete="email"
+                      inputMode="email"
                       required
                     />
-                    {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
-                    <label>Email</label>
+                    {errors.email ? <p className="text-xs text-destructive">{errors.email}</p> : null}
                   </div>
-                </div>
+                </section>
 
-                {/* Address Column */}
-                <div className="col-12 col-md-6">
-                  <h6 className="mb-2">Address Information</h6>
+                <section className="space-y-4">
+                  <h3 className="text-sm font-medium text-muted-foreground">Address</h3>
 
-                  <div className="form-floating mb-2">
-                    <input
+                  <div className="space-y-2">
+                    <Label htmlFor="address.street">Street address</Label>
+                    <Input
+                      id="address.street"
                       type="text"
-                      className="form-control rounded-3"
                       name="address.street"
                       value={formData.address.street}
                       onChange={handleChange}
-                      placeholder="Street Address"
+                      placeholder="123 Main St"
+                      autoComplete="street-address"
                       required
                     />
-                    {errors["address.street"] && (
-                      <div className="text-danger small mt-1">{errors["address.street"]}</div>
-                    )}
-                    <label>Street Address</label>
+                    {errors["address.street"] ? (
+                      <p className="text-xs text-destructive">{errors["address.street"]}</p>
+                    ) : null}
                   </div>
 
-                  <div className="row g-2 mb-2">
-                    <div className="col">
-                      <div className="form-floating">
-                        <input
-                          type="text"
-                          className="form-control rounded-3"
-                          name="address.city"
-                          value={formData.address.city}
-                          onChange={handleChange}
-                          placeholder="City"
-                          required
-                        />
-                        {errors["address.city"] && (
-                          <div className="text-danger small mt-1">{errors["address.city"]}</div>
-                        )}
-                        <label>City</label>
-                      </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="address.city">City</Label>
+                      <Input
+                        id="address.city"
+                        type="text"
+                        name="address.city"
+                        value={formData.address.city}
+                        onChange={handleChange}
+                        placeholder="Cape Town"
+                        autoComplete="address-level2"
+                        required
+                      />
+                      {errors["address.city"] ? (
+                        <p className="text-xs text-destructive">{errors["address.city"]}</p>
+                      ) : null}
                     </div>
 
-                    <div className="col">
-                      <div className="form-floating">
-                        <select
-                          className="form-select rounded-3"
-                          name="address.province"
-                          value={formData.address.province}
-                          onChange={handleChange}
-                          required
-                        >
-                          <option value="">Select Province</option>
-                          <option value="Eastern Cape">Eastern Cape</option>
-                          <option value="Free State">Free State</option>
-                          <option value="Gauteng">Gauteng</option>
-                          <option value="KwaZulu-Natal">KwaZulu-Natal</option>
-                          <option value="Limpopo">Limpopo</option>
-                          <option value="Mpumalanga">Mpumalanga</option>
-                          <option value="North West">North West</option>
-                          <option value="Northern Cape">Northern Cape</option>
-                          <option value="Western Cape">Western Cape</option>
-                        </select>
-                        {errors["address.province"] && (
-                          <div className="text-danger small mt-1">{errors["address.province"]}</div>
-                        )}
-                        <label>Province</label>
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="address.province">Province</Label>
+                      <select
+                        id="address.province"
+                        name="address.province"
+                        value={formData.address.province}
+                        onChange={handleChange}
+                        required
+                        className={provinceSelectClassName}
+                      >
+                        <option value="">Select province</option>
+                        <option value="Eastern Cape">Eastern Cape</option>
+                        <option value="Free State">Free State</option>
+                        <option value="Gauteng">Gauteng</option>
+                        <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+                        <option value="Limpopo">Limpopo</option>
+                        <option value="Mpumalanga">Mpumalanga</option>
+                        <option value="North West">North West</option>
+                        <option value="Northern Cape">Northern Cape</option>
+                        <option value="Western Cape">Western Cape</option>
+                      </select>
+                      {errors["address.province"] ? (
+                        <p className="text-xs text-destructive">{errors["address.province"]}</p>
+                      ) : null}
                     </div>
                   </div>
 
-                  <div className="row g-2 mb-2">
-                    <div className="col">
-                      <div className="form-floating">
-                        <input
-                          type="text"
-                          className="form-control rounded-3"
-                          name="address.postalCode"
-                          value={formData.address.postalCode}
-                          onChange={handleChange}
-                          placeholder="Postal Code"
-                          required
-                        />
-                        {errors["address.postalCode"] && (
-                          <div className="text-danger small mt-1">{errors["address.postalCode"]}</div>
-                        )}
-                        <label>Postal Code</label>
-                      </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="address.postalCode">Postal code</Label>
+                      <Input
+                        id="address.postalCode"
+                        type="text"
+                        name="address.postalCode"
+                        value={formData.address.postalCode}
+                        onChange={handleChange}
+                        placeholder="8001"
+                        autoComplete="postal-code"
+                        required
+                      />
+                      {errors["address.postalCode"] ? (
+                        <p className="text-xs text-destructive">{errors["address.postalCode"]}</p>
+                      ) : null}
                     </div>
 
-                    <div className="col">
-                      <div className="form-floating">
-                        <input
-                          type="text"
-                          className="form-control rounded-3"
-                          name="address.country"
-                          value={formData.address.country}
-                          onChange={handleChange}
-                          placeholder="Country"
-                          required
-                        />
-                        {errors["address.country"] && (
-                          <div className="text-danger small mt-1">{errors["address.country"]}</div>
-                        )}
-                        <label>Country</label>
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="address.country">Country</Label>
+                      <Input
+                        id="address.country"
+                        type="text"
+                        name="address.country"
+                        value={formData.address.country}
+                        onChange={handleChange}
+                        placeholder="South Africa"
+                        autoComplete="country-name"
+                        required
+                      />
+                      {errors["address.country"] ? (
+                        <p className="text-xs text-destructive">{errors["address.country"]}</p>
+                      ) : null}
                     </div>
+                  </div>
+                </section>
+              </div>
+
+              <Separator />
+
+              <section className="space-y-4">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-medium text-muted-foreground">Security</h3>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2"
+                    onClick={handleShowPasswordChange}
+                    aria-label={showPassword ? "Hide passwords" : "Show passwords"}
+                  >
+                    {showPassword ? <EyeOff /> : <Eye />}
+                  </Button>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Create a password"
+                      autoComplete="new-password"
+                      required
+                    />
+                    {errors.password ? (
+                      <p className="text-xs text-destructive">{errors.password}</p>
+                    ) : null}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm password</Label>
+                    <Input
+                      id="confirmPassword"
+                      type={showPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Re-enter your password"
+                      autoComplete="new-password"
+                      required
+                    />
+                    {errors.confirmPassword ? (
+                      <p className="text-xs text-destructive">{errors.confirmPassword}</p>
+                    ) : null}
                   </div>
                 </div>
+              </section>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    "Create account"
+                  )}
+                </Button>
+
+                <p className="text-xs text-muted-foreground">
+                  By signing up, you agree to the terms of use.
+                </p>
               </div>
 
-              {/* Password Fields */}
-              <div className="form-floating mb-2 mt-2">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  className="form-control rounded-3"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Password"
-                  required
-                />
-                {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
-                <label>Password</label>
-              </div>
+              <Separator />
 
-              <div className="form-floating mb-2">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  className="form-control rounded-3"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Confirm Password"
-                  required
-                />
-                {errors.confirmPassword && (
-                  <div className="text-danger small mt-1">{errors.confirmPassword}</div>
-                )}
-                <label>Confirm Password</label>
-              </div>
-
-              <div className="form-check mb-3">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="showPassword"
-                  onChange={handleShowPasswordChange}
-                />
-                <label className="form-check-label" htmlFor="showPassword">
-                  Show Password
-                </label>
-              </div>
-
-              <button
-              style={{ width: "200px"}}
-                className="btn btn-md rounded-3 btn-primary"
-                type="submit"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
-                    Signing you up...
-                  </>
-                ) : (
-                  "Sign Up"
-                )}
-              </button>
-
-              <small className="text-body-secondary d-block text-center mt-2">
-                By signing up, you agree to the terms of use.
-              </small>
-
-              <hr className="my-2" />
-
-              <div className="d-flex justify-content-between align-items-center">
-                <small className="text-body-secondary">Already have an account?</small>
-                <Link to="/login" className="btn m-3 btn-outline-secondary btn-sm">Login</Link>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground">Already have an account?</p>
+                <Button variant="outline" asChild className="w-full sm:w-auto">
+                  <Link to="/login">Sign in</Link>
+                </Button>
               </div>
             </form>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
-
-      <ToastContainer position="top-center" className="position-fixed top-0 start-50 translate-middle-x mt-3" style={{ zIndex: 2000 }}>
-        <Toast show={showToast} onClose={() => setShowToast(false)} delay={5000} autohide>
-          <Toast.Body className={`text-white bg-${toastVariant}`}>{toastMessage}</Toast.Body>
-        </Toast>
-      </ToastContainer>
-    </div>
+    </main>
   );
 }
 
