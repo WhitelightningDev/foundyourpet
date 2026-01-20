@@ -5,6 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Toast, ToastContainer } from "react-bootstrap";
 // Import your AuthContext if using one
 import { AuthContext } from "../context/AuthContext";
+import { API_BASE_URL } from "../config/api";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -42,15 +43,13 @@ function LoginPage() {
   
     try {
       const response = await axios.post(
-        "https://foundyourpet-backend.onrender.com/api/users/login",
+        `${API_BASE_URL}/api/users/login`,
         { email, password }
       );
   
       if (response.status === 200) {
         const { token, user } = response.data;
-        localStorage.setItem("authToken", token);
-        localStorage.setItem("user", JSON.stringify(user));
-        login(token);
+        login(token, user);
   
         showToastMessage("Login successful! Redirecting...");
   
@@ -70,7 +69,15 @@ function LoginPage() {
   const handleLoginError = (error) => {
     if (error.response) {
       const { status, data } = error.response;
-      const message = data.error || data.message || "An unexpected error occurred.";
+      const validationErrors = Array.isArray(data?.errors) ? data.errors : [];
+      const firstValidationError =
+        validationErrors.length > 0 ? validationErrors[0]?.msg : null;
+      const message =
+        data?.error ||
+        data?.message ||
+        data?.msg ||
+        firstValidationError ||
+        "An unexpected error occurred.";
   
       switch (status) {
         case 400:
@@ -81,6 +88,9 @@ function LoginPage() {
           break;
         case 404:
           showToastMessage("User not found. Please sign up.");
+          break;
+        case 409:
+          showToastMessage(message);
           break;
         case 500:
           showToastMessage("Server error. Please try again later.");
@@ -177,7 +187,7 @@ function LoginPage() {
                   >
                     Forgot Password
                   </Link>
-                  <Link to="/Signup" className="btn btn-outline-secondary">
+                  <Link to="/signup" className="btn btn-outline-secondary">
                     Signup
                   </Link>
                 </div>

@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
   const [petData, setPetData] = useState({
     name: "",
@@ -71,8 +73,29 @@ const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
 
     setIsLoading(true);
     try {
-      const decodedToken = JSON.parse(atob(token.split(".")[1]));
-      const userId = decodedToken.userId;
+      const parseJwtPayload = (jwtToken) => {
+        const payload = jwtToken?.split?.(".")?.[1];
+        if (!payload) return null;
+        try {
+          const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+          const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+          return JSON.parse(atob(padded));
+        } catch {
+          return null;
+        }
+      };
+
+      const decodedToken = parseJwtPayload(token);
+      const userId = user?._id || decodedToken?.userId;
+      if (!userId) {
+        setToast({
+          show: true,
+          message: "We couldn't identify your account. Please log out and log back in.",
+          type: "error",
+        });
+        setIsLoading(false);
+        return;
+      }
 
       const sizeKey = petData.size.toLowerCase();
       const monthlyPrice =

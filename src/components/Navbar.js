@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, LogOut, Menu, UserCircle } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
@@ -22,17 +22,7 @@ function NavigationBar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { isLoggedIn, logout } = useContext(AuthContext);
-
-  const user = useMemo(() => {
-    try {
-      const storedUser = localStorage.getItem("user");
-      return storedUser ? JSON.parse(storedUser) : null;
-    } catch (error) {
-      console.error("Failed to parse user from localStorage:", error);
-      return null;
-    }
-  }, []);
+  const { isLoggedIn, logout, user } = useContext(AuthContext);
 
   const isAdmin = user?.isAdmin;
 
@@ -46,7 +36,7 @@ function NavigationBar() {
     navigate("/");
   };
 
-  const dashboardHref = isAdmin ? "/admin-dashboard" : "/Dashboard";
+  const dashboardHref = isAdmin ? "/admin-dashboard" : "/dashboard";
 
   const primaryNav = [
     { label: "Home", href: "/" },
@@ -115,14 +105,14 @@ function NavigationBar() {
                     size="sm"
                     className="h-9 rounded-full bg-secondary/80 px-4 text-secondary-foreground no-underline shadow-sm hover:bg-secondary"
                   >
-                    <Link to="/Login">Log in</Link>
+                    <Link to="/login">Log in</Link>
                   </Button>
                   <Button
                     asChild
                     size="sm"
                     className="h-9 rounded-full px-4 no-underline shadow-sm"
                   >
-                    <Link to="/Signup">Sign up</Link>
+                    <Link to="/signup">Sign up</Link>
                   </Button>
                 </div>
               </>
@@ -278,12 +268,12 @@ function NavigationBar() {
                       variant="secondary"
                       className="justify-start gap-2 no-underline"
                     >
-                      <Link to="/Login">Log in</Link>
+                      <Link to="/login">Log in</Link>
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
                     <Button asChild className="justify-start gap-2 no-underline">
-                      <Link to="/Signup">Sign up</Link>
+                      <Link to="/signup">Sign up</Link>
                     </Button>
                   </SheetClose>
                 </div>
