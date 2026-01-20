@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { API_BASE_URL } from "../config/api";
 
 const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
   const navigate = useNavigate();
@@ -107,52 +108,43 @@ const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
         return;
       }
 
-      const formData = new FormData();
-      formData.append("name", petData.name.trim());
-      formData.append("species", petData.species);
-      formData.append("breed", petData.breed.trim());
-      formData.append("age", petData.age);
-      formData.append("gender", petData.gender);
-      formData.append("size", petData.size);
-      formData.append("spayedNeutered", petData.spayedNeutered);
-      formData.append("userId", userId);
-
+      let photoUrl = null;
       if (petData.photoFile) {
-        formData.append("photo", petData.photoFile);
-      }
+        const uploadFormData = new FormData();
+        uploadFormData.append("photo", petData.photoFile);
 
-      const response = await fetch(
-        "https://foundyourpet-backend.onrender.com/api/pets/create",
-        {
+        const uploadRes = await fetch(`${API_BASE_URL}/api/pets/upload-photo`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
-          body: formData,
-        }
-      );
+          body: uploadFormData,
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error adding pet:", errorData);
-        setToast({ show: true, message: "An error occurred while adding the pet.", type: "error" });
-        setIsLoading(false);
-        return;
+        if (!uploadRes.ok) {
+          const errorData = await uploadRes.json().catch(() => ({}));
+          console.error("Error uploading photo:", errorData);
+          setToast({ show: true, message: "Could not upload pet photo. Please try again.", type: "error" });
+          setIsLoading(false);
+          return;
+        }
+
+        const uploaded = await uploadRes.json();
+        photoUrl = uploaded?.photoUrl || null;
       }
 
-      const result = await response.json();
-      console.log("Pet added successfully:", result);
-      setToast({ show: true, message: "Pet added. Redirecting to subscription checkout…", type: "success" });
-      refreshPets();
+      setToast({ show: true, message: "Redirecting to secure subscription checkout…", type: "success" });
       closeModal();
 
-      const createdPet = result?.pet ?? result?.data ?? result?.newPet ?? result;
-      if (!createdPet?._id) {
-        setToast({
-          show: true,
-          message: "Pet was added, but we could not start checkout. Please try again from your dashboard.",
-          type: "error",
-        });
-        return;
-      }
+      const petDraft = {
+        userId,
+        name: petData.name.trim(),
+        species: petData.species,
+        breed: petData.breed.trim(),
+        age: Number(petData.age),
+        gender: petData.gender,
+        size: sizeKey,
+        spayedNeutered: !!petData.spayedNeutered,
+        photoUrl,
+      };
 
       navigate("/checkout", {
         state: {
@@ -160,7 +152,8 @@ const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
           total: monthlyPrice,
           package: { type: `${petData.size} Pet Subscription` },
           membershipObjectId: null,
-          selectedPets: [createdPet],
+          selectedPets: [],
+          petDraft,
         },
       });
     } catch (error) {

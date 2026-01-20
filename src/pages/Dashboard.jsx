@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import "../styles/Dashboard.css";
 import axios from "axios";
-import { Container, Button, Spinner, Card } from "react-bootstrap";
 import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -10,8 +8,13 @@ import EditPetModal from "../components/EditPetModal";
 import PetDetailsModal from "../components/PetDetailsModal";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import PetListSection from "../components/PetListSection";
-import "react-loading-skeleton/dist/skeleton.css";
 import { FaWhatsapp } from "react-icons/fa";
+import { API_BASE_URL } from "../config/api";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -63,7 +66,7 @@ const Dashboard = () => {
   const fetchUser = useCallback(async () => {
   try {
     const response = await axios.get(
-      "https://foundyourpet-backend.onrender.com/api/users/me",
+      `${API_BASE_URL}/api/users/me`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     const userData = response.data.user;
@@ -96,7 +99,7 @@ const Dashboard = () => {
   const fetchPets = useCallback(async () => {
     try {
       const response = await axios.get(
-        "https://foundyourpet-backend.onrender.com/api/pets",
+        `${API_BASE_URL}/api/pets`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPets(response.data);
@@ -120,7 +123,7 @@ const Dashboard = () => {
   const handleViewDetails = async (pet) => {
     try {
       const response = await axios.get(
-        `https://foundyourpet-backend.onrender.com/api/pets/${pet._id}`,
+        `${API_BASE_URL}/api/pets/${pet._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setSelectedPet(response.data);
@@ -164,7 +167,7 @@ const Dashboard = () => {
       };
 
       await axios.put(
-        `https://foundyourpet-backend.onrender.com/api/pets/${currentPet._id}`,
+        `${API_BASE_URL}/api/pets/${currentPet._id}`,
         updatedData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -192,7 +195,7 @@ const Dashboard = () => {
     setIsDeleting(true);
     try {
       await axios.delete(
-        `https://foundyourpet-backend.onrender.com/api/pets/${petToDelete}`,
+        `${API_BASE_URL}/api/pets/${petToDelete}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPets((prev) => prev.filter((pet) => pet._id !== petToDelete));
@@ -227,70 +230,86 @@ const Dashboard = () => {
   const dogs = pets.filter((pet) => pet.species?.toLowerCase() === "dog");
   const cats = pets.filter((pet) => pet.species?.toLowerCase() === "cat");
   const activeMembershipCount = pets.filter((pet) => pet.hasMembership).length;
+  const canOrderTags = pets.length > 0;
 
   return (
-    <Container className="my-5">
-      <Card className="border-0 shadow-sm rounded-4 bg-light-subtle">
-        <Card.Body className="text-center px-5 py-5">
+    <div className="mx-auto w-full max-w-5xl px-4 py-10">
+      <Card className="shadow-sm">
+        <CardHeader className="text-center">
           {userLoading ? (
-            <Spinner animation="border" size="lg" />
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
           ) : (
             <>
-              <h1 className="display-5 fw-semibold text-dark mb-3">
-                Welcome back, {user.name}
-              </h1>
+              <CardTitle className="text-3xl">Welcome back, {user.name}</CardTitle>
+              <CardDescription>
+                Subscriptions are billed monthly per pet. Small: R50 • Medium: R70 • Large: R100.
+              </CardDescription>
+            </>
+          )}
+        </CardHeader>
 
-              {/* WhatsApp Share Button */}
-              <div className="mb-3">
+        {!userLoading && (
+          <CardContent className="space-y-6">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Badge variant="secondary">
+                Active subscriptions: {activeMembershipCount} / {pets.length}
+              </Badge>
+              <Badge variant="outline">Choose a tier when you add a pet</Badge>
+            </div>
+
+            <Separator />
+
+            <div className="flex flex-col items-center justify-center gap-3">
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 <Button
-                  variant="outline-success"
-                  size="lg"
-                  onClick={handleShare}
-                  className="d-inline-flex align-items-center gap-2 rounded-pill px-4 py-2 shadow-sm"
-                  style={{
-                    fontWeight: 600,
-                  }}
+                  onClick={handleOpenModal}
+                  className="rounded-full px-6"
+                  title="Add a new pet"
                 >
-                  <FaWhatsapp size={20} />
+                  <FaPlus />
+                  Add New Pet
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={handleShare}
+                  className="rounded-full px-6"
+                >
+                  <FaWhatsapp />
                   Share on WhatsApp
                 </Button>
               </div>
 
-              <div className="mt-4">
-                <p className="fw-medium fs-5 text-dark mb-2">Subscriptions are billed monthly per pet</p>
-                <p className="text-muted mb-0">
-                  Small: <strong>R50/mo</strong> • Medium: <strong>R70/mo</strong> • Large:{" "}
-                  <strong>R100/mo</strong> — choose the tier when you add a pet.
-                </p>
-                <p className="text-muted mt-2 mb-0">
-                  Active subscriptions: <strong>{activeMembershipCount}</strong> / <strong>{pets.length}</strong>
-                </p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Button variant="outline" onClick={() => navigate("/prices")}>
+                  View pricing
+                </Button>
+                <Button
+                  onClick={() => navigate("/select-tag/standard")}
+                  disabled={!canOrderTags}
+                >
+                  Order tags (R250 each)
+                </Button>
               </div>
 
-              {/* Add New Pet Button */}
-              <div className="mt-5">
-                <Button
-                  variant="dark"
-                  size="lg"
-                  onClick={handleOpenModal}
-                  className="px-5 py-3 rounded-pill fw-medium shadow-sm"
-                  title="Add a new pet"
-                >
-                  <FaPlus className="me-2" />
-                  Add New Pet
-                </Button>
-                <div className="mt-3 d-flex flex-wrap justify-content-center gap-2">
-                  <Button variant="outline-primary" onClick={() => navigate("/prices")}>
-                    View pricing
-                  </Button>
-                  <Button variant="primary" onClick={() => navigate("/select-tag/standard")}>
-                    Order tags (R250 each)
-                  </Button>
-                </div>
+              <div className="max-w-2xl rounded-lg border bg-muted/40 p-4 text-left text-sm text-muted-foreground">
+                <p className="font-medium text-foreground">
+                  Add a pet first before buying a tag.
+                </p>
+                <p className="mt-1">
+                  Tags can only be ordered for pets with an active subscription.
+                </p>
+                {!canOrderTags && (
+                  <p className="mt-2">
+                    You don&apos;t have any pets yet—add one to continue.
+                  </p>
+                )}
               </div>
-            </>
-          )}
-        </Card.Body>
+            </div>
+          </CardContent>
+        )}
       </Card>
 
       <div className="mt-5">
@@ -350,7 +369,7 @@ const Dashboard = () => {
         deletionSuccess={false}
         refreshPets={refreshPets}
       />
-    </Container>
+    </div>
   );
 };
 
