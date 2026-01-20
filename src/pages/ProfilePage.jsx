@@ -12,6 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { API_BASE_URL } from "../config/api";
+import { toast } from "sonner";
 
 function ProfilePage() {
   const navigate = useNavigate();
@@ -82,7 +83,7 @@ function ProfilePage() {
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (!userData.address.country.trim()) {
-      alert("Please include a country in your address.");
+      toast.error("Please include a country in your address.");
       return;
     }
 
@@ -98,12 +99,12 @@ function ProfilePage() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert("Profile updated successfully");
+      toast.success("Profile updated successfully.");
       updateUser(response.data.user);
       setOriginalData(userData);
       setIsEditing(false);
     } catch (error) {
-      alert("Failed to update profile");
+      toast.error("Failed to update profile.");
       console.error(error);
     }
   };
