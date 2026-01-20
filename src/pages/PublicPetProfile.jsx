@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from "../config/api";
 
 export default function PublicPetProfile() {
   const { petId } = useParams();
@@ -26,7 +27,7 @@ export default function PublicPetProfile() {
   }, []);
 
   useEffect(() => {
-    fetch(`https://foundyourpet-backend.onrender.com/api/pets/public/${petId}`)
+    fetch(`${API_BASE_URL}/api/pets/public/${petId}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch pet info");

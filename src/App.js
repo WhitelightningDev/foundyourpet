@@ -30,6 +30,7 @@ import FailurePage from "./payments-response-pages/FailurePage";
 import CancelPage from "./payments-response-pages/CancelPage";
 import PetRedirect from "./pages/PetRedirect";
 import TagOrderTracking from "./pages/TagOrderTracking";
+import { Toaster } from "@/components/ui/sonner";
 
 function App() {
   return (
@@ -100,6 +101,7 @@ function App() {
             </Routes>
           </main>
           <Footer />
+          <Toaster />
         </div>
       </AuthProvider>
     </Router>

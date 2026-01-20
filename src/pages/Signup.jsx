@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../config/api";
+import { toast } from "sonner";
 
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,6 @@ function Signup() {
     },
   });
 
-  const [message, setMessage] = useState(null); // { type: "success" | "error", text: string }
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -54,11 +54,6 @@ function Signup() {
 
   const handleShowPasswordChange = () => {
     setShowPassword(!showPassword);
-  };
-
-  const showMessage = (text, type = "error") => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 5000);
   };
 
   const validateInputs = () => {
@@ -95,21 +90,16 @@ function Signup() {
     e.preventDefault();
     if (validateInputs()) {
       setIsLoading(true);
-      setMessage(null);
       try {
         const response = await axios.post(
           `${API_BASE_URL}/api/users/signup`,
           formData
         );
 
-        showMessage(
-          response.data?.message || response.data?.msg || "Signup successful!",
-          "success"
-        );
+        toast.success(response.data?.message || response.data?.msg || "Signup successful!");
 
         setTimeout(() => {
           window.location.href = "/signup-success";
-          setIsLoading(false);
         }, 2000);
       } catch (error) {
         if (error.response) {
@@ -118,15 +108,16 @@ function Signup() {
           const firstValidationError =
             validationErrors.length > 0 ? validationErrors[0]?.msg : null;
 
-          showMessage(
+          toast.error(
             data?.message ||
               data?.msg ||
               firstValidationError ||
               "Signup failed. Please try again."
           );
         } else {
-          showMessage("An error occurred. Please try again.");
+          toast.error("An error occurred. Please try again.");
         }
+      } finally {
         setIsLoading(false);
       }
     }
@@ -154,20 +145,6 @@ function Signup() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {message ? (
-              <div
-                className={[
-                  "rounded-md border px-3 py-2 text-sm",
-                  message.type === "success"
-                    ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-destructive/30 bg-destructive/10 text-destructive",
-                ].join(" ")}
-                role="status"
-              >
-                {message.text}
-              </div>
-            ) : null}
-
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
                 <section className="space-y-4">
