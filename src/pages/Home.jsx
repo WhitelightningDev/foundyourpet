@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 function Home() {
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -63,7 +64,7 @@ function Home() {
       "--muted": "40 100% 95%",
       "--muted-foreground": "215.4 16.3% 38%",
 
-      "--accent": "34 100% 90%",
+      "--accent": "174 56% 90%",
       "--accent-foreground": "222.2 47.4% 11.2%",
 
       "--destructive": "0 84.2% 60.2%",
@@ -245,7 +246,11 @@ function Home() {
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <Button asChild size="lg" className="gap-2">
+                <Button
+                  asChild
+                  size="lg"
+                  className="gap-2 shadow-md shadow-primary/15 ring-1 ring-primary/10 hover:shadow-primary/20"
+                >
                   <Link to="/dashboard">
                     Get Started <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -313,6 +318,8 @@ function Home() {
 
             <div className="relative">
               <div className="absolute -inset-6 -z-10 rounded-3xl bg-gradient-to-tr from-[#1BB6A8]/25 via-[#FFB55C]/15 to-transparent blur-2xl" />
+              <div className="pointer-events-none absolute -right-12 -top-12 -z-10 h-72 w-72 rounded-full border border-primary/20 bg-[radial-gradient(circle_at_center,rgba(27,182,168,0.18),transparent_65%)]" />
+              <div className="pointer-events-none absolute -right-20 -top-20 -z-10 h-96 w-96 rounded-full border border-primary/10" />
               <div className="relative overflow-hidden rounded-3xl border bg-card shadow-xl">
                 <div className="absolute inset-0 bg-gradient-to-tr from-black/10 via-transparent to-transparent" />
                 <img
@@ -328,16 +335,28 @@ function Home() {
                   <button
                     key={tag.id}
                     type="button"
-                    className="flex items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 text-left shadow-sm transition-colors hover:bg-accent"
+                    className={cn(
+                      "group flex w-full items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:bg-accent hover:shadow-md hover:shadow-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                      activeTagId === tag.id && "border-primary/40 shadow-primary/10"
+                    )}
+                    aria-pressed={activeTagId === tag.id}
                     onClick={() => openTagDetails(tag.id)}
                   >
-                    <span className="text-sm font-medium">{tag.title}</span>
-                    <Badge
-                      variant={tag.status === "Available" ? "default" : "secondary"}
-                      className="shrink-0"
-                    >
-                      {tag.status}
-                    </Badge>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium">{tag.title}</div>
+                      <div className="mt-0.5 hidden truncate text-xs text-muted-foreground sm:block lg:hidden xl:block">
+                        {tag.description}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={tag.status === "Available" ? "default" : "secondary"}
+                        className="shrink-0"
+                      >
+                        {tag.status}
+                      </Badge>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                    </div>
                   </button>
                 ))}
               </div>
@@ -382,10 +401,13 @@ function Home() {
           {howItWorks.map((step) => {
             const Icon = step.icon;
             return (
-              <Card key={step.title}>
+              <Card
+                key={step.title}
+                className="group transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md hover:shadow-primary/10"
+              >
                 <CardHeader className="space-y-2">
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-md border bg-background">
-                    <Icon className="h-5 w-5" />
+                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-md border bg-background/60 shadow-sm ring-1 ring-primary/10 group-hover:border-primary/20">
+                    <Icon className="h-5 w-5 text-primary" />
                   </div>
                   <CardTitle className="text-base">{step.title}</CardTitle>
                   <CardDescription>{step.description}</CardDescription>
@@ -414,8 +436,15 @@ function Home() {
 
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {tags.map((tag) => (
-              <Card key={tag.id} className="overflow-hidden">
+              <Card
+                key={tag.id}
+                className={cn(
+                  "group overflow-hidden transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background",
+                  activeTagId === tag.id && "border-primary/40"
+                )}
+              >
                 <div className="relative">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-primary/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                   <img
                     src={tag.image}
                     alt={tag.title}
@@ -490,27 +519,27 @@ function Home() {
               tag instantly shows your contact information.
             </p>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Card>
-                <CardHeader className="space-y-1">
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-md border bg-background">
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
-                  <CardTitle className="text-base">Privacy-first</CardTitle>
-                  <CardDescription>
-                    Share only what you choose to share.
-                  </CardDescription>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Card>
+              <CardHeader className="space-y-1">
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-md border bg-background/60 shadow-sm ring-1 ring-primary/10">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle className="text-base">Privacy-first</CardTitle>
+                <CardDescription>
+                  Share only what you choose to share.
+                </CardDescription>
                 </CardHeader>
               </Card>
-              <Card>
-                <CardHeader className="space-y-1">
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-md border bg-background">
-                    <Sparkles className="h-5 w-5" />
-                  </div>
-                  <CardTitle className="text-base">Always ready</CardTitle>
-                  <CardDescription>
-                    Works even if the finder has no app.
-                  </CardDescription>
+            <Card>
+              <CardHeader className="space-y-1">
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-md border bg-background/60 shadow-sm ring-1 ring-primary/10">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle className="text-base">Always ready</CardTitle>
+                <CardDescription>
+                  Works even if the finder has no app.
+                </CardDescription>
                 </CardHeader>
               </Card>
             </div>
