@@ -1,11 +1,12 @@
 import { useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import axios from "axios";
 import BillingForm from "../components/BillingForm";
 import { API_BASE_URL } from "../config/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { AuthContext } from "../context/AuthContext";
 
 function CheckoutPage() {
   const { state } = useLocation();
@@ -17,6 +18,9 @@ function CheckoutPage() {
     selectedPets = [],
     petDraft,
   } = state || {};
+
+  const { user: authUser, token: authToken } = useContext(AuthContext);
+  const token = useMemo(() => authToken || localStorage.getItem("authToken"), [authToken]);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -34,9 +38,37 @@ function CheckoutPage() {
 
   // Removed separate membership cost addition since total includes it
   const subtotal = total;
-  const petsForDisplay = selectedPets.length ? selectedPets : petDraft ? [petDraft] : [];
+  const petsForDisplay = selectedPets.length
+    ? selectedPets
+    : petDraft
+      ? [petDraft]
+      : [];
   const perPetPrice = petsForDisplay.length ? subtotal / petsForDisplay.length : subtotal;
   const isNewPetSubscription = membership && !selectedPets.length && !!petDraft;
+
+  const resolveUserId = () => {
+    if (authUser?._id) return authUser._id;
+
+    if (token) {
+      try {
+        const payload = token.split(".")[1];
+        const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+        const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+        const decoded = JSON.parse(atob(padded));
+        if (decoded?.userId) return decoded.userId;
+      } catch {
+        // ignore
+      }
+    }
+
+    try {
+      const storedUser = localStorage.getItem("user");
+      const parsed = storedUser ? JSON.parse(storedUser) : null;
+      return parsed?._id || null;
+    } catch {
+      return null;
+    }
+  };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -73,31 +105,36 @@ function CheckoutPage() {
       return;
     }
 
-    let user = null;
-    try {
-      const storedUser = localStorage.getItem("user");
-      user = storedUser ? JSON.parse(storedUser) : null;
-    } catch (err) {
-      console.error("Failed to parse user from localStorage:", err);
-    }
-
-    if (!user?._id) {
-      alert("User not logged in or missing user ID.");
-      return;
-    }
-
     try {
       setIsSubmitting(true);
-      const token = localStorage.getItem("authToken");
+      const userId = resolveUserId() || "";
+      if (!userId) {
+        alert("User not logged in or missing user ID.");
+        return;
+      }
+
+      const petIds = selectedPets.map((pet) => pet._id).filter(Boolean);
+      const safePetDraft = isNewPetSubscription
+        ? {
+            ...petDraft,
+            userId,
+          }
+        : null;
+
+      if (membership && petIds.length === 0 && !safePetDraft) {
+        alert("No pet selected for subscription. Please go back and select a pet.");
+        return;
+      }
+
       const response = await axios.post(`${API_BASE_URL}/api/payment/createCheckout`, {
-        userId: user._id,
-        petIds: selectedPets.map((pet) => pet._id).filter(Boolean),
+        userId,
+        petIds,
         amountInCents: Math.round(subtotal * 100),
         membership,
         membershipId: membershipObjectId,
         packageType: pkg?.type || "Standard",
         billingDetails: formData,
-        ...(isNewPetSubscription ? { petDraft } : {}),
+        ...(safePetDraft ? { petDraft: safePetDraft } : {}),
       }, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
 
       if (response.data?.checkout_url) {
@@ -106,8 +143,9 @@ function CheckoutPage() {
         alert("Checkout URL not received. Please try again.");
       }
     } catch (err) {
+      const serverMessage = err?.response?.data?.message;
       console.error("Checkout error:", err.response?.data || err.message);
-      alert("There was an error initiating checkout. Please try again.");
+      alert(serverMessage || "There was an error initiating checkout. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

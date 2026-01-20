@@ -241,7 +241,8 @@ const Dashboard = () => {
   const visiblePets = pets.filter((pet) => {
     const currentUserId = normalizeUserId(user?._id);
     const petUserId = normalizeUserId(pet?.userId);
-    if (!currentUserId || !petUserId) return true;
+    if (!currentUserId) return true;
+    if (!petUserId) return false;
     return petUserId === currentUserId;
   });
 
