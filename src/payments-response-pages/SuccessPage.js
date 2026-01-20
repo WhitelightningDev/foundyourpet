@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 
 const SuccessPage = () => {
   const [params] = useSearchParams();
@@ -15,26 +16,28 @@ const SuccessPage = () => {
     const fetchDetails = async () => {
       try {
         setLoading(true);
+        const token = localStorage.getItem("authToken");
         // Fetch payment details
-        const { data } = await axios.get(`http://localhost:5001/api/payment/details/${paymentId}`);
+        const { data } = await axios.get(
+          `${API_BASE_URL}/api/payment/details/${paymentId}`,
+          token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
+        );
 
         if (data.success) {
           setDetails(data.data);
 
-          // Now activate membership for the user
-          const userId = data.data.user._id;
-          const activateRes = await axios.post('http://localhost:5001/api/users/activate-membership', { userId });
-
-          if (activateRes.status === 200) {
-            setMembershipUpdated(true);
-
-            // Optional: Re-fetch payment details to get updated membership status
-            const refreshedData = await axios.get(`http://localhost:5001/api/payment/details/${paymentId}`);
-            if (refreshedData.data.success) {
-              setDetails(refreshedData.data.data);
+          // Optional: sync user membership flag (server only allows if payment is a successful membership purchase)
+          if (data.data.kind === "membership" && token) {
+            try {
+              const activateRes = await axios.post(
+                `${API_BASE_URL}/api/users/activate-membership`,
+                { paymentId },
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              if (activateRes.status === 200) setMembershipUpdated(true);
+            } catch (e) {
+              // ignore: webhook is the source of truth; this is only a fallback sync
             }
-          } else {
-            setError("Failed to activate membership.");
           }
         } else {
           setError("Could not retrieve payment details.");

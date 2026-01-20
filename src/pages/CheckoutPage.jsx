@@ -2,6 +2,7 @@ import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import BillingForm from "../components/BillingForm";
+import { API_BASE_URL } from "../config/api";
 
 function CheckoutPage() {
   const { state } = useLocation();
@@ -78,7 +79,8 @@ function CheckoutPage() {
     }
 
     try {
-      const response = await axios.post("http://localhost:5001/api/payment/createCheckout", {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.post(`${API_BASE_URL}/api/payment/createCheckout`, {
         userId: user._id,
         petIds: selectedPets.map((pet) => pet._id),
         amountInCents: Math.round(subtotal * 100),
@@ -86,7 +88,7 @@ function CheckoutPage() {
         membershipId: membershipObjectId,
         packageType: pkg?.type || "Standard",
         billingDetails: formData,
-      });
+      }, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
 
       if (response.data?.checkout_url) {
         window.location.href = response.data.checkout_url;
