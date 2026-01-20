@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Loader2, Mail, MapPin, PawPrint, Phone } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -231,6 +232,25 @@ const Dashboard = () => {
     }
   }, [token, fetchUser, fetchPets, navigate]);
 
+  useEffect(() => {
+    if (!token) return undefined;
+
+    const openStatuses = new Set(["unfulfilled", "processing", "submitted", "shipped"]);
+    const hasOpenTagOrder = pets.some((pet) => {
+      const status = pet?.tagOrder?.fulfillment?.status || (pet?.tagOrder ? "unfulfilled" : null);
+      if (!status) return false;
+      return openStatuses.has(String(status).toLowerCase());
+    });
+
+    if (!hasOpenTagOrder) return undefined;
+
+    const interval = setInterval(() => {
+      fetchPets();
+    }, 20000);
+
+    return () => clearInterval(interval);
+  }, [token, pets, fetchPets]);
+
   const normalizeUserId = (value) => {
     if (!value) return "";
     if (typeof value === "string") return value;
@@ -281,6 +301,17 @@ const Dashboard = () => {
             <Button onClick={handleOpenModal} title="Add a new pet">
               <FaPlus />
               Add pet
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                fetchUser();
+                fetchPets();
+              }}
+              title="Refresh dashboard"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh
             </Button>
             <Button variant="outline" onClick={handleShare}>
               <FaWhatsapp />

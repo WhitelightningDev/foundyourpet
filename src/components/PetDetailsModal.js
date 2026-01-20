@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, Button, Row, Col, Image, Card, Container } from "react-bootstrap";
+import { API_BASE_URL } from "../config/api";
 
 const renderField = (label, value) => (
   <Row className="mb-2 align-items-start">
@@ -18,7 +19,31 @@ const PetDetailsModal = ({ show, handleClose, pet }) => {
   const getImageSrc = () =>
     pet.photoUrl?.startsWith("http")
       ? pet.photoUrl
-      : `https://foundyourpet-backend.onrender.com${pet.photoUrl}`;
+      : `${API_BASE_URL}${pet.photoUrl}`;
+
+  const normalizeDeliveryStatus = (status) => {
+    const normalized = (status || "").toString().trim().toLowerCase();
+    return normalized || "unfulfilled";
+  };
+
+  const deliveryStatusLabel = (status) => {
+    const normalized = normalizeDeliveryStatus(status);
+    if (normalized === "unfulfilled") return "Unfulfilled";
+    if (normalized === "processing") return "Processing";
+    if (normalized === "submitted") return "Submitted";
+    if (normalized === "shipped") return "Shipped";
+    if (normalized === "delivered") return "Delivered";
+    if (normalized === "cancelled") return "Cancelled";
+    return normalized;
+  };
+
+  const tagOrder = pet.tagOrder || null;
+  const deliveryStatus = pet.hasTag ? deliveryStatusLabel(tagOrder?.fulfillment?.status) : "—";
+  const trackingNumber = pet.hasTag ? tagOrder?.fulfillment?.pudo?.trackingNumber || "—" : "—";
+  const purchasedAt = tagOrder?.purchasedAt ? new Date(tagOrder.purchasedAt) : null;
+  const purchasedAtLabel = purchasedAt && !Number.isNaN(purchasedAt.getTime())
+    ? purchasedAt.toLocaleString("en-ZA")
+    : "—";
 
   return (
     <Modal
@@ -95,6 +120,19 @@ const PetDetailsModal = ({ show, handleClose, pet }) => {
                     <span className="text-danger fw-semibold">Not Active ❌</span>
                   )
                 )}
+
+                {renderField(
+                  "Tag Status",
+                  pet.hasTag ? (
+                    <span className="text-success fw-semibold">Ordered ✅</span>
+                  ) : (
+                    <span className="text-danger fw-semibold">Not ordered ❌</span>
+                  )
+                )}
+                {renderField("Tag Type", pet.tagType || tagOrder?.tagType || "—")}
+                {renderField("Tag Purchased", pet.hasTag ? purchasedAtLabel : "—")}
+                {renderField("Delivery Status", deliveryStatus)}
+                {renderField("Tracking Number", trackingNumber)}
               </Col>
             </Row>
           </Card>
@@ -102,6 +140,21 @@ const PetDetailsModal = ({ show, handleClose, pet }) => {
       </Modal.Body>
 
       <Modal.Footer className="border-0 pt-2">
+        {tagOrder?.paymentId ? (
+          <Button
+            variant="primary"
+            onClick={() => {
+              window.location.href = `/tag-orders/${tagOrder.paymentId}`;
+            }}
+            className="rounded-pill px-4 fw-semibold"
+            style={{
+              fontSize: "1rem",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+            }}
+          >
+            Track delivery
+          </Button>
+        ) : null}
         <Button
           variant="outline-secondary"
           onClick={handleClose}
