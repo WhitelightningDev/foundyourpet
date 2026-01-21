@@ -135,7 +135,7 @@ function Home() {
         status: "Coming soon",
         description:
           "Smart tracking integration for Samsung devices for even more peace of mind.",
-        image: "/SamsungSmartTag.png",
+        image: "/samsungsmarttagrebg.png",
         modalTitle: "Samsung SmartTag",
         modalDescription:
           "A smart tag that works with Samsung devices for tracking and proximity finding.",
@@ -147,7 +147,7 @@ function Home() {
         status: "Coming soon",
         description:
           "Seamless iOS integration using Apple’s Find My ecosystem for advanced location tracking.",
-        image: "/AppleAitTag.png",
+        image: "/apple-airtag.png",
         modalTitle: "Apple AirTag",
         modalDescription:
           "Apple’s smart tracking tag designed for iOS devices via the Find My app.",
@@ -434,23 +434,25 @@ function Home() {
             </Button>
           </div>
 
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {tags.map((tag) => (
               <Card
                 key={tag.id}
                 className={cn(
-                  "group overflow-hidden transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background",
+                  "group flex h-full flex-col overflow-hidden transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background",
                   activeTagId === tag.id && "border-primary/40"
                 )}
               >
-                <div className="relative">
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-primary/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                  <img
-                    src={tag.image}
-                    alt={tag.title}
-                    className="h-44 w-full object-cover"
-                    loading="lazy"
-                  />
+                <div className="relative border-b bg-gradient-to-b from-background to-muted/40">
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(27,182,168,0.12),transparent_55%)] opacity-0 transition-opacity group-hover:opacity-100" />
+                  <div className="flex h-56 items-center justify-center px-6 py-6">
+                    <img
+                      src={tag.image}
+                      alt={tag.title}
+                      className="h-full w-auto max-w-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+                      loading="lazy"
+                    />
+                  </div>
                   <div className="absolute left-3 top-3">
                     <Badge
                       variant={tag.status === "Available" ? "default" : "secondary"}
@@ -460,12 +462,12 @@ function Home() {
                   </div>
                 </div>
 
-                <CardHeader className="space-y-2">
+                <CardHeader className="space-y-2 pb-4">
                   <CardTitle className="text-xl">{tag.title}</CardTitle>
                   <CardDescription>{tag.description}</CardDescription>
                 </CardHeader>
 
-                <CardContent className="space-y-2">
+                <CardContent className="flex-1 space-y-2">
                   {(tag.features ?? []).slice(0, 2).map((f) => (
                     <div key={f.title} className="flex items-start gap-2">
                       <Check className="mt-0.5 h-4 w-4 text-primary" />
@@ -477,7 +479,7 @@ function Home() {
                   ))}
                 </CardContent>
 
-                <CardFooter className="flex items-center justify-between gap-3">
+                <CardFooter className="mt-auto flex items-center justify-between gap-3">
                   <Button variant="outline" onClick={() => openTagDetails(tag.id)}>
                     Details
                   </Button>
