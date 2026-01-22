@@ -42,6 +42,7 @@ function NavigationBar() {
 
   const primaryNav = [
     { label: "Home", href: "/" },
+    { label: "Reports", href: "/reports" },
     { label: "Prices", href: "/prices" },
     { label: "Features", href: "/features" },
     { label: "Contact", href: "/contact" },
