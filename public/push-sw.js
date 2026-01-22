@@ -8,12 +8,22 @@
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
+self.addEventListener('message', (event) => {
+  if (event?.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('push', (event) => {
   try {
     const data = event.data?.json?.() || null;
     const title = data?.title || data?.notification?.title || 'Found Your Pet';
     const body = data?.body || data?.notification?.body || '';
     const url = data?.url || data?.data?.url || '/';
+    const payload = { type: 'PUSH_RECEIVED', title, body, url, receivedAt: new Date().toISOString() };
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      clients.forEach((client) => client.postMessage(payload));
+    });
     event.waitUntil(self.registration.showNotification(title, { body, icon: '/android-chrome-192x192.png', data: { url } }));
   } catch {
     // ignore

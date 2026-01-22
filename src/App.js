@@ -36,6 +36,7 @@ import { toast } from "sonner";
 import { listenForForegroundMessages } from "@/lib/notifications";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import EngagementPrompts from "@/components/EngagementPrompts";
+import { setLastPushMessage } from "@/lib/pushInbox";
 
 function App() {
   useEffect(() => {
@@ -47,6 +48,13 @@ function App() {
         payload?.notification?.body || payload?.data?.body || "Open the site to view details.";
 
       toast.message(title, { description });
+      setLastPushMessage({
+        type: "PUSH_RECEIVED",
+        title,
+        body: description,
+        url: payload?.data?.url || "/reports",
+        receivedAt: new Date().toISOString(),
+      });
     }).then((unsub) => {
       unsubscribe = typeof unsub === "function" ? unsub : () => {};
     });
