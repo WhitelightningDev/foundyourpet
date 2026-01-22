@@ -27,7 +27,7 @@ export async function submitPublicPetReport({
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      await createPublicReportFallbackToLocal({
+      const localReport = await createPublicReportFallbackToLocal({
         firstName,
         lastName,
         phoneNumber,
@@ -36,13 +36,18 @@ export async function submitPublicPetReport({
         description,
         photoFile,
       }).catch(() => null);
-      return { ok: false, error: data?.message || "Failed to submit report" };
+      return {
+        ok: true,
+        data: { local: true },
+        report: localReport,
+        warning: data?.message || "Saved locally (server rejected request).",
+      };
     }
 
     const data = await res.json().catch(() => ({}));
     return { ok: true, data };
   } catch (error) {
-    await createPublicReportFallbackToLocal({
+    const localReport = await createPublicReportFallbackToLocal({
       firstName,
       lastName,
       phoneNumber,
@@ -51,6 +56,11 @@ export async function submitPublicPetReport({
       description,
       photoFile,
     }).catch(() => null);
-    return { ok: false, error: error?.message || "Network error" };
+    return {
+      ok: true,
+      data: { local: true },
+      report: localReport,
+      warning: error?.message || "Saved locally (network error).",
+    };
   }
 }

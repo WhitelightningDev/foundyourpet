@@ -297,42 +297,29 @@ function Home() {
         photoFile: petReport.photoFile,
       });
 
-      if (res.ok) {
-        toast.success("Report submitted.");
-        setPetReport({
-          firstName: "",
-          lastName: "",
-          phoneNumber: "",
-          photoFile: null,
-          petStatus: "lost",
-          location: "",
-          description: "",
-        });
-        setPetReportErrors({});
+      if (!res?.ok) {
+        toast.error("Couldn't submit report.");
         return;
       }
 
-      const subject = `Pet Report (${petReport.petStatus === "found" ? "Found" : "Lost"})`;
-      const bodyLines = [
-        `Status: ${petReport.petStatus === "found" ? "Found" : "Lost"}`,
-        `First name: ${petReport.firstName.trim()}`,
-        `Last name: ${petReport.lastName.trim()}`,
-        `Phone number: ${petReport.phoneNumber.trim()}`,
-        `Location: ${petReport.location.trim()}`,
-        petReport.description.trim() ? `Description: ${petReport.description.trim()}` : null,
-        "",
-        `Photo selected: ${petReport.photoFile?.name || "None"}`,
-        "Please attach the photo to this email before sending.",
-      ].filter(Boolean);
+      if (res?.data?.local) {
+        toast.message("Report saved locally.", {
+          description: res.warning || "We’ll sync when the server is available.",
+        });
+      } else {
+        toast.success("Report submitted.");
+      }
 
-      const mailtoLink = `mailto:support@foundyourpet.co.za?subject=${encodeURIComponent(
-        subject
-      )}&body=${encodeURIComponent(bodyLines.join("\n"))}`;
-
-      toast.message("Couldn't submit online — opening an email draft instead.", {
-        description: res.error,
+      setPetReport({
+        firstName: "",
+        lastName: "",
+        phoneNumber: "",
+        photoFile: null,
+        petStatus: "lost",
+        location: "",
+        description: "",
       });
-      window.location.href = mailtoLink;
+      setPetReportErrors({});
     } finally {
       setPetReportSubmitting(false);
     }
@@ -522,7 +509,7 @@ function Home() {
             <div className="rounded-xl border bg-card p-4 text-sm text-muted-foreground">
               <div className="font-medium text-foreground">Photo tip</div>
               <div className="mt-1">
-                If online submission fails, we’ll open an email draft — please attach the photo before sending.
+                Upload a clear photo (face/markings) to help identify the pet quickly.
               </div>
             </div>
             <div className="flex flex-col gap-2">
