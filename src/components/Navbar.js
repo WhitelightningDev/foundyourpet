@@ -1,6 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Bell, LayoutDashboard, LogOut, Menu, UserCircle } from "lucide-react";
+import {
+  BarChart3,
+  Bell,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  UserCircle,
+  Users,
+} from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import logo from "../assets/android-chrome-192x192.png";
 import { toast } from "sonner";
@@ -26,7 +35,7 @@ import {
   setReportsLastLatestAt,
   setReportsLastSeenAt,
 } from "@/lib/reportSeen";
-import { getLastPushMessage } from "@/lib/pushInbox";
+import { clearLastPushMessage, getLastPushMessage } from "@/lib/pushInbox";
 
 function NavigationBar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -97,7 +106,14 @@ function NavigationBar() {
     };
   }, []);
 
-  const dashboardHref = isAdmin ? "/admin-dashboard" : "/dashboard";
+  const dashboardHref = isAdmin ? "/admin-dashboard?tab=users" : "/dashboard";
+
+  const adminNav = [
+    { label: "Users", href: "/admin-dashboard?tab=users", icon: Users },
+    { label: "Reports", href: "/admin-dashboard?tab=reports", icon: FileText },
+    { label: "Analytics", href: "/admin-dashboard?tab=analytics", icon: BarChart3 },
+    { label: "Tags", href: "/admin-dashboard?tab=tags", icon: LayoutDashboard },
+  ];
 
   const primaryNav = [
     { label: "Home", href: "/" },
@@ -107,8 +123,12 @@ function NavigationBar() {
     { label: "Contact", href: "/contact" },
   ];
 
+  const navItems = isAdmin ? adminNav : primaryNav;
+
   const isActive = (href) =>
-    location.pathname.toLowerCase() === href.toLowerCase();
+    href.includes("?")
+      ? `${location.pathname}${location.search}`.toLowerCase() === href.toLowerCase()
+      : location.pathname.toLowerCase() === href.toLowerCase();
 
   const navButtonClassName = (href) =>
     cn(
@@ -140,7 +160,7 @@ function NavigationBar() {
 
         <nav className="hidden items-center md:flex" aria-label="Primary">
           <div className="flex items-center rounded-full border bg-muted/30 p-1 shadow-sm">
-            {primaryNav.map((item) => (
+            {navItems.map((item) => (
               <Button
                 key={item.href}
                 asChild
@@ -217,6 +237,7 @@ function NavigationBar() {
                         onClick={() => {
                           setReportsLastSeenAt(latestReportAt || new Date().toISOString());
                           setHasReportUpdates(false);
+                          clearLastPushMessage();
                           navigate(lastAlert.url || "/reports");
                         }}
                       >
@@ -236,6 +257,7 @@ function NavigationBar() {
                     onClick={() => {
                       setReportsLastSeenAt(latestReportAt || new Date().toISOString());
                       setHasReportUpdates(false);
+                      clearLastPushMessage();
                       toast.message("Marked as read.");
                     }}
                   >
@@ -253,14 +275,17 @@ function NavigationBar() {
 
           {isLoggedIn ? (
             <>
-              <div className="mx-1 hidden h-6 w-px bg-border md:block" />
-              <Button asChild variant="secondary" size="sm" className="gap-2 no-underline">
-                <Link to={dashboardHref}>
-                  <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
-                  {isAdmin ? <Badge variant="outline">Admin</Badge> : null}
-                </Link>
-              </Button>
+              {!isAdmin ? (
+                <>
+                  <div className="mx-1 hidden h-6 w-px bg-border md:block" />
+                  <Button asChild variant="secondary" size="sm" className="gap-2 no-underline">
+                    <Link to={dashboardHref}>
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </Button>
+                </>
+              ) : null}
 
               <Popover>
                 <PopoverTrigger asChild>
@@ -344,6 +369,7 @@ function NavigationBar() {
                     onClick={() => {
                       setReportsLastSeenAt(latestReportAt || new Date().toISOString());
                       setHasReportUpdates(false);
+                      clearLastPushMessage();
                       toast.message("Marked as read.");
                     }}
                   >
@@ -380,7 +406,7 @@ function NavigationBar() {
               </SheetHeader>
 
               <div className="mt-6 flex flex-col gap-1">
-                {primaryNav.map((item) => (
+                {navItems.map((item) => (
                   <SheetClose asChild key={item.href}>
                     <Button
                       asChild
@@ -402,19 +428,21 @@ function NavigationBar() {
 
               {isLoggedIn ? (
                 <div className="flex flex-col gap-2">
-                  <SheetClose asChild>
-                    <Button
-                      asChild
-                      variant="secondary"
-                      className="justify-start gap-2 no-underline"
-                    >
-                      <Link to={dashboardHref}>
-                        <LayoutDashboard className="h-4 w-4" />
-                        Dashboard
-                        {isAdmin ? <Badge variant="outline">Admin</Badge> : null}
-                      </Link>
-                    </Button>
-                  </SheetClose>
+                  {!isAdmin ? (
+                    <SheetClose asChild>
+                      <Button
+                        asChild
+                        variant="secondary"
+                        className="justify-start gap-2 no-underline"
+                      >
+                        <Link to={dashboardHref}>
+                          <LayoutDashboard className="h-4 w-4" />
+                          Dashboard
+                        </Link>
+                      </Button>
+                    </SheetClose>
+                  ) : null}
+
                   <SheetClose asChild>
                     <Button
                       asChild
