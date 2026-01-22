@@ -42,6 +42,29 @@ export async function registerPushServiceWorker() {
   }
 }
 
+export async function getWebPushSubscription() {
+  if (!isWebPushSupported()) return null;
+  const registration = await registerPushServiceWorker();
+  if (!registration) return null;
+  try {
+    return await registration.pushManager.getSubscription();
+  } catch {
+    return null;
+  }
+}
+
+export async function unsubscribeFromWebPush() {
+  const subscription = await getWebPushSubscription();
+  if (!subscription) return { ok: true, endpoint: null };
+  const endpoint = subscription.endpoint || null;
+  try {
+    await subscription.unsubscribe();
+    return { ok: true, endpoint };
+  } catch (error) {
+    return { ok: false, endpoint, error: error?.message || "Failed to unsubscribe" };
+  }
+}
+
 export async function subscribeToWebPush({ vapidPublicKey } = {}) {
   const key = vapidPublicKey || process.env.REACT_APP_WEB_PUSH_PUBLIC_KEY;
   if (!key) {

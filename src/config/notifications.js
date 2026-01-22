@@ -17,6 +17,14 @@ export const WEB_PUSH_PUBLIC_KEY_URL = `${API_BASE_URL}${normalizePath(
   process.env.REACT_APP_WEB_PUSH_PUBLIC_KEY_PATH || "/api/notifications/webpush/public-key"
 )}`;
 
+export const WEB_PUSH_UNSUBSCRIBE_URL = `${API_BASE_URL}${normalizePath(
+  process.env.REACT_APP_WEB_PUSH_UNSUBSCRIBE_PATH || "/api/notifications/webpush/unsubscribe"
+)}`;
+
+export const NOTIFICATIONS_UNREGISTER_URL = `${API_BASE_URL}${normalizePath(
+  process.env.REACT_APP_NOTIFICATIONS_UNREGISTER_PATH || "/api/notifications/unregister"
+)}`;
+
 export const PUBLIC_PET_REPORT_URL = `${API_BASE_URL}${normalizePath(
   process.env.REACT_APP_PUBLIC_PET_REPORT_PATH || "/api/reports/public-pet"
 )}`;

@@ -35,6 +35,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { listenForForegroundMessages } from "@/lib/notifications";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
+import EngagementPrompts from "@/components/EngagementPrompts";
 
 function App() {
   useEffect(() => {
@@ -61,6 +62,7 @@ function App() {
         <div className="flex min-h-screen flex-col bg-background text-foreground">
           <AnalyticsTracker />
           <NavigationBar />
+          <EngagementPrompts />
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<Home />} />

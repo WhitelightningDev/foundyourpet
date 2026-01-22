@@ -1,7 +1,9 @@
 import {
   NOTIFICATIONS_REGISTER_URL,
+  NOTIFICATIONS_UNREGISTER_URL,
   WEB_PUSH_PUBLIC_KEY_URL,
   WEB_PUSH_SUBSCRIBE_URL,
+  WEB_PUSH_UNSUBSCRIBE_URL,
 } from "@/config/notifications";
 
 export async function registerWebPushToken(token) {
@@ -65,6 +67,42 @@ export async function fetchWebPushPublicKey() {
     const publicKey = data?.publicKey || null;
     if (!publicKey) return { ok: false, error: "Missing public key" };
     return { ok: true, publicKey };
+  } catch (error) {
+    return { ok: false, error: error?.message || "Network error" };
+  }
+}
+
+export async function unregisterWebPushSubscription(endpoint) {
+  if (!endpoint) return { ok: false, error: "Missing endpoint" };
+  try {
+    const res = await fetch(WEB_PUSH_UNSUBSCRIBE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ endpoint }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return { ok: false, error: data?.message || "Failed to unregister subscription" };
+    }
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error?.message || "Network error" };
+  }
+}
+
+export async function unregisterPushToken(token) {
+  if (!token) return { ok: false, error: "Missing token" };
+  try {
+    const res = await fetch(NOTIFICATIONS_UNREGISTER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return { ok: false, error: data?.message || "Failed to unregister token" };
+    }
+    return { ok: true };
   } catch (error) {
     return { ok: false, error: error?.message || "Network error" };
   }
