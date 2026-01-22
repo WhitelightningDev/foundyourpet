@@ -4,6 +4,8 @@ import UserDetailsModal from "../components/UserDetailsModal";
 import QRCodeModal from "../components/QRCodeModal";
 import UserListSection from "../components/UserListSection";
 import TagOrdersSection from "../components/TagOrdersSection";
+import AdminReportsCard from "@/components/AdminReportsCard";
+import AdminAnalyticsCard from "@/components/AdminAnalyticsCard";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -340,6 +342,11 @@ function AdminDashboard() {
               )}
             </CardContent>
           </Card>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <AdminReportsCard token={token} />
+          <AdminAnalyticsCard token={token} />
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">

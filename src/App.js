@@ -34,6 +34,7 @@ import ReportsFeed from "./pages/ReportsFeed";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { listenForForegroundMessages } from "@/lib/notifications";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
 
 function App() {
   useEffect(() => {
@@ -58,6 +59,7 @@ function App() {
     <Router>
       <AuthProvider>
         <div className="flex min-h-screen flex-col bg-background text-foreground">
+          <AnalyticsTracker />
           <NavigationBar />
           <main className="flex-1">
             <Routes>

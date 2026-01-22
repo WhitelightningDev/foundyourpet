@@ -11,7 +11,7 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
-const outputPath = path.join(__dirname, "..", "public", "firebase-messaging-sw.js");
+const outputPath = path.join(__dirname, "..", "public", "push-sw.js");
 const hasConfig = Object.values(firebaseConfig).every(Boolean);
 
 const header =
@@ -28,9 +28,26 @@ if (!hasConfig) {
     "\n" +
     "self.addEventListener('install', () => self.skipWaiting());\n" +
     "self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));\n" +
-    "self.addEventListener('push', () => {});\n";
+    "\n" +
+    "self.addEventListener('push', (event) => {\n" +
+    "  try {\n" +
+    "    const data = event.data?.json?.() || null;\n" +
+    "    const title = data?.title || data?.notification?.title || 'Found Your Pet';\n" +
+    "    const body = data?.body || data?.notification?.body || '';\n" +
+    "    const url = data?.url || data?.data?.url || '/';\n" +
+    "    event.waitUntil(self.registration.showNotification(title, { body, icon: '/android-chrome-192x192.png', data: { url } }));\n" +
+    "  } catch {\n" +
+    "    // ignore\n" +
+    "  }\n" +
+    "});\n" +
+    "\n" +
+    "self.addEventListener('notificationclick', (event) => {\n" +
+    "  event.notification?.close?.();\n" +
+    "  const url = event.notification?.data?.url || '/';\n" +
+    "  event.waitUntil(self.clients.openWindow(url));\n" +
+    "});\n";
   fs.writeFileSync(outputPath, stub, "utf8");
-  console.log("[fcm] Wrote stub firebase-messaging-sw.js (missing Firebase env vars).");
+  console.log("[fcm] Wrote stub push-sw.js (missing Firebase env vars).");
   process.exit(0);
 }
 
@@ -53,6 +70,20 @@ const sw =
   "  self.registration.showNotification(title, options);\n" +
   "});\n" +
   "\n" +
+  "// Also support generic Web Push payloads.\n" +
+  "self.addEventListener('push', (event) => {\n" +
+  "  try {\n" +
+  "    const data = event.data?.json?.() || null;\n" +
+  "    const title = data?.title || data?.notification?.title;\n" +
+  "    if (!title) return;\n" +
+  "    const body = data?.body || data?.notification?.body || '';\n" +
+  "    const url = data?.url || data?.data?.url || '/';\n" +
+  "    event.waitUntil(self.registration.showNotification(title, { body, icon: '/android-chrome-192x192.png', data: { url } }));\n" +
+  "  } catch {\n" +
+  "    // ignore\n" +
+  "  }\n" +
+  "});\n" +
+  "\n" +
   "self.addEventListener('notificationclick', (event) => {\n" +
   "  event.notification?.close?.();\n" +
   "  const url = event.notification?.data?.url || '/';\n" +
@@ -60,5 +91,4 @@ const sw =
   "});\n";
 
 fs.writeFileSync(outputPath, sw, "utf8");
-console.log("[fcm] Wrote firebase-messaging-sw.js");
-
+console.log("[fcm] Wrote push-sw.js");

@@ -39,4 +39,3 @@ If these endpoints don’t exist yet, the UI falls back to `localStorage` (devic
 - Report card + interactions: `src/components/ReportCard.jsx`
 - Local fallback store: `src/lib/localReportsStore.js`
 - API wrappers: `src/services/reportsFeed.js`
-

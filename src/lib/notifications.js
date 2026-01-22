@@ -14,7 +14,7 @@ export async function registerFcmServiceWorker() {
   if (typeof window === "undefined") return null;
   if (!("serviceWorker" in navigator)) return null;
   try {
-    return await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    return await navigator.serviceWorker.register("/push-sw.js");
   } catch {
     return null;
   }
@@ -53,4 +53,3 @@ export async function listenForForegroundMessages(handler) {
   const messaging = getMessaging(app);
   return onMessage(messaging, handler);
 }
-
