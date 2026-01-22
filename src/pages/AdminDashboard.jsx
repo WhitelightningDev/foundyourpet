@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
+import { useSearchParams } from "react-router-dom";
 import UserDetailsModal from "../components/UserDetailsModal";
 import QRCodeModal from "../components/QRCodeModal";
 import UserListSection from "../components/UserListSection";
@@ -32,6 +33,7 @@ import {
 import { API_BASE_URL } from "../config/api";
 
 function AdminDashboard() {
+  const [searchParams] = useSearchParams();
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [pets, setPets] = useState([]);
@@ -45,6 +47,11 @@ function AdminDashboard() {
   const searchRef = useRef(null);
 
   const token = localStorage.getItem("authToken");
+
+  const tabParam = (searchParams.get("tab") || "users").toLowerCase();
+  const activeTab = ["users", "reports", "analytics", "tags"].includes(tabParam)
+    ? tabParam
+    : "users";
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -66,8 +73,10 @@ function AdminDashboard() {
   }, [token]);
 
   useEffect(() => {
+    if (activeTab !== "users") return;
+    if (users.length > 0) return;
     fetchUsers();
-  }, [fetchUsers]);
+  }, [activeTab, fetchUsers, users.length]);
 
   const handleViewDetails = async (userId) => {
     try {
@@ -206,13 +215,14 @@ function AdminDashboard() {
                   Admin dashboard
                 </h1>
                 <p className="text-muted-foreground">
-                  Manage users and view account details.
+                  Manage users, reports, and analytics.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+          {activeTab === "users" ? (
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
             <div className="relative w-full sm:w-[320px]">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -249,10 +259,13 @@ function AdminDashboard() {
               <RefreshCw className={loading ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
               Refresh
             </Button>
-          </div>
+            </div>
+          ) : null}
         </div>
 
-        <Card className="relative overflow-hidden border bg-[#075E63] text-white shadow-xl shadow-primary/10">
+        {activeTab === "users" ? (
+          <div className="mt-6 space-y-8">
+            <Card className="relative overflow-hidden border bg-[#075E63] text-white shadow-xl shadow-primary/10">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(0,0,0,0.35),transparent_55%)]" />
           <div className="pointer-events-none absolute inset-0 opacity-35 [background-image:linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:44px_44px]" />
           <CardContent className="relative grid gap-6 p-6 sm:p-8 lg:grid-cols-5 lg:items-center">
@@ -342,17 +355,12 @@ function AdminDashboard() {
               )}
             </CardContent>
           </Card>
-        </div>
+	        </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
-          <AdminReportsCard token={token} />
-          <AdminAnalyticsCard token={token} />
-        </div>
-
-        <div className="grid gap-4 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
-            <CardHeader className="space-y-2">
-              <CardTitle className="flex items-center justify-between gap-4">
+	        <div className="grid gap-4 lg:grid-cols-3">
+	          <Card className="lg:col-span-2">
+	            <CardHeader className="space-y-2">
+	              <CardTitle className="flex items-center justify-between gap-4">
                 <span>Recent users</span>
                 <div className="flex items-center gap-2">
                   <Button
@@ -575,8 +583,26 @@ function AdminDashboard() {
             </Tabs>
           </CardContent>
         </Card>
+          </div>
+        ) : null}
 
-        <TagOrdersSection token={token} />
+        {activeTab === "reports" ? (
+          <div className="mt-6">
+            <AdminReportsCard token={token} />
+          </div>
+        ) : null}
+
+        {activeTab === "analytics" ? (
+          <div className="mt-6">
+            <AdminAnalyticsCard token={token} />
+          </div>
+        ) : null}
+
+        {activeTab === "tags" ? (
+          <div className="mt-6">
+            <TagOrdersSection token={token} />
+          </div>
+        ) : null}
       </div>
 
       <UserDetailsModal
