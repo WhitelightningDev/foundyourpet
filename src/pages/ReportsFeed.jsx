@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import ReportCard from "@/components/ReportCard";
+import { setReportsLastSeenAt } from "@/lib/reportSeen";
 import { fetchPublicReports } from "@/services/reportsFeed";
 
 function ReportsFeed() {
@@ -38,6 +39,11 @@ function ReportsFeed() {
   useEffect(() => {
     loadPage(1, { replace: true });
   }, [loadPage]);
+
+  useEffect(() => {
+    // Visiting the feed marks reports as "seen" for update badge purposes.
+    setReportsLastSeenAt(new Date().toISOString());
+  }, []);
 
   const stats = useMemo(() => {
     const lost = items.filter((r) => r.petStatus === "lost").length;

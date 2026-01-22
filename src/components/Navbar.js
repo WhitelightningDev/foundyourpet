@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, LogOut, Menu, UserCircle } from "lucide-react";
+import { Bell, LayoutDashboard, LogOut, Menu, UserCircle } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import logo from "../assets/android-chrome-192x192.png";
 import { toast } from "sonner";
@@ -18,12 +18,22 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import EnableNotificationsButton from "@/components/EnableNotificationsButton";
+import { fetchPublicReports } from "@/services/reportsFeed";
+import {
+  ensureReportsLastSeenInitialized,
+  getReportsLastSeenAt,
+  setReportsLastLatestAt,
+  setReportsLastSeenAt,
+} from "@/lib/reportSeen";
 
 function NavigationBar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoggedIn, logout, user } = useContext(AuthContext);
+  const [hasReportUpdates, setHasReportUpdates] = useState(false);
+  const [latestReportAt, setLatestReportAt] = useState(null);
 
   const isAdmin = user?.isAdmin;
 
@@ -37,6 +47,43 @@ function NavigationBar() {
     toast.message("Logged out.");
     navigate("/");
   };
+
+  useEffect(() => {
+    ensureReportsLastSeenInitialized();
+
+    let active = true;
+
+    const check = async () => {
+      const res = await fetchPublicReports({ page: 1, limit: 1 });
+      if (!active) return;
+      if (!res?.ok) return;
+
+      const latest = res.items?.[0]?.createdAt ? String(res.items[0].createdAt) : null;
+      setLatestReportAt(latest);
+      if (latest) setReportsLastLatestAt(latest);
+
+      const lastSeen = getReportsLastSeenAt();
+      if (!latest || !lastSeen) {
+        setHasReportUpdates(false);
+        return;
+      }
+
+      const hasNew = new Date(latest).getTime() > new Date(lastSeen).getTime();
+      setHasReportUpdates(hasNew && !location.pathname.startsWith("/reports"));
+    };
+
+    check();
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") check();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      active = false;
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [location.pathname]);
 
   const dashboardHref = isAdmin ? "/admin-dashboard" : "/dashboard";
 
@@ -124,6 +171,52 @@ function NavigationBar() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative rounded-full border bg-background/50 shadow-sm hover:bg-accent"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+                {hasReportUpdates ? (
+                  <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-destructive" />
+                ) : null}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-80 p-3">
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Updates</div>
+                <div className="text-sm text-muted-foreground">
+                  {hasReportUpdates ? "New reports since your last visit." : "No new reports right now."}
+                </div>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <Button asChild size="sm">
+                    <Link to="/reports">View reports</Link>
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setReportsLastSeenAt(latestReportAt || new Date().toISOString());
+                      setHasReportUpdates(false);
+                      toast.message("Marked as read.");
+                    }}
+                  >
+                    Mark as read
+                  </Button>
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">Notifications</div>
+                  <EnableNotificationsButton className="w-full justify-center" />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
           {isLoggedIn ? (
             <>
               <div className="mx-1 hidden h-6 w-px bg-border md:block" />
@@ -185,7 +278,53 @@ function NavigationBar() {
           ) : null}
         </div>
 
-        <div className="md:hidden">
+        <div className="flex items-center gap-2 md:hidden">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+                {hasReportUpdates ? (
+                  <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-destructive" />
+                ) : null}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-80 p-3">
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Updates</div>
+                <div className="text-sm text-muted-foreground">
+                  {hasReportUpdates ? "New reports since your last visit." : "No new reports right now."}
+                </div>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <Button asChild size="sm">
+                    <Link to="/reports">View reports</Link>
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setReportsLastSeenAt(latestReportAt || new Date().toISOString());
+                      setHasReportUpdates(false);
+                      toast.message("Marked as read.");
+                    }}
+                  >
+                    Mark as read
+                  </Button>
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">Notifications</div>
+                  <EnableNotificationsButton className="w-full justify-center" />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="Open menu">
