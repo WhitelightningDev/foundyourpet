@@ -23,3 +23,16 @@ export function setLastPushMessage(message) {
   }
 }
 
+export function clearLastPushMessage() {
+  try {
+    localStorage.removeItem(LAST_PUSH_KEY);
+  } catch {
+    // ignore
+  }
+
+  try {
+    window.dispatchEvent(new Event("pushMessageReceived"));
+  } catch {
+    // ignore
+  }
+}

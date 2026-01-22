@@ -29,6 +29,7 @@ const extractTotalFromResponse = (response) => {
   const candidates = [
     response?.data?.data?.total,
     response?.data?.data?.count,
+    response?.data?.data?.page?.total,
     response?.data?.data?.pagination?.total,
     response?.data?.pagination?.total,
     response?.data?.total,
@@ -71,6 +72,7 @@ function TagOrdersSection({ token }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [countsLoading, setCountsLoading] = useState(false);
 
   const [qInput, setQInput] = useState("");
   const [q, setQ] = useState("");
@@ -139,6 +141,7 @@ function TagOrdersSection({ token }) {
     let mounted = true;
 
     const loadCounts = async () => {
+      setCountsLoading(true);
       const resolvedQuery = (q || "").toString().trim();
       const requests = statusTabs.map((t) =>
         axios.get(`${API_BASE_URL}/api/payment/admin/tag-orders`, {
@@ -160,13 +163,14 @@ function TagOrdersSection({ token }) {
         const tab = statusTabs[idx]?.value;
         if (!tab || result.status !== "fulfilled") return;
         const total = extractTotalFromResponse(result.value);
-        if (total == null) return;
-        next[tab] = total;
+        if (total != null) next[tab] = total;
       });
 
       if (Object.keys(next).length) {
         setTabCounts((prev) => ({ ...prev, ...next }));
       }
+
+      setCountsLoading(false);
     };
 
     loadCounts();
@@ -228,15 +232,19 @@ function TagOrdersSection({ token }) {
       <CardContent className="space-y-4">
         <Tabs value={statusTab} onValueChange={setStatusTab}>
           <div className="overflow-x-auto pb-1">
-            <TabsList className="w-max justify-start">
+            <TabsList className="w-max justify-start gap-1">
               {statusTabs.map((t) => (
                 <TabsTrigger key={t.value} value={t.value}>
                   <span className="flex items-center gap-2">
                     <span>{t.label}</span>
                     <span className="rounded-md bg-background/70 px-1.5 py-0.5 text-[11px] text-foreground shadow-sm ring-1 ring-border">
-                      {loading && t.value === statusTab
-                        ? "—"
-                        : tabCounts?.[t.value] ?? (t.value === statusTab && !loading ? orders.length : "—")}
+                      {(() => {
+                        const cached = tabCounts?.[t.value];
+                        if (typeof cached === "number") return cached;
+                        if (!loading && t.value === statusTab) return orders.length;
+                        if (countsLoading) return "…";
+                        return 0;
+                      })()}
                     </span>
                   </span>
                 </TabsTrigger>
