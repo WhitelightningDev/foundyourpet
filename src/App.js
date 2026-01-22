@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Prices from "./pages/Prices";
@@ -30,9 +30,30 @@ import FailurePage from "./payments-response-pages/FailurePage";
 import CancelPage from "./payments-response-pages/CancelPage";
 import PetRedirect from "./pages/PetRedirect";
 import TagOrderTracking from "./pages/TagOrderTracking";
+import ReportsFeed from "./pages/ReportsFeed";
 import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
+import { listenForForegroundMessages } from "@/lib/notifications";
 
 function App() {
+  useEffect(() => {
+    let unsubscribe = () => {};
+
+    listenForForegroundMessages((payload) => {
+      const title = payload?.notification?.title || "New pet report";
+      const description =
+        payload?.notification?.body || payload?.data?.body || "Open the site to view details.";
+
+      toast.message(title, { description });
+    }).then((unsub) => {
+      unsubscribe = typeof unsub === "function" ? unsub : () => {};
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   return (
     <Router>
       <AuthProvider>
@@ -41,6 +62,7 @@ function App() {
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/reports" element={<ReportsFeed />} />
               <Route path="/prices" element={<Prices />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/features" element={<Features />} />

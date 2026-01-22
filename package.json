@@ -21,6 +21,7 @@
     "bootstrap-icons": "^1.11.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "firebase": "^12.8.0",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.1",
     "lucide-react": "^0.476.0",
@@ -42,7 +43,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "prestart": "node scripts/generate-firebase-messaging-sw.cjs",
     "start": "craco start",
+    "prebuild": "node scripts/generate-firebase-messaging-sw.cjs",
     "build": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject"
