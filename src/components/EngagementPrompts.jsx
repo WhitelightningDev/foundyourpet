@@ -14,22 +14,9 @@ const daysSince = (iso) => {
   return ms / (24 * 60 * 60 * 1000);
 };
 
-function shouldShowWithCooldown(key, cooldownDays) {
-  try {
-    const last = localStorage.getItem(key);
-    if (!last) return true;
-    return daysSince(last) >= cooldownDays;
-  } catch {
-    return true;
-  }
-}
-
-function dismiss(key) {
-  try {
-    localStorage.setItem(key, new Date().toISOString());
-  } catch {
-    // ignore
-  }
+function shouldShowWithCooldown(lastDismissedAt, cooldownDays) {
+  if (!lastDismissedAt) return true;
+  return daysSince(lastDismissedAt) >= cooldownDays;
 }
 
 function EngagementPrompts({ className }) {
@@ -40,6 +27,20 @@ function EngagementPrompts({ className }) {
       return Boolean(localStorage.getItem("pushEnabled"));
     } catch {
       return false;
+    }
+  });
+  const [installDismissedAt, setInstallDismissedAt] = useState(() => {
+    try {
+      return localStorage.getItem("dismissedInstallPromptAt");
+    } catch {
+      return null;
+    }
+  });
+  const [pushDismissedAt, setPushDismissedAt] = useState(() => {
+    try {
+      return localStorage.getItem("dismissedPushPromptAt");
+    } catch {
+      return null;
     }
   });
 
@@ -61,10 +62,30 @@ function EngagementPrompts({ className }) {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
+  const dismissInstall = () => {
+    const now = new Date().toISOString();
+    try {
+      localStorage.setItem("dismissedInstallPromptAt", now);
+    } catch {
+      // ignore
+    }
+    setInstallDismissedAt(now);
+  };
+
+  const dismissPush = () => {
+    const now = new Date().toISOString();
+    try {
+      localStorage.setItem("dismissedPushPromptAt", now);
+    } catch {
+      // ignore
+    }
+    setPushDismissedAt(now);
+  };
+
   const canShowInstall =
     showOnThisRoute &&
     !isInstalled &&
-    shouldShowWithCooldown("dismissedInstallPromptAt", 3);
+    shouldShowWithCooldown(installDismissedAt, 3);
 
   useEffect(() => {
     const sync = () => {
@@ -89,7 +110,7 @@ function EngagementPrompts({ className }) {
     typeof window !== "undefined" &&
     "Notification" in window &&
     window.Notification.permission === "default" &&
-    shouldShowWithCooldown("dismissedPushPromptAt", 2);
+    shouldShowWithCooldown(pushDismissedAt, 2);
 
   if (!canShowInstall && !canShowPush) return null;
 
@@ -114,7 +135,7 @@ function EngagementPrompts({ className }) {
                     Install Found Your Pet for a faster experience and easier notifications.
                   </div>
                 </div>
-                <Button type="button" variant="ghost" size="sm" onClick={() => dismiss("dismissedInstallPromptAt")}>
+                <Button type="button" variant="ghost" size="sm" onClick={dismissInstall}>
                   Not now
                 </Button>
               </div>
@@ -129,7 +150,7 @@ function EngagementPrompts({ className }) {
                       await deferredInstallPrompt.userChoice;
                     } finally {
                       setDeferredInstallPrompt(null);
-                      dismiss("dismissedInstallPromptAt");
+                      dismissInstall();
                     }
                   }}
                 >
@@ -168,7 +189,7 @@ function EngagementPrompts({ className }) {
                     Get alerts when new lost/found reports are posted.
                   </div>
                 </div>
-                <Button type="button" variant="ghost" size="sm" onClick={() => dismiss("dismissedPushPromptAt")}>
+                <Button type="button" variant="ghost" size="sm" onClick={dismissPush}>
                   Not now
                 </Button>
               </div>
@@ -179,7 +200,7 @@ function EngagementPrompts({ className }) {
                   type="button"
                   variant="outline"
                   className="w-full justify-center sm:w-auto"
-                  onClick={() => dismiss("dismissedPushPromptAt")}
+                  onClick={dismissPush}
                 >
                   Dismiss
                 </Button>

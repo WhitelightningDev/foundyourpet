@@ -26,6 +26,7 @@ import {
   setReportsLastLatestAt,
   setReportsLastSeenAt,
 } from "@/lib/reportSeen";
+import { getLastPushMessage } from "@/lib/pushInbox";
 
 function NavigationBar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -34,6 +35,7 @@ function NavigationBar() {
   const { isLoggedIn, logout, user } = useContext(AuthContext);
   const [hasReportUpdates, setHasReportUpdates] = useState(false);
   const [latestReportAt, setLatestReportAt] = useState(null);
+  const [lastAlert, setLastAlert] = useState(() => getLastPushMessage());
 
   const isAdmin = user?.isAdmin;
 
@@ -84,6 +86,16 @@ function NavigationBar() {
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [location.pathname]);
+
+  useEffect(() => {
+    const sync = () => setLastAlert(getLastPushMessage());
+    window.addEventListener("storage", sync);
+    window.addEventListener("pushMessageReceived", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("pushMessageReceived", sync);
+    };
+  }, []);
 
   const dashboardHref = isAdmin ? "/admin-dashboard" : "/dashboard";
 
@@ -191,6 +203,28 @@ function NavigationBar() {
                 <div className="text-sm text-muted-foreground">
                   {hasReportUpdates ? "New reports since your last visit." : "No new reports right now."}
                 </div>
+                {lastAlert?.title ? (
+                  <div className="rounded-lg border bg-muted/20 p-3">
+                    <div className="text-sm font-medium">{lastAlert.title}</div>
+                    {lastAlert.body ? (
+                      <div className="mt-1 text-sm text-muted-foreground">{lastAlert.body}</div>
+                    ) : null}
+                    <div className="mt-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => {
+                          setReportsLastSeenAt(latestReportAt || new Date().toISOString());
+                          setHasReportUpdates(false);
+                          navigate(lastAlert.url || "/reports");
+                        }}
+                      >
+                        Open reports
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
                 <div className="flex flex-wrap gap-2 pt-1">
                   <Button asChild size="sm">
                     <Link to="/reports">View reports</Link>

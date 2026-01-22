@@ -29,12 +29,22 @@ if (!hasConfig) {
     "self.addEventListener('install', () => self.skipWaiting());\n" +
     "self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));\n" +
     "\n" +
+    "self.addEventListener('message', (event) => {\n" +
+    "  if (event?.data?.type === 'SKIP_WAITING') {\n" +
+    "    self.skipWaiting();\n" +
+    "  }\n" +
+    "});\n" +
+    "\n" +
     "self.addEventListener('push', (event) => {\n" +
     "  try {\n" +
     "    const data = event.data?.json?.() || null;\n" +
     "    const title = data?.title || data?.notification?.title || 'Found Your Pet';\n" +
     "    const body = data?.body || data?.notification?.body || '';\n" +
     "    const url = data?.url || data?.data?.url || '/';\n" +
+    "    const payload = { type: 'PUSH_RECEIVED', title, body, url, receivedAt: new Date().toISOString() };\n" +
+    "    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {\n" +
+    "      clients.forEach((client) => client.postMessage(payload));\n" +
+    "    });\n" +
     "    event.waitUntil(self.registration.showNotification(title, { body, icon: '/android-chrome-192x192.png', data: { url } }));\n" +
     "  } catch {\n" +
     "    // ignore\n" +
@@ -67,7 +77,19 @@ const sw =
   "    icon: '/android-chrome-192x192.png',\n" +
   "    data: payload?.data || {},\n" +
   "  };\n" +
+  "  const body = payload?.notification?.body || '';\n" +
+  "  const url = payload?.data?.url || '/';\n" +
+  "  const msg = { type: 'PUSH_RECEIVED', title, body, url, receivedAt: new Date().toISOString() };\n" +
+  "  self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {\n" +
+  "    clients.forEach((client) => client.postMessage(msg));\n" +
+  "  });\n" +
   "  self.registration.showNotification(title, options);\n" +
+  "});\n" +
+  "\n" +
+  "self.addEventListener('message', (event) => {\n" +
+  "  if (event?.data?.type === 'SKIP_WAITING') {\n" +
+  "    self.skipWaiting();\n" +
+  "  }\n" +
   "});\n" +
   "\n" +
   "// Also support generic Web Push payloads.\n" +
@@ -78,6 +100,10 @@ const sw =
   "    if (!title) return;\n" +
   "    const body = data?.body || data?.notification?.body || '';\n" +
   "    const url = data?.url || data?.data?.url || '/';\n" +
+  "    const msg = { type: 'PUSH_RECEIVED', title, body, url, receivedAt: new Date().toISOString() };\n" +
+  "    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {\n" +
+  "      clients.forEach((client) => client.postMessage(msg));\n" +
+  "    });\n" +
   "    event.waitUntil(self.registration.showNotification(title, { body, icon: '/android-chrome-192x192.png', data: { url } }));\n" +
   "  } catch {\n" +
   "    // ignore\n" +
