@@ -21,7 +21,7 @@ reportWebVitals();
 
 if (typeof window !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/firebase-messaging-sw.js").catch(() => {
+    navigator.serviceWorker.register("/push-sw.js").catch(() => {
       // no-op
     });
   });

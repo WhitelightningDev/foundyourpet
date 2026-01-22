@@ -4,8 +4,10 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getFcmToken, isFcmSupported } from "@/lib/notifications";
-import { registerWebPushToken } from "@/services/notifications";
+import { isFirebaseConfigured } from "@/lib/firebase";
+import { getFcmToken } from "@/lib/notifications";
+import { isIOSDevice, isRunningStandalonePwa, isWebPushSupported, subscribeToWebPush } from "@/lib/webPush";
+import { fetchWebPushPublicKey, registerWebPushSubscription, registerWebPushToken } from "@/services/notifications";
 
 function EnableNotificationsButton({ className }) {
   const [isWorking, setIsWorking] = useState(false);
@@ -13,7 +15,7 @@ function EnableNotificationsButton({ className }) {
 
   useEffect(() => {
     try {
-      setIsEnabled(Boolean(localStorage.getItem("fcmToken")));
+      setIsEnabled(Boolean(localStorage.getItem("pushEnabled")));
     } catch {
       setIsEnabled(false);
     }
@@ -28,9 +30,10 @@ function EnableNotificationsButton({ className }) {
 
     setIsWorking(true);
     try {
-      const supported = await isFcmSupported();
-      if (!supported) {
-        toast.error("Push notifications aren't configured for this site yet.");
+      if (isIOSDevice() && !isRunningStandalonePwa()) {
+        toast.message("Install this app to enable notifications on iPhone/iPad.", {
+          description: "Use Safari → Share → Add to Home Screen, then open the app from your Home Screen.",
+        });
         return;
       }
 
@@ -40,14 +43,63 @@ function EnableNotificationsButton({ className }) {
         return;
       }
 
+      // Preferred for PWAs/desktop: standards-based Web Push.
+      if (isWebPushSupported()) {
+        const keyRes = process.env.REACT_APP_WEB_PUSH_PUBLIC_KEY
+          ? { ok: true, publicKey: process.env.REACT_APP_WEB_PUSH_PUBLIC_KEY }
+          : await fetchWebPushPublicKey();
+
+        if (!keyRes.ok) {
+          toast.error("Push notifications aren't configured for this site yet.", {
+            description: keyRes.error,
+          });
+          return;
+        }
+
+        const subRes = await subscribeToWebPush({ vapidPublicKey: keyRes.publicKey });
+        if (!subRes.ok) {
+          toast.error("Couldn't enable notifications.", { description: subRes.error });
+          return;
+        }
+
+        try {
+          localStorage.setItem("webPushSubscription", JSON.stringify(subRes.subscription));
+          localStorage.setItem("pushEnabled", "true");
+        } catch {
+          // ignore
+        }
+
+        const regRes = await registerWebPushSubscription(subRes.subscription);
+        if (!regRes.ok) {
+          toast.message("Notifications enabled, but server registration failed.", {
+            description: regRes.error,
+          });
+          setIsEnabled(true);
+          return;
+        }
+
+        toast.success("Notifications enabled.");
+        setIsEnabled(true);
+        return;
+      }
+
+      // Fallback: FCM token (useful for Android/Chrome, not supported in all browsers).
+      if (!isFirebaseConfigured()) {
+        toast.error("Push notifications aren't configured for this site yet.", {
+          description: "Missing Web Push VAPID key and Firebase config.",
+        });
+        return;
+      }
+
       const token = await getFcmToken();
       if (!token) {
-        toast.error("Couldn't enable notifications. Missing Firebase settings?");
+        toast.error("Couldn't enable notifications.");
         return;
       }
 
       try {
         localStorage.setItem("fcmToken", token);
+        localStorage.setItem("pushEnabled", "true");
       } catch {
         // ignore
       }
@@ -83,4 +135,3 @@ function EnableNotificationsButton({ className }) {
 }
 
 export default EnableNotificationsButton;
-
