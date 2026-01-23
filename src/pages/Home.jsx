@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -11,8 +11,6 @@ import {
   Truck,
   UserPlus,
 } from "lucide-react";
-import { toast } from "sonner";
-
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,10 +34,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import EnableNotificationsButton from "@/components/EnableNotificationsButton";
-import { submitPublicPetReport } from "@/services/publicPetReports";
 
 function Home() {
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -47,32 +42,6 @@ function Home() {
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState("");
   const [notifySubmitted, setNotifySubmitted] = useState(false);
-
-  const [petReport, setPetReport] = useState({
-    firstName: "",
-    lastName: "",
-    phoneNumber: "",
-    photoFile: null,
-    petStatus: "lost",
-    location: "",
-    description: "",
-  });
-  const [petReportErrors, setPetReportErrors] = useState({});
-  const [petPhotoPreviewUrl, setPetPhotoPreviewUrl] = useState(null);
-  const [petReportSubmitting, setPetReportSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!petReport.photoFile) {
-      setPetPhotoPreviewUrl(null);
-      return undefined;
-    }
-
-    const url = URL.createObjectURL(petReport.photoFile);
-    setPetPhotoPreviewUrl(url);
-    return () => {
-      URL.revokeObjectURL(url);
-    };
-  }, [petReport.photoFile]);
 
   const homeThemeVars = useMemo(
     () => ({
@@ -246,85 +215,6 @@ function Home() {
     setDetailsOpen(true);
   };
 
-  const petReportSelectBaseClass =
-    "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background " +
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 " +
-    "disabled:cursor-not-allowed disabled:opacity-50";
-
-  const updatePetReportField = (field, value) => {
-    setPetReport((prev) => ({ ...prev, [field]: value }));
-    if (petReportErrors[field]) {
-      setPetReportErrors((prev) => ({ ...prev, [field]: "" }));
-    }
-  };
-
-  const validatePetReport = () => {
-    const errors = {};
-
-    if (!petReport.firstName.trim()) errors.firstName = "First name is required.";
-    if (!petReport.lastName.trim()) errors.lastName = "Last name is required.";
-
-    const phoneDigits = petReport.phoneNumber.replace(/\D/g, "");
-    if (!petReport.phoneNumber.trim()) errors.phoneNumber = "Phone number is required.";
-    else if (phoneDigits.length < 7) errors.phoneNumber = "Please enter a valid phone number.";
-
-    if (!petReport.photoFile) errors.photoFile = "Pet photo is required.";
-    if (!["lost", "found"].includes(petReport.petStatus))
-      errors.petStatus = "Please select Lost or Found.";
-    if (!petReport.location.trim()) errors.location = "Location is required.";
-
-    return errors;
-  };
-
-  const handlePetReportSubmit = async (e) => {
-    e.preventDefault();
-    const errors = validatePetReport();
-    if (Object.keys(errors).length) {
-      setPetReportErrors(errors);
-      toast.error("Please complete the required fields.");
-      return;
-    }
-
-    setPetReportSubmitting(true);
-    try {
-      const res = await submitPublicPetReport({
-        firstName: petReport.firstName.trim(),
-        lastName: petReport.lastName.trim(),
-        phoneNumber: petReport.phoneNumber.trim(),
-        petStatus: petReport.petStatus,
-        location: petReport.location.trim(),
-        description: petReport.description.trim(),
-        photoFile: petReport.photoFile,
-      });
-
-      if (!res?.ok) {
-        toast.error("Couldn't submit report.");
-        return;
-      }
-
-      if (res?.data?.local) {
-        toast.message("Report saved locally.", {
-          description: res.warning || "We’ll sync when the server is available.",
-        });
-      } else {
-        toast.success("Report submitted.");
-      }
-
-      setPetReport({
-        firstName: "",
-        lastName: "",
-        phoneNumber: "",
-        photoFile: null,
-        petStatus: "lost",
-        location: "",
-        description: "",
-      });
-      setPetReportErrors({});
-    } finally {
-      setPetReportSubmitting(false);
-    }
-  };
-
   return (
     <main className="bg-background text-foreground" style={homeThemeVars}>
       <section className="relative overflow-hidden border-b">
@@ -494,231 +384,45 @@ function Home() {
         </div>
       </section>
 
-      <section
-        id="report-pet"
-        className="mx-auto w-full max-w-6xl px-4 py-16 sm:py-20"
-      >
+      <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:py-20">
         <div className="grid gap-8 lg:grid-cols-5">
           <div className="space-y-3 lg:col-span-2">
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              Report a Lost or Found Pet
+              Community Reports
             </h2>
             <p className="text-sm text-muted-foreground">
-              No login required. Fill in the details to submit a report.
+              Post a lost or found pet report and browse what’s happening in your area.
             </p>
-            <div className="rounded-xl border bg-card p-4 text-sm text-muted-foreground">
-              <div className="font-medium text-foreground">Photo tip</div>
-              <div className="mt-1">
-                Upload a clear photo (face/markings) to help identify the pet quickly.
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <div className="text-sm font-medium text-foreground">Get alerts</div>
-              <div className="text-sm text-muted-foreground">
-                Enable browser notifications to get new report updates.
-              </div>
-              <EnableNotificationsButton className="w-full justify-center" />
-              <Button asChild variant="secondary" className="w-full justify-center">
-                <Link to="/reports">View community feed</Link>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button asChild className="w-full sm:w-auto">
+                <Link to="/reports?new=1">Add post</Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full sm:w-auto">
+                <Link to="/reports">View feed</Link>
               </Button>
             </div>
           </div>
 
           <Card className="lg:col-span-3">
             <CardHeader>
-              <CardTitle>Report a Lost or Found Pet</CardTitle>
+              <CardTitle>Fast, simple, helpful</CardTitle>
               <CardDescription>
-                Share your details so we can help connect a pet with their family.
+                Create a report with a step-by-step modal on the Reports page.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form className="grid gap-5" noValidate onSubmit={handlePetReportSubmit}>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label
-                      htmlFor="report-first-name"
-                      className={cn(petReportErrors.firstName && "text-destructive")}
-                    >
-                      First Name <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="report-first-name"
-                      value={petReport.firstName}
-                      onChange={(e) => updatePetReportField("firstName", e.target.value)}
-                      autoComplete="given-name"
-                      aria-invalid={!!petReportErrors.firstName}
-                      className={cn(petReportErrors.firstName && "border-destructive")}
-                    />
-                    {petReportErrors.firstName ? (
-                      <p className="text-xs font-medium text-destructive">
-                        {petReportErrors.firstName}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label
-                      htmlFor="report-last-name"
-                      className={cn(petReportErrors.lastName && "text-destructive")}
-                    >
-                      Last Name <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="report-last-name"
-                      value={petReport.lastName}
-                      onChange={(e) => updatePetReportField("lastName", e.target.value)}
-                      autoComplete="family-name"
-                      aria-invalid={!!petReportErrors.lastName}
-                      className={cn(petReportErrors.lastName && "border-destructive")}
-                    />
-                    {petReportErrors.lastName ? (
-                      <p className="text-xs font-medium text-destructive">
-                        {petReportErrors.lastName}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label
-                      htmlFor="report-phone"
-                      className={cn(petReportErrors.phoneNumber && "text-destructive")}
-                    >
-                      Phone Number <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                      id="report-phone"
-                      type="tel"
-                      placeholder="+27 74 123 4567"
-                      value={petReport.phoneNumber}
-                      onChange={(e) => updatePetReportField("phoneNumber", e.target.value)}
-                      autoComplete="tel"
-                      aria-invalid={!!petReportErrors.phoneNumber}
-                      className={cn(petReportErrors.phoneNumber && "border-destructive")}
-                    />
-                    {petReportErrors.phoneNumber ? (
-                      <p className="text-xs font-medium text-destructive">
-                        {petReportErrors.phoneNumber}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label
-                      htmlFor="report-status"
-                      className={cn(petReportErrors.petStatus && "text-destructive")}
-                    >
-                      Pet Status <span className="text-destructive">*</span>
-                    </Label>
-                    <select
-                      id="report-status"
-                      value={petReport.petStatus}
-                      onChange={(e) => updatePetReportField("petStatus", e.target.value)}
-                      className={cn(
-                        petReportSelectBaseClass,
-                        petReportErrors.petStatus && "border-destructive"
-                      )}
-                      aria-invalid={!!petReportErrors.petStatus}
-                    >
-                      <option value="lost">Lost</option>
-                      <option value="found">Found</option>
-                    </select>
-                    {petReportErrors.petStatus ? (
-                      <p className="text-xs font-medium text-destructive">
-                        {petReportErrors.petStatus}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label
-                    htmlFor="report-location"
-                    className={cn(petReportErrors.location && "text-destructive")}
-                  >
-                    Location where the pet was lost or found{" "}
-                    <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="report-location"
-                    placeholder="e.g. Parkhurst, Johannesburg"
-                    value={petReport.location}
-                    onChange={(e) => updatePetReportField("location", e.target.value)}
-                    aria-invalid={!!petReportErrors.location}
-                    className={cn(petReportErrors.location && "border-destructive")}
-                  />
-                  {petReportErrors.location ? (
-                    <p className="text-xs font-medium text-destructive">
-                      {petReportErrors.location}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="report-photo" className={cn(petReportErrors.photoFile && "text-destructive")}>
-                    Pet Photo <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="report-photo"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      updatePetReportField("photoFile", e.target.files?.[0] || null)
-                    }
-                    aria-invalid={!!petReportErrors.photoFile}
-                    className={cn(petReportErrors.photoFile && "border-destructive")}
-                  />
-                  {petPhotoPreviewUrl ? (
-                    <div className="flex items-start gap-3 pt-2">
-                      <img
-                        src={petPhotoPreviewUrl}
-                        alt="Selected pet"
-                        className="h-20 w-20 rounded-md border object-cover"
-                        loading="lazy"
-                      />
-                      <div className="min-w-0 space-y-2">
-                        <div className="truncate text-sm font-medium">
-                          {petReport.photoFile?.name}
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => updatePetReportField("photoFile", null)}
-                        >
-                          Remove photo
-                        </Button>
-                      </div>
-                    </div>
-                  ) : null}
-                  {petReportErrors.photoFile ? (
-                    <p className="text-xs font-medium text-destructive">
-                      {petReportErrors.photoFile}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="report-description">Description (optional)</Label>
-                  <Textarea
-                    id="report-description"
-                    placeholder="Any details that can help identify the pet (collar color, breed, markings, etc.)"
-                    value={petReport.description}
-                    onChange={(e) => updatePetReportField("description", e.target.value)}
-                    rows={4}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-xs text-muted-foreground">
-                    If enabled, new reports can trigger a push notification.
-                  </p>
-                  <Button type="submit" className="w-full sm:w-auto" disabled={petReportSubmitting}>
-                    {petReportSubmitting ? "Submitting…" : "Submit report"}
-                  </Button>
-                </div>
-              </form>
+            <CardContent className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
+              <div className="rounded-lg border bg-muted/20 p-4">
+                <div className="font-medium text-foreground">No login</div>
+                <div className="mt-1">Create a report in under a minute.</div>
+              </div>
+              <div className="rounded-lg border bg-muted/20 p-4">
+                <div className="font-medium text-foreground">Guided steps</div>
+                <div className="mt-1">A clean stepper with validation.</div>
+              </div>
+              <div className="rounded-lg border bg-muted/20 p-4">
+                <div className="font-medium text-foreground">Photo-first</div>
+                <div className="mt-1">A clear photo boosts visibility in the feed.</div>
+              </div>
             </CardContent>
           </Card>
         </div>

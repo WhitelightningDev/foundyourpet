@@ -10,9 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import ReportStatusBadge from "@/components/ReportStatusBadge";
 import { cn } from "@/lib/utils";
 import { formatTimeAgo } from "@/lib/timeAgo";
-import { fetchComments, flagReport, postComment, toggleReaction } from "@/services/reportsFeed";
+import { freeServices } from "@/services/free";
 
 function ReportCard({ report, onUpdate }) {
   const [commentName, setCommentName] = useState("");
@@ -26,7 +27,6 @@ function ReportCard({ report, onUpdate }) {
   const [flagDetails, setFlagDetails] = useState("");
 
   const statusLabel = report.petStatus === "found" ? "Found" : "Lost";
-  const statusVariant = report.petStatus === "found" ? "secondary" : "default";
 
   const photo = report.photoUrl || "/android-chrome-192x192.png";
   const timeAgo = useMemo(() => formatTimeAgo(report.createdAt), [report.createdAt]);
@@ -40,7 +40,7 @@ function ReportCard({ report, onUpdate }) {
   const handleReaction = async (reactionType) => {
     setWorking(true);
     try {
-      const res = await toggleReaction({ reportId: report.id, reactionType });
+      const res = await freeServices.reports.toggleReaction({ reportId: report.id, reactionType });
       if (!res?.ok) {
         toast.error("Couldn't update reaction.");
         return;
@@ -66,7 +66,7 @@ function ReportCard({ report, onUpdate }) {
 
     setWorking(true);
     try {
-      const res = await postComment({
+      const res = await freeServices.reports.postComment({
         reportId: report.id,
         name: commentName.trim(),
         text: commentText.trim(),
@@ -118,7 +118,7 @@ function ReportCard({ report, onUpdate }) {
 
     setWorking(true);
     try {
-      const res = await flagReport({
+      const res = await freeServices.reports.flagReport({
         reportId: report.id,
         reason: flagReason.trim(),
         details: flagDetails.trim(),
@@ -151,7 +151,7 @@ function ReportCard({ report, onUpdate }) {
     setLoadingComments(true);
     try {
       const pageToLoad = next ? commentsPage + 1 : 1;
-      const res = await fetchComments({ reportId: report.id, page: pageToLoad, limit: 20 });
+      const res = await freeServices.reports.fetchComments({ reportId: report.id, page: pageToLoad, limit: 20 });
       if (!res?.ok) {
         toast.error("Couldn't load comments.");
         return;
@@ -191,7 +191,7 @@ function ReportCard({ report, onUpdate }) {
               loading="lazy"
             />
             <div className="absolute left-3 top-3 flex items-center gap-2">
-              <Badge variant={statusVariant}>{statusLabel}</Badge>
+              <ReportStatusBadge status={report.petStatus}>{statusLabel}</ReportStatusBadge>
               {timeAgo ? <Badge variant="outline">{timeAgo}</Badge> : null}
             </div>
           </div>

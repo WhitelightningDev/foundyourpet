@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import EnableNotificationsButton from "@/components/EnableNotificationsButton";
-import { fetchPublicReports } from "@/services/reportsFeed";
+import { freeServices } from "@/services/free";
 import {
   ensureReportsLastSeenInitialized,
   getReportsLastSeenAt,
@@ -65,7 +65,7 @@ function NavigationBar() {
     let active = true;
 
     const check = async () => {
-      const res = await fetchPublicReports({ page: 1, limit: 1 });
+      const res = await freeServices.reports.fetchPublicReports({ page: 1, limit: 1 });
       if (!active) return;
       if (!res?.ok) return;
 

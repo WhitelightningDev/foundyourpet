@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import ReportStatusBadge from "@/components/ReportStatusBadge";
 import { cn } from "@/lib/utils";
 import { formatTimeAgo } from "@/lib/timeAgo";
 import { deleteAdminReport, fetchAdminReports, setReportHidden } from "@/services/adminReports";
@@ -165,9 +166,7 @@ function AdminReportsCard({ token, className }) {
                   </div>
                   <div className="col-span-3 space-y-2 p-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant={r.petStatus === "found" ? "secondary" : "default"}>
-                        {r.petStatus === "found" ? "Found" : "Lost"}
-                      </Badge>
+                      <ReportStatusBadge status={r.petStatus} />
                       <Badge variant="outline">{formatTimeAgo(r.createdAt)}</Badge>
                       {r.isHidden ? <Badge variant="outline">Hidden</Badge> : null}
                     </div>
@@ -255,4 +254,3 @@ function AdminReportsCard({ token, className }) {
 }
 
 export default AdminReportsCard;
-
