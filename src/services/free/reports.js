@@ -2,6 +2,7 @@ import { API_BASE_URL } from "@/config/api";
 import {
   PUBLIC_PET_REPORT_URL,
   PUBLIC_REPORTS_FEED_URL,
+  REPORTS_API_PREFIX,
   reportCommentsUrl,
   reportFlagUrl,
   reportReactionsUrl,
@@ -152,6 +153,55 @@ export async function fetchPublicReports({ page = 1, limit = 10 } = {}) {
   }
 }
 
+export async function fetchPublicReport({ reportId }) {
+  if (!reportId) return { ok: false, error: "Missing reportId" };
+  const id = String(reportId);
+
+  async function findInPublicFeed() {
+    const limit = 20;
+    let page = 1;
+    let nextPage = 1;
+
+    // Keep this bounded so opening a share link can't accidentally DDoS the API.
+    const maxPages = 8;
+
+    while (nextPage && page <= maxPages) {
+      // eslint-disable-next-line no-await-in-loop
+      const pageRes = await fetchPublicReports({ page, limit });
+      if (!pageRes?.ok) return null;
+      const match = (pageRes.items || []).find((r) => String(r?.id) === id);
+      if (match) return match;
+      nextPage = pageRes.nextPage;
+      page = nextPage || page + 1;
+    }
+
+    return null;
+  }
+
+  try {
+    const { res, data } = await fetchJson(`${REPORTS_API_PREFIX}/${encodeURIComponent(id)}`, {
+      method: "GET",
+    });
+    if (!res.ok) {
+      const found = await findInPublicFeed();
+      if (found) return { ok: true, report: found, fromFeed: true };
+      return { ok: false, error: data?.message || `HTTP ${res.status}` };
+    }
+
+    const report = normalizeReport(data?.report ?? data);
+    if (!report) return { ok: false, error: "Report not found" };
+    return { ok: true, report, data };
+  } catch {
+    const found = await findInPublicFeed();
+    if (found) return { ok: true, report: found, fromFeed: true };
+
+    const local = getLocalReport(id);
+    const report = normalizeReport(local);
+    if (!report) return { ok: false, error: "Report not found" };
+    return { ok: true, report, local: true };
+  }
+}
+
 export async function postComment({ reportId, name, text }) {
   try {
     const { res, data } = await fetchJson(reportCommentsUrl(reportId), {
@@ -220,6 +270,7 @@ export const reportsService = {
   normalizeReport,
   submitPublicPetReport,
   fetchPublicReports,
+  fetchPublicReport,
   createPublicReportFallbackToLocal,
   postComment,
   fetchComments,
