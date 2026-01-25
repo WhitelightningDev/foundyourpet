@@ -164,7 +164,7 @@ function ReportsFeed() {
   }, [visibleItems]);
 
   return (
-    <main className="relative bg-background px-4 py-12 text-foreground sm:py-16">
+    <main className="relative bg-background px-3 py-10 text-foreground sm:px-4 sm:py-16">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(27,182,168,0.14),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-[#FFD66B]/35 via-[#FFB55C]/15 to-[#FF8E4A]/15" />
 
@@ -227,20 +227,24 @@ function ReportsFeed() {
                 <ReportStatusBadge status="lost">Lost: {stats.lost}</ReportStatusBadge>
                 <ReportStatusBadge status="found">Found: {stats.found}</ReportStatusBadge>
                 {urlQuery ? (
-                  <Badge variant="outline" className="truncate">
+                  <Badge variant="outline" className="max-w-full truncate sm:max-w-[260px]">
                     Filter: {urlQuery}
                   </Badge>
                 ) : null}
               </div>
-              <div className="flex gap-2">
-                <Button type="button" className="gap-2" onClick={() => setReportOpen(true)}>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                <Button
+                  type="button"
+                  className="w-full gap-2 sm:w-auto"
+                  onClick={() => setReportOpen(true)}
+                >
                   <Plus className="h-4 w-4" />
                   Add post
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
-                  className="gap-2"
+                  className="w-full gap-2 sm:w-auto"
                   disabled={isLoading}
                   onClick={() => loadPage(1, { replace: true })}
                 >
