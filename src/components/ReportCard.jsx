@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Eye, Flag, Heart, HelpingHand, MessageCircle, ThumbsUp } from "lucide-react";
+import { Eye, Flag, Heart, HelpingHand, MessageCircle, Share2, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -10,12 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import ReportPhoto from "@/components/ReportPhoto";
 import ReportStatusBadge from "@/components/ReportStatusBadge";
 import { cn } from "@/lib/utils";
 import { formatTimeAgo } from "@/lib/timeAgo";
 import { freeServices } from "@/services/free";
 
-function ReportCard({ report, onUpdate }) {
+function ReportCard({ report, onUpdate, highlighted }) {
   const [commentName, setCommentName] = useState("");
   const [commentText, setCommentText] = useState("");
   const [working, setWorking] = useState(false);
@@ -25,12 +26,12 @@ function ReportCard({ report, onUpdate }) {
   const [flagOpen, setFlagOpen] = useState(false);
   const [flagReason, setFlagReason] = useState("");
   const [flagDetails, setFlagDetails] = useState("");
+  const [shareOpen, setShareOpen] = useState(false);
 
   const statusLabel = report.petStatus === "found" ? "Found" : "Lost";
 
-  const photo = report.photoUrl || "/android-chrome-192x192.png";
   const timeAgo = useMemo(() => formatTimeAgo(report.createdAt), [report.createdAt]);
-  const displayName = report.firstName || "Anonymous";
+  const displayName = report.postedBy || report.firstName || "Anonymous";
   const reactions = report.reactions || { like: 0, heart: 0, help: 0, seen: 0, helped: 0 };
 
   const updateOne = (nextReport) => {
@@ -179,16 +180,69 @@ function ReportCard({ report, onUpdate }) {
     }
   };
 
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/share/report/${encodeURIComponent(String(report.id))}`
+      : "";
+
+  const shareText = (() => {
+    const petName = String(report.petName || "").trim();
+    const location = String(report.location || "").trim();
+    const postedBy = String(displayName || "").trim();
+    const pieces = [
+      `${statusLabel} pet report${petName ? `: ${petName}` : ""}`,
+      location ? `Location: ${location}` : null,
+      postedBy ? `Posted by: ${postedBy}` : null,
+    ].filter(Boolean);
+    return pieces.join(" • ");
+  })();
+
+  const handleShare = async () => {
+    if (typeof window === "undefined") return;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: shareText,
+          text: shareText,
+          url: shareUrl,
+        });
+        return;
+      }
+    } catch {
+      // fall back to dialog
+    }
+
+    setShareOpen(true);
+  };
+
+  const handleCopyLink = async () => {
+    if (!shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied.");
+    } catch {
+      toast.error("Couldn't copy link.");
+    }
+  };
+
   return (
     <>
-      <Card className="overflow-hidden">
+      <Card
+        id={`report-${report.id}`}
+        className={cn(
+          "overflow-hidden scroll-mt-24 transition-shadow",
+          highlighted && "ring-2 ring-primary/40 shadow-lg shadow-primary/10"
+        )}
+      >
         <div className="grid md:grid-cols-5">
           <div className="relative md:col-span-2">
-            <img
-              src={photo}
+            <ReportPhoto
+              photoUrl={report.photoUrl}
+              petType={report.petType}
               alt={`${statusLabel} pet`}
-              className="h-56 w-full object-cover md:h-full"
-              loading="lazy"
+              className="h-56 w-full md:h-full"
+              imgClassName="h-56 w-full md:h-full"
             />
             <div className="absolute left-3 top-3 flex items-center gap-2">
               <ReportStatusBadge status={report.petStatus}>{statusLabel}</ReportStatusBadge>
@@ -199,6 +253,9 @@ function ReportCard({ report, onUpdate }) {
           <div className="md:col-span-3">
             <CardHeader className="space-y-2">
               <div className="flex flex-col gap-1">
+                {report.petName ? (
+                  <div className="text-base font-semibold">{report.petName}</div>
+                ) : null}
                 <div className="text-sm text-muted-foreground">
                   Posted by <span className="font-medium text-foreground">{displayName}</span>
                 </div>
@@ -378,13 +435,62 @@ function ReportCard({ report, onUpdate }) {
               <div className="text-xs text-muted-foreground">
                 {report.description ? "Description included." : "No description."}
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => setFlagOpen(true)}>
-                Report incorrect content
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="outline" size="sm" className="gap-2" onClick={handleShare}>
+                  <Share2 className="h-4 w-4" />
+                  Share
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => setFlagOpen(true)}>
+                  Report incorrect content
+                </Button>
+              </div>
             </CardFooter>
           </div>
         </div>
       </Card>
+
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share this post</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <div className="rounded-lg border bg-muted/20 p-3 text-sm text-muted-foreground">
+              {shareText}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Share link</Label>
+              <Input value={shareUrl} readOnly />
+              <div className="text-xs text-muted-foreground">
+                WhatsApp/Instagram will show a preview with the pet’s details.
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+            <Button type="button" variant="outline" onClick={() => setShareOpen(false)}>
+              Close
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  const url = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`;
+                  window.open(url, "_blank", "noopener,noreferrer");
+                }}
+              >
+                Share to WhatsApp
+              </Button>
+              <Button type="button" onClick={handleCopyLink}>
+                Copy link
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={flagOpen} onOpenChange={setFlagOpen}>
         <DialogContent>

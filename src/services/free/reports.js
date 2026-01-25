@@ -31,9 +31,15 @@ export function normalizeReport(report) {
           ? `${API_BASE_URL}${rawPhoto}`
           : null;
 
+  const petTypeRaw = report.petType || report.pet_type || report.petKind || null;
+  const petType = typeof petTypeRaw === "string" ? petTypeRaw.toLowerCase() : null;
+
   return {
     id,
+    petName: report.petName || report.pet_name || report.pet || "",
+    petType: petType === "cat" || petType === "dog" ? petType : "dog",
     firstName: report.firstName || report.name || "Anonymous",
+    postedBy: report.postedBy || report.posted_by || null,
     petStatus: (report.petStatus || report.status || "lost").toLowerCase(),
     location: report.location || "",
     createdAt:
@@ -56,6 +62,8 @@ export async function createPublicReportFallbackToLocal(form) {
 }
 
 export async function submitPublicPetReport({
+  petName,
+  petType,
   firstName,
   lastName,
   phoneNumber,
@@ -65,6 +73,8 @@ export async function submitPublicPetReport({
   photoFile,
 }) {
   const formData = new FormData();
+  if (petName) formData.append("petName", petName);
+  if (petType) formData.append("petType", petType);
   formData.append("firstName", firstName);
   formData.append("lastName", lastName);
   formData.append("phoneNumber", phoneNumber);
@@ -81,6 +91,8 @@ export async function submitPublicPetReport({
 
     if (!res.ok) {
       const localReport = await createPublicReportFallbackToLocal({
+        petName,
+        petType,
         firstName,
         lastName,
         phoneNumber,
@@ -100,6 +112,8 @@ export async function submitPublicPetReport({
     return { ok: true, data };
   } catch (error) {
     const localReport = await createPublicReportFallbackToLocal({
+      petName,
+      petType,
       firstName,
       lastName,
       phoneNumber,

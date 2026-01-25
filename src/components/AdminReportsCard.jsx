@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import ReportPhoto from "@/components/ReportPhoto";
 import ReportStatusBadge from "@/components/ReportStatusBadge";
 import { cn } from "@/lib/utils";
 import { formatTimeAgo } from "@/lib/timeAgo";
@@ -157,11 +158,12 @@ function AdminReportsCard({ token, className }) {
               <div key={r.id} className="overflow-hidden rounded-xl border bg-card">
                 <div className="grid grid-cols-5">
                   <div className="col-span-2">
-                    <img
-                      src={r.photoUrl || "/android-chrome-192x192.png"}
+                    <ReportPhoto
+                      photoUrl={r.photoUrl}
+                      petType={r.petType}
                       alt="Reported pet"
-                      className="h-full min-h-24 w-full object-cover"
-                      loading="lazy"
+                      className="h-full min-h-24"
+                      imgClassName="h-full min-h-24"
                     />
                   </div>
                   <div className="col-span-3 space-y-2 p-3">

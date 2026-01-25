@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Check, ChevronLeft, ChevronRight, ImagePlus } from "lucide-react";
+import { Cat, Check, ChevronLeft, ChevronRight, Dog, ImagePlus, PawPrint } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -19,15 +19,21 @@ import ReportStatusBadge from "@/components/ReportStatusBadge";
 import { cn } from "@/lib/utils";
 import { freeServices, normalizeReport } from "@/services/free";
 
-const emptyForm = {
-  firstName: "",
-  lastName: "",
-  phoneNumber: "",
-  photoFile: null,
-  petStatus: "lost",
-  location: "",
-  description: "",
-};
+function makeEmptyForm(defaultPetStatus) {
+  const normalized = String(defaultPetStatus || "").toLowerCase();
+  const petStatus = normalized === "found" ? "found" : "lost";
+  return {
+    petName: "",
+    petType: "dog",
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
+    photoFile: null,
+    petStatus,
+    location: "",
+    description: "",
+  };
+}
 
 function digitsOnly(value) {
   return String(value || "").replace(/\D/g, "");
@@ -37,6 +43,9 @@ function buildStepErrors(stepIndex, form) {
   const errors = {};
 
   if (stepIndex === 0) {
+    if (!form.petName.trim()) errors.petName = "Pet name is required.";
+    if (!["dog", "cat"].includes(String(form.petType || "").toLowerCase()))
+      errors.petType = "Please select Dog or Cat.";
     if (!["lost", "found"].includes(form.petStatus)) errors.petStatus = "Please select Lost or Found.";
     if (!form.location.trim()) errors.location = "Location is required.";
   }
@@ -46,10 +55,6 @@ function buildStepErrors(stepIndex, form) {
     if (!form.lastName.trim()) errors.lastName = "Last name is required.";
     if (!form.phoneNumber.trim()) errors.phoneNumber = "Phone number is required.";
     else if (digitsOnly(form.phoneNumber).length < 7) errors.phoneNumber = "Please enter a valid phone number.";
-  }
-
-  if (stepIndex === 2) {
-    if (!form.photoFile) errors.photoFile = "Pet photo is required.";
   }
 
   return errors;
@@ -106,9 +111,9 @@ function Stepper({ steps, activeIndex }) {
   );
 }
 
-export default function ReportPetModal({ open, onOpenChange, onSubmitted }) {
+export default function ReportPetModal({ open, onOpenChange, onSubmitted, defaultPetStatus }) {
   const [stepIndex, setStepIndex] = useState(0);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(() => makeEmptyForm(defaultPetStatus));
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState(null);
@@ -128,7 +133,7 @@ export default function ReportPetModal({ open, onOpenChange, onSubmitted }) {
       {
         key: "photo",
         label: "Photo",
-        description: "A clear photo helps with quick identification.",
+        description: "Optional — a clear photo helps with quick identification.",
       },
       {
         key: "review",
@@ -155,17 +160,20 @@ export default function ReportPetModal({ open, onOpenChange, onSubmitted }) {
     return () => URL.revokeObjectURL(url);
   }, [form.photoFile]);
 
-  const resetAll = () => {
+  useEffect(() => {
+    if (!open) {
+      setStepIndex(0);
+      setErrors({});
+      setSubmitting(false);
+      setPhotoPreviewUrl(null);
+      return;
+    }
+
     setStepIndex(0);
-    setForm(emptyForm);
+    setForm(makeEmptyForm(defaultPetStatus));
     setErrors({});
     setSubmitting(false);
-    setPhotoPreviewUrl(null);
-  };
-
-  useEffect(() => {
-    if (!open) resetAll();
-  }, [open]);
+  }, [defaultPetStatus, open]);
 
   const updateField = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -190,7 +198,7 @@ export default function ReportPetModal({ open, onOpenChange, onSubmitted }) {
 
   const submit = async () => {
     // Validate all steps in case the user skipped back/forth.
-    for (let i = 0; i < 3; i += 1) {
+    for (let i = 0; i < 2; i += 1) {
       const nextErrors = buildStepErrors(i, form);
       if (Object.keys(nextErrors).length) {
         setErrors(nextErrors);
@@ -203,6 +211,8 @@ export default function ReportPetModal({ open, onOpenChange, onSubmitted }) {
     setSubmitting(true);
     try {
       const res = await freeServices.reports.submitPublicPetReport({
+        petName: form.petName.trim(),
+        petType: form.petType,
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
         phoneNumber: form.phoneNumber.trim(),
@@ -260,6 +270,46 @@ export default function ReportPetModal({ open, onOpenChange, onSubmitted }) {
         <div className="max-h-[70vh] overflow-y-auto px-6 py-5">
           {stepIndex === 0 ? (
             <div className="grid gap-5 sm:grid-cols-2">
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="pet-name" className={cn(errors.petName && "text-destructive")}>
+                  Pet name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="pet-name"
+                  placeholder="e.g. Bella"
+                  value={form.petName}
+                  onChange={(e) => updateField("petName", e.target.value)}
+                  className={cn(errors.petName && "border-destructive")}
+                  aria-invalid={!!errors.petName}
+                />
+                {errors.petName ? (
+                  <p className="text-xs font-medium text-destructive">{errors.petName}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    This shows on the post and in share previews.
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="pet-type" className={cn(errors.petType && "text-destructive")}>
+                  Pet type <span className="text-destructive">*</span>
+                </Label>
+                <select
+                  id="pet-type"
+                  value={form.petType}
+                  onChange={(e) => updateField("petType", e.target.value)}
+                  className={cn(selectBaseClass, errors.petType && "border-destructive")}
+                  aria-invalid={!!errors.petType}
+                >
+                  <option value="dog">Dog</option>
+                  <option value="cat">Cat</option>
+                </select>
+                {errors.petType ? (
+                  <p className="text-xs font-medium text-destructive">{errors.petType}</p>
+                ) : null}
+              </div>
+
               <div className="space-y-1.5">
                 <Label htmlFor="pet-status" className={cn(errors.petStatus && "text-destructive")}>
                   Status <span className="text-destructive">*</span>
@@ -279,7 +329,7 @@ export default function ReportPetModal({ open, onOpenChange, onSubmitted }) {
                 ) : null}
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 sm:col-span-2">
                 <Label htmlFor="pet-location" className={cn(errors.location && "text-destructive")}>
                   Location <span className="text-destructive">*</span>
                 </Label>
@@ -372,7 +422,7 @@ export default function ReportPetModal({ open, onOpenChange, onSubmitted }) {
             <div className="grid gap-5">
               <div className="space-y-1.5">
                 <Label htmlFor="photo" className={cn(errors.photoFile && "text-destructive")}>
-                  Pet photo <span className="text-destructive">*</span>
+                  Pet photo (optional)
                 </Label>
                 <Input
                   id="photo"
@@ -406,13 +456,9 @@ export default function ReportPetModal({ open, onOpenChange, onSubmitted }) {
                 ) : (
                   <div className="mt-3 flex items-center gap-3 rounded-xl border bg-muted/30 p-4 text-sm text-muted-foreground">
                     <ImagePlus className="h-5 w-5" />
-                    <div>Upload a clear photo to increase visibility in the feed.</div>
+                    <div>Upload a clear photo to increase visibility in the feed (optional).</div>
                   </div>
                 )}
-
-                {errors.photoFile ? (
-                  <p className="text-xs font-medium text-destructive">{errors.photoFile}</p>
-                ) : null}
               </div>
 
               <div className="space-y-1.5">
@@ -446,13 +492,24 @@ export default function ReportPetModal({ open, onOpenChange, onSubmitted }) {
                           loading="lazy"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-                          Photo required
+                        <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                          {form.petType === "cat" ? (
+                            <Cat className="h-10 w-10" />
+                          ) : form.petType === "dog" ? (
+                            <Dog className="h-10 w-10" />
+                          ) : (
+                            <PawPrint className="h-10 w-10" />
+                          )}
+                          <div className="text-xs">No photo</div>
                         </div>
                       )}
                     </div>
                   </div>
                   <div className="space-y-2 sm:col-span-2">
+                    <div className="text-sm">
+                      <span className="font-medium">Name:</span>{" "}
+                      <span className="text-muted-foreground">{form.petName.trim() || "—"}</span>
+                    </div>
                     <div className="text-sm">
                       <span className="font-medium">Location:</span>{" "}
                       <span className="text-muted-foreground">{form.location.trim() || "—"}</span>
