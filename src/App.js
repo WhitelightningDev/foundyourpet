@@ -31,6 +31,8 @@ import CancelPage from "./payments-response-pages/CancelPage";
 import PetRedirect from "./pages/PetRedirect";
 import TagOrderTracking from "./pages/TagOrderTracking";
 import ReportsFeed from "./pages/ReportsFeed";
+import ReportShare from "./pages/ReportShare";
+import NotFound from "./pages/NotFound";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { listenForForegroundMessages } from "@/lib/notifications";
@@ -75,6 +77,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/reports" element={<ReportsFeed />} />
+              <Route path="/share/report/:reportId" element={<ReportShare />} />
               <Route path="/prices" element={<Prices />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/features" element={<Features />} />
@@ -132,6 +135,7 @@ function App() {
                 }
               />
               <Route path="/Dashboard" element={<Navigate to="/dashboard" replace />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           <Footer />

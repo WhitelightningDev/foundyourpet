@@ -431,17 +431,30 @@ function ReportCard({ report, onUpdate, highlighted }) {
               </div>
             </CardContent>
 
-            <CardFooter className="flex items-center justify-between gap-3">
+            <CardFooter className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
               <div className="text-xs text-muted-foreground">
                 {report.description ? "Description included." : "No description."}
               </div>
-              <div className="flex items-center gap-2">
-                <Button type="button" variant="outline" size="sm" className="gap-2" onClick={handleShare}>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2 sm:w-auto"
+                  onClick={handleShare}
+                >
                   <Share2 className="h-4 w-4" />
                   Share
                 </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => setFlagOpen(true)}>
-                  Report incorrect content
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto"
+                  onClick={() => setFlagOpen(true)}
+                >
+                  <span className="sm:hidden">Report</span>
+                  <span className="hidden sm:inline">Report incorrect content</span>
                 </Button>
               </div>
             </CardFooter>
@@ -470,13 +483,14 @@ function ReportCard({ report, onUpdate, highlighted }) {
           </div>
 
           <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-between">
-            <Button type="button" variant="outline" onClick={() => setShareOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setShareOpen(false)} className="w-full sm:w-auto">
               Close
             </Button>
-            <div className="flex gap-2">
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
               <Button
                 type="button"
                 variant="secondary"
+                className="w-full sm:w-auto"
                 onClick={() => {
                   const url = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`;
                   window.open(url, "_blank", "noopener,noreferrer");
@@ -484,7 +498,7 @@ function ReportCard({ report, onUpdate, highlighted }) {
               >
                 Share to WhatsApp
               </Button>
-              <Button type="button" onClick={handleCopyLink}>
+              <Button type="button" onClick={handleCopyLink} className="w-full sm:w-auto">
                 Copy link
               </Button>
             </div>
@@ -520,11 +534,11 @@ function ReportCard({ report, onUpdate, highlighted }) {
             </div>
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setFlagOpen(false)}>
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button type="button" variant="outline" onClick={() => setFlagOpen(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
-            <Button type="button" disabled={working} onClick={handleFlag}>
+            <Button type="button" disabled={working} onClick={handleFlag} className="w-full sm:w-auto">
               Submit report
             </Button>
           </DialogFooter>
