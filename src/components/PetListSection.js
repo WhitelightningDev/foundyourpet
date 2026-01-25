@@ -128,7 +128,15 @@ const PetListSection = ({
       ) : pets.length > 0 ? (
         <div className="space-y-3">
           {pets.map((pet) => (
-            <Card key={pet._id} className="shadow-sm transition-shadow hover:shadow-md">
+            <Card
+              key={pet._id}
+              className={cn(
+                "overflow-hidden shadow-sm transition-shadow hover:shadow-md",
+                pet.hasMembership
+                  ? "border-emerald-200/70 dark:border-emerald-500/30"
+                  : "border-yellow-200/70 dark:border-yellow-500/30"
+              )}
+            >
               <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-4">
                   {pet.photoUrl ? (
@@ -146,7 +154,13 @@ const PetListSection = ({
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="truncate text-base font-semibold">{pet.name}</h3>
-                      <Badge variant={pet.hasMembership ? "default" : "secondary"}>
+                      <Badge
+                        className={cn(
+                          pet.hasMembership
+                            ? "border-emerald-300/70 bg-emerald-100 text-emerald-950 hover:bg-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-200 dark:hover:bg-emerald-500/15"
+                            : "border-yellow-300/80 bg-yellow-100 text-yellow-950 hover:bg-yellow-100 dark:border-yellow-500/40 dark:bg-yellow-500/15 dark:text-yellow-200 dark:hover:bg-yellow-500/15"
+                        )}
+                      >
                         {pet.hasMembership ? "Subscription active" : "Not subscribed"}
                       </Badge>
                     </div>
@@ -208,16 +222,16 @@ const PetListSection = ({
                 </div>
 
                 <div className="flex flex-1 flex-wrap justify-start gap-2 sm:justify-end">
-                  <Button variant="outline" size="sm" onClick={() => handleViewDetails(pet)}>
-                    <FaEye />
+                  <Button variant="outline" size="sm" className="gap-2" onClick={() => handleViewDetails(pet)}>
+                    <FaEye className="h-4 w-4" />
                     View
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleEditClick(pet)}>
-                    <FaEdit />
+                  <Button variant="outline" size="sm" className="gap-2" onClick={() => handleEditClick(pet)}>
+                    <FaEdit className="h-4 w-4" />
                     Edit
                   </Button>
-                  <Button variant="destructive" size="sm" onClick={() => handleDeleteClick(pet._id)}>
-                    <FaTrash />
+                  <Button variant="destructive" size="sm" className="gap-2" onClick={() => handleDeleteClick(pet._id)}>
+                    <FaTrash className="h-4 w-4" />
                     Delete
                   </Button>
 
@@ -227,27 +241,29 @@ const PetListSection = ({
                         <Button
                           size="sm"
                           variant="outline"
+                          className="gap-2"
                           onClick={() => navigate(`/tag-orders/${pet.tagOrder.paymentId}`)}
                         >
-                          <FaTruck />
+                          <FaTruck className="h-4 w-4" />
                           Track delivery
                         </Button>
                       ) : null}
                       <Button
                         size="sm"
+                        className="gap-2"
                         onClick={() =>
                           navigate("/select-tag/standard", {
                             state: { user, pet },
                           })
                         }
                       >
-                        <FaCartPlus />
+                        <FaCartPlus className="h-4 w-4" />
                         Order tag
                       </Button>
                     </>
                   ) : (
-                    <Button variant="secondary" size="sm" onClick={() => handleStartSubscription(pet)}>
-                      <FaCreditCard />
+                    <Button variant="secondary" size="sm" className="gap-2" onClick={() => handleStartSubscription(pet)}>
+                      <FaCreditCard className="h-4 w-4" />
                       Subscribe
                     </Button>
                   )}

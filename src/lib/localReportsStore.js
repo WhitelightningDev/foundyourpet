@@ -33,6 +33,8 @@ function uid() {
 }
 
 export async function addLocalReport({
+  petName,
+  petType,
   firstName,
   lastName,
   phoneNumber,
@@ -41,11 +43,13 @@ export async function addLocalReport({
   description,
   photoFile,
 }) {
-  const photoDataUrl = await fileToJpegDataUrl(photoFile).catch(() => null);
+  const photoDataUrl = photoFile ? await fileToJpegDataUrl(photoFile).catch(() => null) : null;
   const now = new Date().toISOString();
 
   const report = {
     id: uid(),
+    petName: petName || "",
+    petType: (petType || "dog").toString().trim().toLowerCase(),
     firstName: firstName || "",
     lastName: lastName || "",
     phoneNumber: phoneNumber || "",
