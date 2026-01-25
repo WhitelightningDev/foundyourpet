@@ -248,8 +248,8 @@ export default function ReportPetModal({ open, onOpenChange, onSubmitted, defaul
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0">
-        <div className="border-b bg-gradient-to-br from-primary/10 via-background to-secondary/35 px-6 py-5">
+      <DialogContent className="flex max-h-[92vh] w-[calc(100vw-1.5rem)] flex-col overflow-hidden p-0 sm:max-w-xl">
+        <div className="border-b bg-gradient-to-br from-primary/10 via-background to-secondary/35 px-4 py-4 sm:px-6 sm:py-5">
           <DialogHeader>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -267,7 +267,7 @@ export default function ReportPetModal({ open, onOpenChange, onSubmitted, defaul
           </div>
         </div>
 
-        <div className="max-h-[70vh] overflow-y-auto px-6 py-5">
+        <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
           {stepIndex === 0 ? (
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="space-y-1.5 sm:col-span-2">
@@ -540,22 +540,34 @@ export default function ReportPetModal({ open, onOpenChange, onSubmitted, defaul
           ) : null}
         </div>
 
-        <DialogFooter className="gap-2 border-t bg-background px-6 py-4 sm:gap-3">
-          <Button type="button" variant="outline" onClick={() => onOpenChange?.(false)} disabled={submitting}>
+        <DialogFooter className="flex-col gap-2 border-t bg-background px-4 py-3 sm:flex-row sm:gap-3 sm:px-6 sm:py-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange?.(false)}
+            disabled={submitting}
+            className="w-full sm:w-auto"
+          >
             Cancel
           </Button>
-          <div className="flex flex-1 items-center justify-end gap-2">
-            <Button type="button" variant="secondary" onClick={goBack} disabled={submitting || stepIndex === 0}>
+          <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-1 sm:flex-row sm:items-center sm:justify-end">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={goBack}
+              disabled={submitting || stepIndex === 0}
+              className="w-full sm:w-auto"
+            >
               <ChevronLeft className="h-4 w-4" />
               Back
             </Button>
             {stepIndex < steps.length - 1 ? (
-              <Button type="button" onClick={goNext} disabled={submitting}>
+              <Button type="button" onClick={goNext} disabled={submitting} className="w-full sm:w-auto">
                 Next
                 <ChevronRight className="h-4 w-4" />
               </Button>
             ) : (
-              <Button type="button" onClick={submit} disabled={submitting}>
+              <Button type="button" onClick={submit} disabled={submitting} className="w-full sm:w-auto">
                 {submitting ? "Posting…" : "Post report"}
               </Button>
             )}
