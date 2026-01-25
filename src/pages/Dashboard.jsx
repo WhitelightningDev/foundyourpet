@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import AddPetModal from "../components/AddPetModal";
@@ -8,15 +7,15 @@ import EditPetModal from "../components/EditPetModal";
 import PetDetailsModal from "../components/PetDetailsModal";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import PetListSection from "../components/PetListSection";
-import { FaWhatsapp } from "react-icons/fa";
 import { API_BASE_URL } from "../config/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Loader2, Mail, MapPin, PawPrint, Phone } from "lucide-react";
+import { Calendar, LayoutDashboard, Loader2, Mail, MapPin, PawPrint, Plus, Share2, Tag, Phone } from "lucide-react";
 import { RefreshCw } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -287,21 +286,30 @@ const Dashboard = () => {
   })();
 
   return (
-    <main className="min-h-screen bg-muted/40">
+    <main className="relative min-h-screen bg-background text-foreground">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(27,182,168,0.14),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-[#FFD66B]/25 via-[#FFB55C]/10 to-[#FF8E4A]/10" />
+
       <div className="mx-auto w-full max-w-6xl px-4 py-8">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage your account and your pets in one place.
-            </p>
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl border bg-card shadow-sm ring-1 ring-primary/10">
+              <LayoutDashboard className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+              <p className="text-sm text-muted-foreground">
+                Manage your account and your pets in one place.
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={handleOpenModal} title="Add a new pet">
-              <FaPlus />
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+            <Button onClick={handleOpenModal} title="Add a new pet" className="col-span-2 gap-2 sm:col-span-1">
+              <Plus className="h-4 w-4" />
               Add pet
             </Button>
+
             <Button
               variant="outline"
               onClick={() => {
@@ -309,12 +317,14 @@ const Dashboard = () => {
                 fetchPets();
               }}
               title="Refresh dashboard"
+              className="gap-2"
             >
               <RefreshCw className="h-4 w-4" />
               Refresh
             </Button>
-            <Button variant="outline" onClick={handleShare}>
-              <FaWhatsapp />
+
+            <Button variant="secondary" onClick={handleShare} className="gap-2">
+              <Share2 className="h-4 w-4" />
               Share
             </Button>
           </div>
@@ -348,7 +358,13 @@ const Dashboard = () => {
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant={user.membershipActive ? "default" : "secondary"}>
+                      <Badge
+                        className={cn(
+                          user.membershipActive
+                            ? "border-emerald-300/70 bg-emerald-100 text-emerald-950 hover:bg-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-200 dark:hover:bg-emerald-500/15"
+                            : "border-yellow-300/80 bg-yellow-100 text-yellow-950 hover:bg-yellow-100 dark:border-yellow-500/40 dark:bg-yellow-500/15 dark:text-yellow-200 dark:hover:bg-yellow-500/15"
+                        )}
+                      >
                         {user.membershipActive ? "Membership active" : "No active membership"}
                       </Badge>
                       <Badge variant="outline">
@@ -405,14 +421,16 @@ const Dashboard = () => {
                 <CardDescription>Order tags and manage subscriptions.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" onClick={() => navigate("/prices")} className="w-full">
+                <Button variant="outline" onClick={() => navigate("/prices")} className="w-full justify-start gap-2">
+                  <Tag className="h-4 w-4" />
                   View pricing
                 </Button>
                 <Button
                   onClick={() => navigate("/select-tag/standard")}
                   disabled={!canOrderTags}
-                  className="w-full"
+                  className="w-full justify-start gap-2"
                 >
+                  <Tag className="h-4 w-4" />
                   Order tags (R250 each)
                 </Button>
 
@@ -435,26 +453,46 @@ const Dashboard = () => {
           <div className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Card className="shadow-sm">
-                <CardHeader className="space-y-1">
-                  <CardDescription>Total pets</CardDescription>
+                <CardHeader className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <CardDescription>Total pets</CardDescription>
+                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-muted/30">
+                      <PawPrint className="h-4 w-4 text-primary" />
+                    </div>
+                  </div>
                   <CardTitle className="text-3xl">{visiblePets.length}</CardTitle>
                 </CardHeader>
               </Card>
               <Card className="shadow-sm">
-                <CardHeader className="space-y-1">
-                  <CardDescription>Subscribed</CardDescription>
+                <CardHeader className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <CardDescription>Subscribed</CardDescription>
+                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-muted/30">
+                      <Tag className="h-4 w-4 text-primary" />
+                    </div>
+                  </div>
                   <CardTitle className="text-3xl">{subscribedPets.length}</CardTitle>
                 </CardHeader>
               </Card>
               <Card className="shadow-sm">
-                <CardHeader className="space-y-1">
-                  <CardDescription>Dogs</CardDescription>
+                <CardHeader className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <CardDescription>Dogs</CardDescription>
+                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-muted/30">
+                      <PawPrint className="h-4 w-4 text-primary" />
+                    </div>
+                  </div>
                   <CardTitle className="text-3xl">{dogs.length}</CardTitle>
                 </CardHeader>
               </Card>
               <Card className="shadow-sm">
-                <CardHeader className="space-y-1">
-                  <CardDescription>Cats</CardDescription>
+                <CardHeader className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <CardDescription>Cats</CardDescription>
+                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-muted/30">
+                      <PawPrint className="h-4 w-4 text-primary" />
+                    </div>
+                  </div>
                   <CardTitle className="text-3xl">{cats.length}</CardTitle>
                 </CardHeader>
               </Card>
@@ -467,11 +505,13 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="all">
-                  <TabsList className="w-full justify-start">
-                    <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="dogs">Dogs</TabsTrigger>
-                    <TabsTrigger value="cats">Cats</TabsTrigger>
-                  </TabsList>
+                  <div className="overflow-x-auto pb-1">
+                    <TabsList className="w-max justify-start">
+                      <TabsTrigger value="all">All</TabsTrigger>
+                      <TabsTrigger value="dogs">Dogs</TabsTrigger>
+                      <TabsTrigger value="cats">Cats</TabsTrigger>
+                    </TabsList>
+                  </div>
 
                   <TabsContent value="all">
                     <PetListSection

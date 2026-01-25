@@ -222,43 +222,45 @@ function AdminDashboard() {
           </div>
 
           {activeTab === "users" ? (
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-            <div className="relative w-full sm:w-[320px]">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                ref={searchRef}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search users…"
-                className="pl-9"
-                aria-label="Search users"
-              />
-            </div>
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+              <div className="relative w-full sm:w-[320px]">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  ref={searchRef}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search users…"
+                  className="pl-9"
+                  aria-label="Search users"
+                />
+              </div>
 
-            <Button variant="outline" className="gap-2">
-              <CalendarRange className="h-4 w-4" />
-              Last 30 days
-            </Button>
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+                <Button variant="outline" className="w-full gap-2 sm:w-auto">
+                  <CalendarRange className="h-4 w-4" />
+                  Last 30 days
+                </Button>
 
-            <Button
-              variant="outline"
-              className="gap-2"
-              onClick={() => downloadUsersCsv()}
-              disabled={loading || users.length === 0}
-            >
-              <Download className="h-4 w-4" />
-              Export
-            </Button>
+                <Button
+                  variant="outline"
+                  className="w-full gap-2 sm:w-auto"
+                  onClick={() => downloadUsersCsv()}
+                  disabled={loading || users.length === 0}
+                >
+                  <Download className="h-4 w-4" />
+                  Export
+                </Button>
 
-            <Button
-              variant="secondary"
-              className="gap-2"
-              onClick={() => fetchUsers()}
-              disabled={loading}
-            >
-              <RefreshCw className={loading ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
-              Refresh
-            </Button>
+                <Button
+                  variant="secondary"
+                  className="col-span-2 w-full gap-2 sm:col-span-1 sm:w-auto"
+                  onClick={() => fetchUsers()}
+                  disabled={loading}
+                >
+                  <RefreshCw className={loading ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
+                  Refresh
+                </Button>
+              </div>
             </div>
           ) : null}
         </div>
@@ -359,10 +361,10 @@ function AdminDashboard() {
 
 	        <div className="grid gap-4 lg:grid-cols-3">
 	          <Card className="lg:col-span-2">
-	            <CardHeader className="space-y-2">
+              <CardHeader className="space-y-2">
 	              <CardTitle className="flex items-center justify-between gap-4">
                 <span>Recent users</span>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -385,12 +387,12 @@ function AdminDashboard() {
               </CardTitle>
               <CardDescription>Latest accounts in your current search.</CardDescription>
             </CardHeader>
-            <CardContent className="overflow-auto">
-              <table className="w-full text-left text-sm">
+            <CardContent className="overflow-x-auto">
+              <table className="min-w-[680px] w-full text-left text-sm">
                 <thead className="text-xs text-muted-foreground">
                   <tr className="border-b">
                     <th className="py-3 pr-4 font-medium">User</th>
-                    <th className="py-3 pr-4 font-medium">Email</th>
+                    <th className="hidden py-3 pr-4 font-medium sm:table-cell">Email</th>
                     <th className="py-3 pr-4 font-medium">Role</th>
                     <th className="py-3 text-right font-medium">Action</th>
                   </tr>
@@ -402,7 +404,7 @@ function AdminDashboard() {
                         <td className="py-3 pr-4">
                           <Skeleton className="h-4 w-32" />
                         </td>
-                        <td className="py-3 pr-4">
+                        <td className="hidden py-3 pr-4 sm:table-cell">
                           <Skeleton className="h-4 w-44" />
                         </td>
                         <td className="py-3 pr-4">
@@ -427,8 +429,9 @@ function AdminDashboard() {
                             {u?.name} {u?.surname}
                           </div>
                           <div className="text-xs text-muted-foreground">{u?._id}</div>
+                          <div className="mt-1 text-xs text-muted-foreground sm:hidden">{u?.email}</div>
                         </td>
-                        <td className="py-3 pr-4">{u?.email}</td>
+                        <td className="hidden py-3 pr-4 sm:table-cell">{u?.email}</td>
                         <td className="py-3 pr-4">
                           <Badge variant={u?.isAdmin ? "default" : "secondary"}>
                             {u?.isAdmin ? "Admin" : "User"}

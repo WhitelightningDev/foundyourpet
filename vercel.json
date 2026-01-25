@@ -27,6 +27,14 @@
     ],
     "rewrites": [
       {
+        "source": "/share/report/(.*)",
+        "destination": "/api/share/report/$1"
+      },
+      {
+        "source": "/api/(.*)",
+        "destination": "/api/$1"
+      },
+      {
         "source": "/(.*)",
         "destination": "/index.html"
       }
