@@ -10,9 +10,8 @@ import { Separator } from "@/components/ui/separator";
 
 function Features() {
   const subscriptionTiers = [
-    { label: "Small pet", price: 50, hint: "Cats & small dogs" },
-    { label: "Medium pet", price: 70, hint: "Most dogs", popular: true },
-    { label: "Large pet", price: 100, hint: "Large breeds" },
+
+    { label: "Per pet subscription", price: 100, },
   ];
 
   return (

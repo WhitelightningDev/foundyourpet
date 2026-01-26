@@ -413,8 +413,8 @@ function Home() {
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="link" className="h-auto p-0 text-muted-foreground">
-                    <span className="inline-flex items-center gap-2">
-                      <Info className="h-4 w-4" />
+                    <span className="inline-flex items-center gap-2 m-2">
+                      <Info className="h-4 w-4 " />
                       What does a scan show?
                     </span>
                   </Button>
