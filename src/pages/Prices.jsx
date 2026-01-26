@@ -10,27 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator";
 
 function Prices() {
-  const monthlyTiers = [
-    {
-      key: "small",
-      label: "Small pet",
-      price: 50,
-      hint: "Cats & small dogs",
-    },
-    {
-      key: "medium",
-      label: "Medium pet",
-      price: 70,
-      hint: "Most dogs",
-      popular: true,
-    },
-    {
-      key: "large",
-      label: "Large pet",
-      price: 100,
-      hint: "Large breeds",
-    },
-  ];
+  const monthlyPrice = 100;
 
   const tagPrice = 250;
 
@@ -52,7 +32,7 @@ function Prices() {
           Pricing that matches the flow
         </h1>
         <p className="mt-4 text-pretty text-base text-muted-foreground sm:text-lg">
-          Add your pet, choose a monthly subscription based on pet size, then purchase a physical tag when you’re ready.
+          Add your pet, start a monthly subscription per pet, then purchase a physical tag when you’re ready.
         </p>
       </header>
 
@@ -62,53 +42,42 @@ function Prices() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <CardTitle className="flex flex-wrap items-center gap-2">Monthly subscription (per pet)</CardTitle>
-                <CardDescription>Select a tier when you add a pet in your dashboard.</CardDescription>
+                <CardDescription>Flat monthly price per pet.</CardDescription>
               </div>
               <div className="rounded-lg border bg-muted/40 px-4 py-3 text-right">
-                <div className="text-sm text-muted-foreground">Starts from</div>
-                <div className="text-3xl font-semibold tracking-tight">R50</div>
+                <div className="text-sm text-muted-foreground">Monthly</div>
+                <div className="text-3xl font-semibold tracking-tight">R{monthlyPrice}</div>
                 <div className="text-xs text-muted-foreground">per pet / month</div>
               </div>
             </div>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-3">
-              {monthlyTiers.map((tier) => (
-                <div
-                  key={tier.key}
-                  className="relative rounded-lg border bg-background p-4"
-                >
-                  {tier.popular ? (
-                    <div className="absolute right-3 top-3">
-                      <Badge>Most popular</Badge>
-                    </div>
-                  ) : null}
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <PawPrint className="h-4 w-4 text-primary" />
-                    {tier.label}
-                  </div>
-                  <div className="mt-2 flex items-end justify-between gap-3">
-                    <div className="text-2xl font-semibold">R{tier.price}</div>
-                    <Badge variant="outline">per month</Badge>
-                  </div>
-                  <div className="mt-1 text-xs text-muted-foreground">{tier.hint}</div>
-                  <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                    <li className="flex gap-2">
-                      <Check className="mt-0.5 h-4 w-4 text-primary" />
-                      Pet profile + QR scan page
-                    </li>
-                    <li className="flex gap-2">
-                      <Check className="mt-0.5 h-4 w-4 text-primary" />
-                      Update details anytime
-                    </li>
-                    <li className="flex gap-2">
-                      <Check className="mt-0.5 h-4 w-4 text-primary" />
-                      Support + ongoing improvements
-                    </li>
-                  </ul>
+            <div className="rounded-lg border bg-background p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <PawPrint className="h-4 w-4 text-primary" />
+                  Per pet subscription
                 </div>
-              ))}
+                <div className="flex items-end gap-2">
+                  <div className="text-2xl font-semibold">R{monthlyPrice}</div>
+                  <Badge variant="outline">per month</Badge>
+                </div>
+              </div>
+              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                <li className="flex gap-2">
+                  <Check className="mt-0.5 h-4 w-4 text-primary" />
+                  Pet profile + QR scan page
+                </li>
+                <li className="flex gap-2">
+                  <Check className="mt-0.5 h-4 w-4 text-primary" />
+                  Update details anytime
+                </li>
+                <li className="flex gap-2">
+                  <Check className="mt-0.5 h-4 w-4 text-primary" />
+                  Support + ongoing improvements
+                </li>
+              </ul>
             </div>
 
             <div className="rounded-lg border bg-muted/30 p-4">
@@ -116,8 +85,8 @@ function Prices() {
                 <div className="text-sm">
                   <div className="font-medium">How the pricing works</div>
                   <div className="text-muted-foreground">
-                    Your subscription is billed monthly per pet (based on size). After subscribing, you can purchase a
-                    physical tag for that pet.
+                    Your subscription is billed monthly per pet. After subscribing, you can purchase a physical tag for
+                    that pet.
                   </div>
                 </div>
                 <Button asChild variant="secondary">
@@ -190,30 +159,18 @@ function Prices() {
               <Check className="mt-0.5 h-4 w-4 text-primary" />
               Name, breed, photo, and details
             </div>
-            <div className="flex items-start gap-2">
-              <Check className="mt-0.5 h-4 w-4 text-primary" />
-              Choose Small / Medium / Large for billing
-            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle>2) Start the subscription</CardTitle>
-            <CardDescription>Monthly per pet, based on pet size.</CardDescription>
+            <CardDescription>Flat monthly price per pet.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-muted-foreground">
             <div className="flex items-start gap-2">
               <CreditCard className="mt-0.5 h-4 w-4 text-primary" />
-              Small: R50 / month
-            </div>
-            <div className="flex items-start gap-2">
-              <CreditCard className="mt-0.5 h-4 w-4 text-primary" />
-              Medium: R70 / month
-            </div>
-            <div className="flex items-start gap-2">
-              <CreditCard className="mt-0.5 h-4 w-4 text-primary" />
-              Large: R100 / month
+              R{monthlyPrice} / month, per pet
             </div>
           </CardContent>
         </Card>
@@ -249,16 +206,15 @@ function Prices() {
             <AccordionItem value="item-1">
               <AccordionTrigger>What do I pay monthly vs once-off?</AccordionTrigger>
               <AccordionContent>
-                The subscription is billed monthly per pet: <span className="font-medium text-foreground">R50</span>{" "}
-                (Small), <span className="font-medium text-foreground">R70</span> (Medium), or{" "}
-                <span className="font-medium text-foreground">R100</span> (Large). The physical tag is a separate{" "}
+                The subscription is billed monthly per pet:{" "}
+                <span className="font-medium text-foreground">R{monthlyPrice}</span>. The physical tag is a separate{" "}
                 <span className="font-medium text-foreground">R{tagPrice}</span> one-off purchase per tag.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
               <AccordionTrigger>Is the subscription per pet?</AccordionTrigger>
               <AccordionContent>
-                Yes. Each pet has its own subscription tier (Small / Medium / Large) billed monthly.
+                Yes. Each pet has its own subscription billed monthly.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">

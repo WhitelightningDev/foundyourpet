@@ -13,6 +13,42 @@ function guessProtocol(req) {
   return "https";
 }
 
+function normalizePetType(value) {
+  const normalized = (value || "").toString().toLowerCase().trim();
+  if (normalized === "cat") return "cat";
+  if (normalized === "dog") return "dog";
+  return "other";
+}
+
+function absoluteUrl(base, path) {
+  if (!base || !path) return "";
+  const baseTrimmed = base.replace(/\/+$/, "");
+  const pathTrimmed = path.replace(/^\/+/, "");
+  return `${baseTrimmed}/${pathTrimmed}`;
+}
+
+function resolveOgImageUrl({ report, apiBase, siteUrl, petType }) {
+  const raw = (
+    report?.photoUrl ||
+    report?.photo ||
+    report?.photo_path ||
+    report?.photoPath ||
+    report?.photoURL ||
+    ""
+  )
+    .toString()
+    .trim();
+
+  if (raw && raw.startsWith("http")) return raw;
+  if (raw && raw.startsWith("data:")) return "";
+  if (raw && raw.startsWith("/")) return absoluteUrl(apiBase, raw);
+  if (raw) return absoluteUrl(apiBase, raw);
+
+  if (!siteUrl) return "";
+  const placeholder = petType === "cat" ? "og-cat.png" : "og-dog.png";
+  return absoluteUrl(siteUrl, placeholder);
+}
+
 module.exports = async (req, res) => {
   const id = (req.query?.id || "").toString().trim();
   const protocol = guessProtocol(req);
@@ -40,7 +76,7 @@ module.exports = async (req, res) => {
   }
 
   const petStatus = (report?.petStatus || "").toString().toLowerCase() === "found" ? "found" : "lost";
-  const petType = (report?.petType || "").toString().toLowerCase() === "cat" ? "cat" : "dog";
+  const petType = normalizePetType(report?.petType);
   const petName = (report?.petName || "").toString().trim();
   const location = (report?.location || "").toString().trim();
   const postedBy = (report?.postedBy || report?.firstName || "").toString().trim();
@@ -59,12 +95,7 @@ module.exports = async (req, res) => {
     .filter(Boolean)
     .join(" • ");
 
-  const imageUrl = (() => {
-    const raw = (report?.photoUrl || "").toString().trim();
-    if (raw) return raw;
-    if (!siteUrl) return "";
-    return `${siteUrl}/${petType === "cat" ? "og-cat.png" : "og-dog.png"}`;
-  })();
+  const imageUrl = resolveOgImageUrl({ report, apiBase, siteUrl, petType });
 
   const shareUrl = siteUrl ? `${siteUrl}/share/report/${encodeURIComponent(id)}` : "";
   const redirectUrl = siteUrl ? `${siteUrl}/reports?highlight=${encodeURIComponent(id)}` : "";

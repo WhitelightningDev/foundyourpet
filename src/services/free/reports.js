@@ -38,8 +38,10 @@ export function normalizeReport(report) {
   return {
     id,
     petName: report.petName || report.pet_name || report.pet || "",
-    petType: petType === "cat" || petType === "dog" ? petType : "dog",
+    petType: petType === "cat" || petType === "dog" || petType === "other" ? petType : "other",
     firstName: report.firstName || report.name || "Anonymous",
+    lastName: report.lastName || report.last_name || "",
+    phoneNumber: report.phoneNumber || report.phone_number || "",
     postedBy: report.postedBy || report.posted_by || null,
     petStatus: (report.petStatus || report.status || "lost").toLowerCase(),
     location: report.location || "",
