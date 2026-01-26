@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Eye, Flag, Heart, HelpingHand, MessageCircle, Share2, ThumbsUp } from "lucide-react";
+import { Eye, Flag, Heart, HelpingHand, MessageCircle, Phone, Share2, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -27,12 +27,22 @@ function ReportCard({ report, onUpdate, highlighted }) {
   const [flagReason, setFlagReason] = useState("");
   const [flagDetails, setFlagDetails] = useState("");
   const [shareOpen, setShareOpen] = useState(false);
+  const [showContact, setShowContact] = useState(false);
 
   const statusLabel = report.petStatus === "found" ? "Found" : "Lost";
 
   const timeAgo = useMemo(() => formatTimeAgo(report.createdAt), [report.createdAt]);
   const displayName = report.postedBy || report.firstName || "Anonymous";
   const reactions = report.reactions || { like: 0, heart: 0, help: 0, seen: 0, helped: 0 };
+  const phoneNumber = String(report.phoneNumber || "").trim();
+
+  const normalizedWhatsAppNumber = useMemo(() => {
+    const digits = phoneNumber.replace(/\D/g, "");
+    if (!digits) return "";
+    if (digits.startsWith("00")) return digits.slice(2);
+    if (digits.startsWith("0") && digits.length === 10) return `27${digits.slice(1)}`;
+    return digits;
+  }, [phoneNumber]);
 
   const updateOne = (nextReport) => {
     onUpdate((prev) => prev.map((r) => (r.id === report.id ? { ...r, ...nextReport } : r)));
@@ -263,10 +273,66 @@ function ReportCard({ report, onUpdate, highlighted }) {
                   <span className="font-medium">Location:</span>{" "}
                   <span className="text-muted-foreground">{report.location || "—"}</span>
                 </div>
+                {phoneNumber ? (
+                  <div className="text-sm">
+                    <span className="font-medium">Contact:</span>{" "}
+                    {showContact ? (
+                      <span className="text-muted-foreground">
+                        <a className="underline underline-offset-2" href={`tel:${phoneNumber}`}>
+                          {phoneNumber}
+                        </a>
+                      </span>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="ml-2 h-8 gap-2"
+                        onClick={() => setShowContact(true)}
+                      >
+                        <Phone className="h-4 w-4" />
+                        Show phone
+                      </Button>
+                    )}
+                  </div>
+                ) : null}
+                {phoneNumber && showContact ? (
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <Button asChild type="button" size="sm" variant="secondary" className="gap-2">
+                      <a href={`tel:${phoneNumber}`}>Call</a>
+                    </Button>
+                    {normalizedWhatsAppNumber ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          if (typeof window === "undefined") return;
+                          window.open(
+                            `https://wa.me/${encodeURIComponent(normalizedWhatsAppNumber)}`,
+                            "_blank",
+                            "noopener,noreferrer"
+                          );
+                        }}
+                      >
+                        WhatsApp
+                      </Button>
+                    ) : null}
+                    <div className="text-xs text-muted-foreground">
+                      Only contact if you’re trying to help reunite this pet.
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </CardHeader>
 
             <CardContent className="space-y-4">
+              {report.description ? (
+                <div className="rounded-lg border bg-muted/20 p-3 text-sm text-muted-foreground whitespace-pre-wrap">
+                  {report.description}
+                </div>
+              ) : null}
+
               <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
