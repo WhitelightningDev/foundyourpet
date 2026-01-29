@@ -7,11 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { PRICING } from "@/config/pricing";
 
 function Features() {
   const subscriptionTiers = [
 
-    { label: "Per pet subscription", price: 100, },
+    { label: "Per pet membership", price: PRICING.MEMBERSHIP_MONTHLY_RANDS },
   ];
 
   return (
@@ -100,14 +101,14 @@ function Features() {
         <Card>
           <CardHeader>
             <CardTitle>Standard Tag pricing</CardTitle>
-            <CardDescription>The flow is subscription first, then tag purchase.</CardDescription>
+            <CardDescription>Pay once for the tag + start membership (monthly) in the same checkout.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-sm text-muted-foreground">
             <div className="rounded-lg border bg-background p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 font-medium text-foreground">
                   <CreditCard className="h-4 w-4 text-primary" />
-                  Monthly subscription (per pet)
+                  Monthly membership (per pet)
                 </div>
               </div>
               <div className="mt-3 space-y-2">
@@ -129,7 +130,7 @@ function Features() {
                 ))}
               </div>
               <div className="mt-3 text-xs text-muted-foreground">
-                Choose the tier when adding a pet. Subscriptions are billed monthly per pet.
+                Flat price billed monthly per pet.
               </div>
             </div>
 
@@ -141,7 +142,7 @@ function Features() {
                 </div>
                 <Badge variant="outline">per tag</Badge>
               </div>
-              <div className="mt-2 text-3xl font-semibold tracking-tight text-foreground">R250</div>
+              <div className="mt-2 text-3xl font-semibold tracking-tight text-foreground">R{PRICING.TAG_ONCE_OFF_RANDS}</div>
               <ul className="mt-3 space-y-2">
                 <li className="flex gap-2">
                   <Check className="mt-0.5 h-4 w-4 text-primary" />

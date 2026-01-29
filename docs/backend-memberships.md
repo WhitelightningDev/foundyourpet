@@ -1,4 +1,4 @@
-# Backend: per-pet membership + billing dates
+# Backend: PayFast subscription + per-pet membership flags
 
 This frontend expects **per-pet** subscription state to come from `GET /api/pets` (not from `GET /api/users/me`).
 
@@ -13,41 +13,46 @@ In your backend `Pet` model (Mongo/Mongoose), ensure these fields exist and are 
 
 The UI will also tolerate alternate names (`subscriptionStartDate`, `nextBillingDate`, `nextChargeDate`), but using the names above is recommended.
 
-## What the frontend sends on checkout creation
+## What the frontend sends on subscription checkout creation
 
-`POST /api/payment/createCheckout` payload always includes:
+`POST /api/subscriptions/checkout` (auth required) payload includes:
 
-- `userId`
-- `petIds` (array; can be empty when paying for a brand-new pet)
-- `membership` (boolean)
-- `packageType`
-- `billingDetails`
+- `planKey` (currently `"MONTHLY"`)
+- `petIds` (array; can be empty when subscribing for a brand-new pet)
 
-If the user is subscribing for a **new** pet, the payload includes:
+If the user is subscribing for a **new** pet (via Add Pet), the payload includes:
 
 - `petDraft` (pet fields + `userId`)
 
+Once the backend returns the PayFast `actionUrl` + signed `fields`, the frontend builds a form and auto-submits it via `POST` to PayFast (recommended).
+
+## Tags checkout
+
+Tags are a **separate** checkout:
+
+- `POST /api/payment/createCheckout` is used for tag purchases only (Yoco).
+- The UI requires the subscription to be active before ordering tags for any pet.
+
 ## Backend flow to make dashboard membership data correct
 
-### 1) Create checkout
+### 1) Create PayFast subscription checkout
 
-When creating a checkout session, persist a record (DB) that links the provider payment/session id to:
+When creating a checkout session, persist a record (DB) that links your internal reference to:
 
 - `userId`
 - `petIds` (optional)
 - `petDraft` (optional)
-- `membership` flag
-- `amountInCents`
+- `planKey`
+- expected amount
 
-Also make sure your redirect URLs use `FRONTEND_URL`:
+Also make sure your redirect URLs use `FRONTEND_URL` (these are UX-only; activation is via ITN):
 
-- `${FRONTEND_URL}/payment-success?paymentId=<id>`
-- `${FRONTEND_URL}/payment-failure?paymentId=<id>`
-- `${FRONTEND_URL}/payment-cancel?paymentId=<id>`
+- `${FRONTEND_URL}/subscription/success`
+- `${FRONTEND_URL}/subscription/cancel`
 
-### 2) On successful payment (webhook or verification callback)
+### 2) On successful payment (PayFast ITN)
 
-When the provider confirms payment:
+When PayFast confirms payment via ITN:
 
 - Determine `paidAt` (provider timestamp or `new Date()`).
 - If `petDraft` exists:
@@ -78,4 +83,3 @@ If you have seed scripts:
 
 - Ensure every pet has a valid `userId` that matches an existing user `_id`.
 - If you seed subscriptions, set `hasMembership`, `membershipStartDate`, and `nextDebitDate` accordingly.
-
