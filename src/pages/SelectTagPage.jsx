@@ -15,13 +15,15 @@ import {
 import { FaCheck } from "react-icons/fa";
 import axios from "axios";
 import { API_BASE_URL } from "../config/api";
+import { PRICING } from "@/config/pricing";
 
 function SelectTagPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
   const [loading, setLoading] = useState(true);
-  const tagPrice = 250;
+  const tagPrice = PRICING.TAG_ONCE_OFF_RANDS;
+  const membershipMonthlyPrice = PRICING.MEMBERSHIP_MONTHLY_RANDS;
 
   // Initialize user and pets from location.state if available
   const initialUser = location.state?.user || {
@@ -100,11 +102,6 @@ function SelectTagPage() {
   }, [location.state]);
 
   const handlePetSelection = (pet) => {
-    if (!pet?.hasMembership) {
-      setToastMessage("This pet needs an active subscription before you can order a tag.");
-      setShowToast(true);
-      return;
-    }
     setSelectedPets((prev) =>
       prev.includes(pet._id)
         ? prev.filter((id) => id !== pet._id)
@@ -126,16 +123,31 @@ function SelectTagPage() {
         userId: user._id,
       }));
 
-    const finalPrice = selectedPets.length * tagPrice;
+    const needsMembership = selectedPetDetails.filter((pet) => !pet?.hasMembership);
+    const hasMixedMembershipState = needsMembership.length > 0 && needsMembership.length < selectedPetDetails.length;
+    if (hasMixedMembershipState) {
+      setToastMessage("Please checkout subscribed pets separately from pets that still need membership.");
+      setShowToast(true);
+      return;
+    }
+
+    const membershipCount = needsMembership.length;
+    const finalPrice = selectedPetDetails.length * tagPrice + membershipCount * membershipMonthlyPrice;
 
     navigate("/checkout", {
       state: {
         package: { type: "Normal Tag" },
         total: finalPrice,
-        membership: false,
+        membership: membershipCount > 0,
         membershipObjectId: null,
         selectedPets: selectedPetDetails,
         userId: user._id,
+        order: {
+          tagCount: selectedPetDetails.length,
+          tagUnitPrice: tagPrice,
+          membershipCount,
+          membershipUnitPrice: membershipMonthlyPrice,
+        },
       },
     });
   };
@@ -229,7 +241,7 @@ function SelectTagPage() {
           Normal Tag
         </p>
         <p className="text-muted mb-3">
-          Order physical tags for pets with an active subscription.
+          Order physical tags for your pets. If a pet isn&apos;t subscribed yet, membership starts at checkout.
         </p>
         <ul
           className="list-unstyled text-start px-3"
@@ -269,7 +281,6 @@ function SelectTagPage() {
               action
               onClick={() => handlePetSelection(pet)}
               active={selectedPets.includes(pet._id)}
-              disabled={!pet.hasMembership}
               className="d-flex justify-content-between align-items-center"
               style={{
                 cursor: "pointer",
@@ -278,14 +289,12 @@ function SelectTagPage() {
                 transition: "background-color 0.2s ease",
                 border: "none",
                 borderBottom: "1px solid #eee",
-                opacity: pet.hasMembership ? 1 : 0.55,
+                opacity: 1,
               }}
             >
               <span>
                 {pet.name} <small className="text-muted">({pet.species})</small>
-                {!pet.hasMembership ? (
-                  <small className="text-muted"> • subscription required</small>
-                ) : null}
+                {!pet.hasMembership ? <small className="text-muted"> • membership starts at checkout</small> : null}
               </span>
               <Form.Check
                 type="checkbox"
@@ -293,7 +302,6 @@ function SelectTagPage() {
                 onChange={() => handlePetSelection(pet)}
                 onClick={(e) => e.stopPropagation()}
                 style={{ transform: "scale(1.2)" }}
-                disabled={!pet.hasMembership}
                 aria-label={`Select pet ${pet.name}`}
               />
             </ListGroup.Item>
@@ -307,12 +315,25 @@ function SelectTagPage() {
         style={{ maxWidth: "600px", margin: "auto", alignItems: "center" }}
       >
         <Col xs={12} md={6} className="mb-3 mb-md-0">
-          <h5 style={{ fontWeight: "600", fontSize: "1.3rem" }}>
-            Total:{" "}
-            <span className="text-primary">
-              R{(tagPrice * selectedPets.length).toFixed(2)}
-            </span>
-          </h5>
+          {(() => {
+            const selected = pets.filter((pet) => selectedPets.includes(pet._id));
+            const membershipCount = selected.filter((pet) => !pet?.hasMembership).length;
+            const dueToday = selected.length * tagPrice + membershipCount * membershipMonthlyPrice;
+            const recurring = membershipCount * membershipMonthlyPrice;
+
+            return (
+              <>
+                <h5 style={{ fontWeight: "600", fontSize: "1.3rem" }}>
+                  Total today: <span className="text-primary">R{dueToday.toFixed(2)}</span>
+                </h5>
+                {membershipCount ? (
+                  <div className="text-muted" style={{ fontSize: "0.9rem" }}>
+                    Then R{recurring.toFixed(2)}/month for membership ({membershipCount} pet{membershipCount === 1 ? "" : "s"}).
+                  </div>
+                ) : null}
+              </>
+            );
+          })()}
         </Col>
         <Col xs={12} md={6} className="text-md-end">
           <Button

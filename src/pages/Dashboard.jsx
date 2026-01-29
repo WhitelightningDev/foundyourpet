@@ -8,6 +8,7 @@ import PetDetailsModal from "../components/PetDetailsModal";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import PetListSection from "../components/PetListSection";
 import { API_BASE_URL } from "../config/api";
+import "../styles/dashboard-theme.css";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, LayoutDashboard, Loader2, Mail, MapPin, PawPrint, Plus, Share2, Tag, Phone } from "lucide-react";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PRICING } from "@/config/pricing";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -286,14 +288,15 @@ const Dashboard = () => {
   })();
 
   return (
-    <main className="relative min-h-screen bg-background text-foreground">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(27,182,168,0.14),transparent_60%)]" />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-[#FFD66B]/25 via-[#FFB55C]/10 to-[#FF8E4A]/10" />
+    <main className="dashboard-theme relative min-h-screen bg-background text-foreground">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.20),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_bottom_right,hsl(var(--secondary)/0.70),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-background via-background to-background/50" />
 
       <div className="mx-auto w-full max-w-6xl px-4 py-8">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl border bg-card shadow-sm ring-1 ring-primary/10">
+            <div className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl border bg-card/70 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60 ring-1 ring-primary/20">
               <LayoutDashboard className="h-5 w-5 text-primary" />
             </div>
             <div>
@@ -305,7 +308,11 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
-            <Button onClick={handleOpenModal} title="Add a new pet" className="col-span-2 gap-2 sm:col-span-1">
+            <Button
+              onClick={handleOpenModal}
+              title="Add a new pet"
+              className="col-span-2 gap-2 shadow-sm hover:shadow sm:col-span-1"
+            >
               <Plus className="h-4 w-4" />
               Add pet
             </Button>
@@ -317,13 +324,13 @@ const Dashboard = () => {
                 fetchPets();
               }}
               title="Refresh dashboard"
-              className="gap-2"
+              className="gap-2 bg-card/60 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/50 hover:bg-card/80"
             >
               <RefreshCw className="h-4 w-4" />
               Refresh
             </Button>
 
-            <Button variant="secondary" onClick={handleShare} className="gap-2">
+            <Button variant="secondary" onClick={handleShare} className="gap-2 shadow-sm hover:shadow">
               <Share2 className="h-4 w-4" />
               Share
             </Button>
@@ -332,7 +339,7 @@ const Dashboard = () => {
 
         <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
           <div className="space-y-6">
-            <Card className="shadow-sm">
+            <Card className="border-primary/10 bg-card/70 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60">
               <CardHeader className="space-y-4">
                 {userLoading ? (
                   <div className="flex items-center justify-center py-8">
@@ -341,7 +348,7 @@ const Dashboard = () => {
                 ) : (
                   <>
                     <div className="flex items-center gap-4">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-xl font-semibold text-primary">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-xl font-semibold text-primary ring-1 ring-primary/20">
                         {initials}
                       </div>
                       <div className="min-w-0">
@@ -415,23 +422,27 @@ const Dashboard = () => {
               ) : null}
             </Card>
 
-            <Card className="shadow-sm">
+            <Card className="border-primary/10 bg-card/70 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60">
               <CardHeader>
                 <CardTitle className="text-lg">Quick actions</CardTitle>
-                <CardDescription>Order tags and manage subscriptions.</CardDescription>
+                <CardDescription>Order tags and manage membership.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" onClick={() => navigate("/prices")} className="w-full justify-start gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate("/prices")}
+                  className="w-full justify-start gap-2 bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/50 hover:bg-card/80"
+                >
                   <Tag className="h-4 w-4" />
                   View pricing
                 </Button>
                 <Button
                   onClick={() => navigate("/select-tag/standard")}
                   disabled={!canOrderTags}
-                  className="w-full justify-start gap-2"
+                  className="w-full justify-start gap-2 shadow-sm hover:shadow"
                 >
                   <Tag className="h-4 w-4" />
-                  Order tags (R250 each)
+                  Order tags (R{PRICING.TAG_ONCE_OFF_RANDS} each)
                 </Button>
 
                 <div className="rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">
@@ -440,7 +451,7 @@ const Dashboard = () => {
                     Add a pet before ordering tags
                   </p>
                   <p className="mt-1">
-                    Tags can only be ordered for pets with an active subscription.
+                    Tags are once-off. If a pet isn&apos;t subscribed yet, checkout will also start membership (R{PRICING.MEMBERSHIP_MONTHLY_RANDS}/month) in the same payment.
                   </p>
                   {!canOrderTags ? (
                     <p className="mt-2">You don&apos;t have any pets yet—add one to continue.</p>
@@ -452,44 +463,44 @@ const Dashboard = () => {
 
           <div className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <Card className="shadow-sm">
+              <Card className="border-primary/10 bg-card/70 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60">
                 <CardHeader className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
                     <CardDescription>Total pets</CardDescription>
-                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-muted/30">
+                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-primary/10 ring-1 ring-primary/10">
                       <PawPrint className="h-4 w-4 text-primary" />
                     </div>
                   </div>
                   <CardTitle className="text-3xl">{visiblePets.length}</CardTitle>
                 </CardHeader>
               </Card>
-              <Card className="shadow-sm">
+              <Card className="border-primary/10 bg-card/70 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60">
                 <CardHeader className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
-                    <CardDescription>Subscribed</CardDescription>
-                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-muted/30">
+                    <CardDescription>Membership active</CardDescription>
+                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-primary/10 ring-1 ring-primary/10">
                       <Tag className="h-4 w-4 text-primary" />
                     </div>
                   </div>
                   <CardTitle className="text-3xl">{subscribedPets.length}</CardTitle>
                 </CardHeader>
               </Card>
-              <Card className="shadow-sm">
+              <Card className="border-primary/10 bg-card/70 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60">
                 <CardHeader className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
                     <CardDescription>Dogs</CardDescription>
-                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-muted/30">
+                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-primary/10 ring-1 ring-primary/10">
                       <PawPrint className="h-4 w-4 text-primary" />
                     </div>
                   </div>
                   <CardTitle className="text-3xl">{dogs.length}</CardTitle>
                 </CardHeader>
               </Card>
-              <Card className="shadow-sm">
+              <Card className="border-primary/10 bg-card/70 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60">
                 <CardHeader className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
                     <CardDescription>Cats</CardDescription>
-                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-muted/30">
+                    <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-primary/10 ring-1 ring-primary/10">
                       <PawPrint className="h-4 w-4 text-primary" />
                     </div>
                   </div>
@@ -498,18 +509,18 @@ const Dashboard = () => {
               </Card>
             </div>
 
-            <Card className="shadow-sm">
+            <Card className="border-primary/10 bg-card/70 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60">
               <CardHeader>
                 <CardTitle className="text-lg">Your pets</CardTitle>
-                <CardDescription>View, edit, subscribe, and order tags.</CardDescription>
+                <CardDescription>View, edit, and order tags.</CardDescription>
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="all">
                   <div className="overflow-x-auto pb-1">
-                    <TabsList className="w-max justify-start">
-                      <TabsTrigger value="all">All</TabsTrigger>
-                      <TabsTrigger value="dogs">Dogs</TabsTrigger>
-                      <TabsTrigger value="cats">Cats</TabsTrigger>
+                    <TabsList className="w-max justify-start bg-muted/40">
+                      <TabsTrigger className="mr-4 btn outline-1" value="all">All</TabsTrigger>
+                      <TabsTrigger  className="mr-4 btn "value="dogs">Dogs</TabsTrigger>
+                      <TabsTrigger  className="btn" value="cats">Cats</TabsTrigger>
                     </TabsList>
                   </div>
 

@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { API_BASE_URL } from "../config/api";
+import { PRICING } from "../config/pricing";
 
 const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
   const navigate = useNavigate();
@@ -99,14 +100,7 @@ const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
       }
 
       const sizeKey = petData.size.toLowerCase();
-      const monthlyPrice =
-        sizeKey === "small" ? 50 : sizeKey === "medium" ? 70 : sizeKey === "large" ? 100 : null;
-
-      if (!monthlyPrice) {
-        setToast({ show: true, message: "Please select a valid pet size.", type: "error" });
-        setIsLoading(false);
-        return;
-      }
+      const monthlyPrice = PRICING.MEMBERSHIP_MONTHLY_RANDS;
 
       let photoUrl = null;
       if (petData.photoFile) {
@@ -131,7 +125,7 @@ const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
         photoUrl = uploaded?.photoUrl || null;
       }
 
-      setToast({ show: true, message: "Redirecting to secure subscription checkout…", type: "success" });
+      setToast({ show: true, message: "Redirecting to secure checkout…", type: "success" });
       closeModal();
 
       const petDraft = {
@@ -150,10 +144,16 @@ const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
         state: {
           membership: true,
           total: monthlyPrice,
-          package: { type: `${petData.size} Pet Subscription` },
+          package: { type: "Subscription" },
           membershipObjectId: null,
           selectedPets: [],
           petDraft,
+          order: {
+            tagCount: 0,
+            tagUnitPrice: PRICING.TAG_ONCE_OFF_RANDS,
+            membershipCount: 1,
+            membershipUnitPrice: monthlyPrice,
+          },
         },
       });
     } catch (error) {
@@ -308,7 +308,7 @@ const AddPetModal = ({ showModal, closeModal, refreshPets }) => {
                         aria-hidden="true"
                       ></span>
                     )}
-                    Add Pet
+                    Add Pet & Checkout
                   </button>
                 </div>
               </form>
