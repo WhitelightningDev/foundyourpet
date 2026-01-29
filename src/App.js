@@ -24,6 +24,8 @@ import SignupSuccess from "./components/SignupSuccess";
 import TsAndCs from "./pages/T's&C's";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import PasswordResetPage from "./pages/PasswordReset";
+import SubscriptionSuccessPage from "./pages/SubscriptionSuccessPage";
+import SubscriptionCancelPage from "./pages/SubscriptionCancelPage";
 // Payment status pags
 import SuccessPage from "./payments-response-pages/SuccessPage";
 import FailurePage from "./payments-response-pages/FailurePage";
@@ -108,6 +110,8 @@ function App() {
               <Route path="/payment-success" element={<SuccessPage />} />
               <Route path="/payment-failure" element={<FailurePage />} />
               <Route path="/payment-cancel" element={<CancelPage />} />
+              <Route path="/subscription/success" element={<SubscriptionSuccessPage />} />
+              <Route path="/subscription/cancel" element={<SubscriptionCancelPage />} />
 
               <Route
                 path="/admin-dashboard"

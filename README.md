@@ -24,7 +24,8 @@ Coming Soon...
   - Optional monthly support membership (includes benefits like free replacements)
 
 - 🧾 **Integrated Payments**
-  - Yoco payments for initial and recurring package billing
+  - PayFast recurring billing for monthly subscriptions
+  - Yoco payments for tag orders (once-off)
 
 - 📸 **QR Code Generation**
   - Admin-generated dynamic QR codes
@@ -65,8 +66,10 @@ JWT_SECRET=your_jwt_secret
 YOCO_SECRET_KEY=your_yoco_secret
 FRONTEND_URL=https://www.foundyourpet.co.za
 
-`FRONTEND_URL` is used by the backend payment flow to build the redirect URLs back to the frontend:
-`/payment-success`, `/payment-failure`, `/payment-cancel`.
+`FRONTEND_URL` is used by the backend to build redirect URLs back to the frontend:
+
+- PayFast subscription UX return/cancel: `/subscription/success`, `/subscription/cancel` (activation happens via ITN)
+- Yoco tag order pages: `/payment-success`, `/payment-failure`, `/payment-cancel`
 Frontend
 
 cd frontend
@@ -79,7 +82,7 @@ Backend: Node.js, Express, MongoDB, Mongoose
 
 Auth: JWT
 
-Payments: Yoco API
+Payments: PayFast (subscriptions) + Yoco (tag orders)
 
 QR Code: qrcode NPM package
 

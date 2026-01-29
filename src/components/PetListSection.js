@@ -2,13 +2,12 @@ import React from "react";
 import { FaEye, FaEdit, FaTrash, FaCartPlus, FaTruck } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import PetListSkeleton from "../loadingskeletons/PetListSkeleton";
-import { toast } from "sonner";
-import { FaCreditCard } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { API_BASE_URL } from "../config/api";
 import { cn } from "@/lib/utils";
+import { PRICING } from "@/config/pricing";
 
 const PetListSection = ({
   title,
@@ -84,33 +83,6 @@ const PetListSection = ({
     );
   };
 
-  const getMonthlyPriceForSize = (size) => {
-    const normalizedSize = (size || "").toString().trim().toLowerCase();
-    if (normalizedSize === "small") return 50;
-    if (normalizedSize === "medium") return 70;
-    if (normalizedSize === "large") return 100;
-    return null;
-  };
-
-  const handleStartSubscription = (pet) => {
-    const monthlyPrice = getMonthlyPriceForSize(pet?.size);
-    if (!monthlyPrice) {
-      toast.warning("Please edit your pet and set Size to Small / Medium / Large before subscribing.");
-      handleEditClick(pet);
-      return;
-    }
-
-    navigate("/checkout", {
-      state: {
-        membership: true,
-        total: monthlyPrice,
-        package: { type: `${pet.size} Pet Subscription` },
-        membershipObjectId: null,
-        selectedPets: [pet],
-      },
-    });
-  };
-
   const getImageSrc = (pet) =>
     pet.photoUrl?.startsWith("http") ? pet.photoUrl : `${API_BASE_URL}${pet.photoUrl || ""}`;
 
@@ -131,7 +103,7 @@ const PetListSection = ({
             <Card
               key={pet._id}
               className={cn(
-                "overflow-hidden shadow-sm transition-shadow hover:shadow-md",
+                "overflow-hidden bg-card/70 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/60 transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-md",
                 pet.hasMembership
                   ? "border-emerald-200/70 dark:border-emerald-500/30"
                   : "border-yellow-200/70 dark:border-yellow-500/30"
@@ -143,10 +115,10 @@ const PetListSection = ({
                     <img
                       src={getImageSrc(pet)}
                       alt={`${pet.name}'s profile`}
-                      className="h-16 w-16 rounded-full object-cover ring-2 ring-border"
+                      className="h-16 w-16 rounded-full object-cover ring-2 ring-primary/20"
                     />
                   ) : (
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-xs text-muted-foreground ring-2 ring-border">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/60 text-xs text-muted-foreground ring-2 ring-primary/10">
                       No Photo
                     </div>
                   )}
@@ -161,7 +133,7 @@ const PetListSection = ({
                             : "border-yellow-300/80 bg-yellow-100 text-yellow-950 hover:bg-yellow-100 dark:border-yellow-500/40 dark:bg-yellow-500/15 dark:text-yellow-200 dark:hover:bg-yellow-500/15"
                         )}
                       >
-                        {pet.hasMembership ? "Subscription active" : "Not subscribed"}
+                        {pet.hasMembership ? "Membership active" : "No membership"}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">{pet.breed}</p>
@@ -258,13 +230,21 @@ const PetListSection = ({
                         }
                       >
                         <FaCartPlus className="h-4 w-4" />
-                        Order tag
+                        {pet.hasMembership ? "Order tag" : `Order tag + R${PRICING.MEMBERSHIP_MONTHLY_RANDS}/mo`}
                       </Button>
                     </>
                   ) : (
-                    <Button variant="secondary" size="sm" className="gap-2" onClick={() => handleStartSubscription(pet)}>
-                      <FaCreditCard className="h-4 w-4" />
-                      Subscribe
+                    <Button
+                      size="sm"
+                      className="gap-2"
+                      onClick={() =>
+                        navigate("/select-tag/standard", {
+                          state: { user, pet },
+                        })
+                      }
+                    >
+                      <FaCartPlus className="h-4 w-4" />
+                      {`Order tag + R${PRICING.MEMBERSHIP_MONTHLY_RANDS}/mo`}
                     </Button>
                   )}
                 </div>
@@ -274,7 +254,7 @@ const PetListSection = ({
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">
-          You don&apos;t have any pets yet. Add a pet first, then subscribe before ordering a tag.
+          You don&apos;t have any pets yet. Add a pet first, then order a tag.
         </p>
       )}
     </div>

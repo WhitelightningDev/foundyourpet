@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import BillingForm from "../components/BillingForm";
 import { API_BASE_URL } from "../config/api";
@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AuthContext } from "../context/AuthContext";
+import { PRICING } from "@/config/pricing";
 
 function CheckoutPage() {
   const { state } = useLocation();
@@ -17,9 +18,10 @@ function CheckoutPage() {
     membershipObjectId,
     selectedPets = [],
     petDraft,
+    order,
   } = state || {};
 
-  const { user: authUser, token: authToken } = useContext(AuthContext);
+  const { user: authUser, token: authToken, refreshUser } = useContext(AuthContext);
   const token = useMemo(() => authToken || localStorage.getItem("authToken"), [authToken]);
 
   const [formData, setFormData] = useState({
@@ -35,16 +37,103 @@ function CheckoutPage() {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const didAttemptRefreshRef = useRef(false);
 
-  // Removed separate membership cost addition since total includes it
   const subtotal = total;
   const petsForDisplay = selectedPets.length
     ? selectedPets
     : petDraft
       ? [petDraft]
       : [];
-  const perPetPrice = petsForDisplay.length ? subtotal / petsForDisplay.length : subtotal;
   const isNewPetSubscription = membership && !selectedPets.length && !!petDraft;
+  const normalizedOrder = order
+    ? {
+        tagCount: Number(order.tagCount) || 0,
+        tagUnitPrice: Number(order.tagUnitPrice) || PRICING.TAG_ONCE_OFF_RANDS,
+        membershipCount: Number(order.membershipCount) || 0,
+        membershipUnitPrice: Number(order.membershipUnitPrice) || PRICING.MEMBERSHIP_MONTHLY_RANDS,
+      }
+    : null;
+  const tagTotal = normalizedOrder ? normalizedOrder.tagCount * normalizedOrder.tagUnitPrice : 0;
+  const membershipTotalToday = normalizedOrder
+    ? normalizedOrder.membershipCount * normalizedOrder.membershipUnitPrice
+    : 0;
+  const membershipRecurringMonthly = membershipTotalToday;
+
+  const buildPrefillFromUser = (user) => {
+    if (!user) return null;
+
+    const rawName = (user?.name || "").toString().trim();
+    const rawSurname = (user?.surname || "").toString().trim();
+    const fullName = rawName || rawSurname ? `${rawName} ${rawSurname}`.trim() : "";
+    const [firstFromFull, ...rest] = fullName.split(/\s+/).filter(Boolean);
+    const lastFromFull = rest.join(" ");
+
+    const address = user?.address || {};
+    const street = (address?.street || "").toString().trim();
+    const city = (address?.city || "").toString().trim();
+    const province = (address?.province || "").toString().trim();
+    const country = (address?.country || "South Africa").toString().trim();
+    const postalCode = (address?.postalCode || "").toString().trim();
+
+    return {
+      firstName: firstFromFull || rawName,
+      lastName: rawSurname || lastFromFull,
+      email: (user?.email || "").toString().trim(),
+      address: street,
+      address2: city,
+      country,
+      province,
+      zip: postalCode,
+    };
+  };
+
+  const mergeOnlyEmptyFields = (prev, next) => {
+    const merged = { ...prev };
+    Object.entries(next || {}).forEach(([key, value]) => {
+      const prevValue = (merged[key] || "").toString();
+      const nextValue = (value || "").toString();
+      if (!prevValue.trim() && nextValue.trim()) merged[key] = nextValue;
+    });
+    return merged;
+  };
+
+  useEffect(() => {
+    const getStoredUser = () => {
+      if (authUser) return authUser;
+      try {
+        const stored = localStorage.getItem("user");
+        return stored ? JSON.parse(stored) : null;
+      } catch {
+        return null;
+      }
+    };
+
+    const storedUser = getStoredUser();
+    const prefill = buildPrefillFromUser(storedUser);
+    if (prefill) {
+      setFormData((prev) => mergeOnlyEmptyFields(prev, prefill));
+    }
+
+    const needsHardFields =
+      !prefill?.firstName?.trim() ||
+      !prefill?.lastName?.trim() ||
+      !prefill?.address?.trim() ||
+      !prefill?.province?.trim() ||
+      !prefill?.zip?.trim();
+
+    if (token && needsHardFields && !didAttemptRefreshRef.current) {
+      didAttemptRefreshRef.current = true;
+      Promise.resolve(refreshUser?.(token))
+        .then((fresh) => {
+          const freshPrefill = buildPrefillFromUser(fresh);
+          if (freshPrefill) setFormData((prev) => mergeOnlyEmptyFields(prev, freshPrefill));
+        })
+        .catch(() => {
+          // ignore: user can still fill the form manually
+        });
+    }
+  }, [authUser, refreshUser, token]);
 
   const resolveUserId = () => {
     if (authUser?._id) return authUser._id;
@@ -126,16 +215,72 @@ function CheckoutPage() {
         return;
       }
 
-      const response = await axios.post(`${API_BASE_URL}/api/payment/createCheckout`, {
-        userId,
-        petIds,
-        amountInCents: Math.round(subtotal * 100),
-        membership,
-        membershipId: membershipObjectId,
-        packageType: pkg?.type || "Standard",
-        billingDetails: formData,
-        ...(safePetDraft ? { petDraft: safePetDraft } : {}),
-      }, token ? { headers: { Authorization: `Bearer ${token}` } } : undefined);
+      if (membership) {
+        if (!token) {
+          alert("Please log in again to start subscription checkout.");
+          return;
+        }
+
+        const response = await axios.post(
+          `${API_BASE_URL}/api/subscriptions/checkout`,
+          {
+            planKey: "MONTHLY",
+            petIds,
+            ...(safePetDraft ? { petDraft: safePetDraft } : {}),
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const actionUrl = response.data?.actionUrl || response.data?.payfastUrl || response.data?.payfast_url;
+        const fields = response.data?.fields;
+
+        const submitPayfastForm = (url, formFields) => {
+          const form = document.createElement("form");
+          form.method = "POST";
+          form.action = url;
+
+          Object.entries(formFields || {}).forEach(([key, value]) => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = key;
+            input.value = value === null || value === undefined ? "" : String(value);
+            form.appendChild(input);
+          });
+
+          document.body.appendChild(form);
+          form.submit();
+        };
+
+        if (actionUrl && fields && typeof fields === "object") {
+          submitPayfastForm(actionUrl, fields);
+          return;
+        }
+
+        // Fallback: older backend response can provide a browser redirect URL
+        const checkoutUrl = response.data?.checkout_url;
+        if (checkoutUrl) {
+          window.location.assign(checkoutUrl);
+          return;
+        }
+
+        console.error("Checkout URL not received:", response.data);
+        alert("Checkout URL not received from server. Please try again.");
+        return;
+      }
+
+      const response = await axios.post(
+        `${API_BASE_URL}/api/payment/createCheckout`,
+        {
+          userId,
+          petIds,
+          amountInCents: Math.round(subtotal * 100),
+          membership: false,
+          membershipId: membershipObjectId,
+          packageType: pkg?.type || "Standard",
+          billingDetails: formData,
+        },
+        token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
+      );
 
       const checkoutUrl = response.data?.checkout_url;
       if (checkoutUrl) {
@@ -174,7 +319,7 @@ function CheckoutPage() {
       <div className="mb-6 text-center">
         <h1 className="text-3xl font-semibold tracking-tight">Checkout</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          You&apos;ll be redirected to Yoco to complete your payment securely.
+          You&apos;ll be redirected to {membership ? "PayFast" : "Yoco"} to complete your payment securely.
         </p>
       </div>
 
@@ -200,27 +345,61 @@ function CheckoutPage() {
                         {(pet.breed || "Unknown breed")}{pet.species ? ` • ${pet.species}` : ""}
                       </p>
                     </div>
-                    <p className="shrink-0 text-sm font-semibold">R{perPetPrice.toFixed(2)}</p>
                   </div>
                 ))}
               </div>
 
               <Separator />
 
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">Subtotal</p>
-                <p className="text-base font-semibold">R{subtotal.toFixed(2)}</p>
-              </div>
+              {normalizedOrder ? (
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <p className="text-muted-foreground">
+                      Tags (once-off) · R{normalizedOrder.tagUnitPrice} × {normalizedOrder.tagCount}
+                    </p>
+                    <p className="font-semibold">R{tagTotal.toFixed(2)}</p>
+                  </div>
+                  {normalizedOrder.membershipCount ? (
+                    <div className="flex items-center justify-between">
+                      <p className="text-muted-foreground">
+                        Membership (monthly) · R{normalizedOrder.membershipUnitPrice} × {normalizedOrder.membershipCount}
+                      </p>
+                      <p className="font-semibold">R{membershipTotalToday.toFixed(2)}</p>
+                    </div>
+                  ) : null}
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">Total due today</p>
+                    <p className="text-base font-semibold">R{subtotal.toFixed(2)}</p>
+                  </div>
+                  {normalizedOrder.membershipCount ? (
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">Then monthly</p>
+                      <p className="text-xs font-medium">R{membershipRecurringMonthly.toFixed(2)}/month</p>
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">Subtotal</p>
+                  <p className="text-base font-semibold">R{subtotal.toFixed(2)}</p>
+                </div>
+              )}
 
               <div className="rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
-                {membership ? (
-                  <p>
-                    This is a monthly subscription for the selected pet.
-                  </p>
+                {normalizedOrder ? (
+                  normalizedOrder.membershipCount ? (
+                    <p>
+                      You&apos;ll pay once today for your tag(s) and the first month of membership. Membership renews monthly
+                      at R{normalizedOrder.membershipUnitPrice} per pet.
+                    </p>
+                  ) : (
+                    <p>This is a once-off tag order. No monthly membership is added.</p>
+                  )
+                ) : membership ? (
+                  <p>This is a monthly subscription for the selected pet.</p>
                 ) : (
-                  <p>
-                    Tags can only be ordered for pets with an active subscription.
-                  </p>
+                  <p>This is a once-off order.</p>
                 )}
               </div>
             </CardContent>

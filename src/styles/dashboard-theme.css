@@ -1,0 +1,25 @@
+.dashboard-theme {
+  --primary: 174 72% 33%;
+  --primary-foreground: 0 0% 100%;
+
+  --ring: 174 72% 38%;
+
+  --secondary: 33 100% 96%;
+  --secondary-foreground: 174 72% 18%;
+
+  --accent: 174 64% 95%;
+  --accent-foreground: 174 72% 18%;
+}
+
+.dark .dashboard-theme {
+  --primary: 174 68% 52%;
+  --primary-foreground: 222.2 84% 4.9%;
+
+  --ring: 174 68% 52%;
+
+  --secondary: 174 30% 16%;
+  --secondary-foreground: 210 40% 98%;
+
+  --accent: 174 30% 16%;
+  --accent-foreground: 210 40% 98%;
+}
